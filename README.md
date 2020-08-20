@@ -1,5 +1,5 @@
 # pb-mod
-modules for sysl/protobuff objects
+modules for sysl/protobuf objects
 
 ## Requirements
 - Ability to easily import from and git service (github/gitlab/bitbucket)
