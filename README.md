@@ -10,9 +10,14 @@ modules for sysl
     - Current solution requires a go.mod file to exist in target repo
 
 ## Nice to haves
+
 - Fast
     - Sysl parser is slow at the moment, large projects take minutes to parse
-
+- Ability to construct a tree of every sysl file in existence
+    - Having a central proxy to track the git tags of every repo that uses sysl can track dependencies and build import graphs of every sysl module in existence
+- Not needing to worry about git credentials if running on an internal network
+    - If The central proxy has access to all the git repos in an organisation, anyone with the repo can edit and build the source code without worrying about git credentials. This also opens up the possibility for something like sysl-catalog to be a service that has access to all the repos that the sysl proxy has access to.
+    
 ## Inspirations
 - go modules: https://github.com/gomods/athens
 
