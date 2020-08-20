@@ -66,6 +66,8 @@ proxy.sysl.io/
 ```
 Now next time this module is requested, the proxy can just return example.sysl.pb (a *sysl.Module) and the *sysl.Modules of `example.sysl.imports.json`
 
+Now that our client has the example.sysl.pb, the same tree structure can be generated in a temp directory on the clients machine to cache this module for the client (Similar to gomod module caching in GOPATH)
+
 ## What about arrai/yaml/json?
 
 Same thing, instead of returning a *sysl.Module, we can just return any other protobuf message, including a raw string of arrai bytes
