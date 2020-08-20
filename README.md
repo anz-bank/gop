@@ -72,3 +72,22 @@ Now that our client has the example.sysl.pb, the same tree structure can be gene
 ## What about arrai/yaml/json?
 
 Same thing, instead of returning a *sysl.Module, we can just return any other protobuf message, including raw bytes
+
+## Changes that need to happen 
+
+1. Imports should be represented in the protobuf message:
+
+sysl.proto
+```diff
+message Module {
+    reserved 1;  // Don't know what this was before.
+    map<string, Application>    apps    = 2;
+    reserved 3; // Previously the unused "types" field
++   repeated string imports = 4;
+    SourceContext source_context = 99;
+}
+```
+
+This means that once a *sysl.Module is returned, the same file structure can be rebuilt:
+1. Using the sysl printer module that prints *sysl.Module objects back to sysl syntax
+2. The imports.json can be inferred directly from the sysl.pb (infact at this point there isn't any need for anything but the .pb file, but is kept in this exampe for illustration purposes)
