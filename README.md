@@ -58,8 +58,9 @@ Within the sysl proxy filesystem/database the following would exist:
 ```
 proxy.sysl.io/
               github.com/
-                         blah/bah/
-                                 @ver/
+                         blah/ // repo
+                              @ver/ // version
+                                 bah/
                                       example.sysl // raw sysl file
                                       example.sysl.pb // compiled protobuf bytes (only of the sysl file, not of the imports)
                                       example.sysl.imports.json // a json list of modules imported by this file
