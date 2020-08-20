@@ -38,7 +38,7 @@ Because sysl module objects are already protobuf objects, returning an already c
 given a sysl file:
 ```
 // example.sysl
-import //github.com/blah/bah@ver
+import //github.com/blah/bah/example.sysl@ver
 // application bar is imported
 
 foo:
