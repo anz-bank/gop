@@ -70,4 +70,4 @@ Now that our client has the example.sysl.pb, the same tree structure can be gene
 
 ## What about arrai/yaml/json?
 
-Same thing, instead of returning a *sysl.Module, we can just return any other protobuf message, including a raw string of arrai bytes
+Same thing, instead of returning a *sysl.Module, we can just return any other protobuf message, including raw bytes
