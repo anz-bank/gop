@@ -1,5 +1,5 @@
-# sysl-mod
-modules for sysl
+# pb-mod
+modules for sysl/protobuff objects
 
 ## Requirements
 - Ability to easily import from and git service (github/gitlab/bitbucket)
