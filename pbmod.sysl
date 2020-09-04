@@ -1,0 +1,7 @@
+pbmod:
+    @package = "pbmod"
+    !type retrieveResponse:
+        content <: bytes
+    /resource/{resource <: string}/{version <: string}:
+        GET:
+            return ok <: retrieveResponse
