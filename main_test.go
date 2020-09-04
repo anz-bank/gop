@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"io"
 	"strings"
 	"testing"
 
@@ -30,12 +31,13 @@ func TestGetRetrieve(t *testing.T) {
 	}
 	client := pbmod.GetResourceClient{}
 	s := &server{retrieveFile: AppConfig{}.getFromGit}
-	res, _ := s.GetResource(context.Background(), req, client)
-	fmt.Println(string(res.Content))
+	res, err := s.GetResource(context.Background(), req, client)
+	require.NoError(t, err)
+	banana := []string{"Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}
+	require.Equal(t, banana, res.Content)
 }
 
 func TestFindImport(t *testing.T) {
-	var regex = `(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)`
 	tests := map[string][]string{
 		`
 #import notimported
@@ -44,8 +46,57 @@ import b.sysl`: {"a.sysl", "b.sysl"},
 	}
 	for in, out := range tests {
 		t.Run(in, func(t *testing.T) {
-			a := findImports(regex, strings.NewReader(in))
+			a := findImports(syslimportRegex, []byte(in))
 			require.Equal(t, out, a)
 		})
 	}
+}
+
+func TestDoImport(t *testing.T) {
+	resources := map[string]string{
+		`a.sysl`: `import b.sysl
+App:
+	endpoint:
+		...`,
+		`b.sysl`: `
+import c.sysl
+	_:
+		...`,
+		`c.sysl`: `
+App3:
+	endpoint:
+		...`,
+	}
+	content, err := doImport("", `a.sysl`, tester{resources: resources}.importerTest)
+	fmt.Println(content, err)
+	var fullFile []byte
+	for _, file := range content {
+		fullFile = append(fullFile, []byte("\n")...)
+		fullFile = append(fullFile, file...)
+	}
+	require.Equal(t, `
+
+App:
+	endpoint:
+		...
+
+
+	_:
+		...
+
+App3:
+	endpoint:
+		...`, string(fullFile))
+}
+
+type tester struct {
+	resources map[string]string
+}
+
+func (t tester) importerTest(repo, resource, version string) (contents io.Reader, err error) {
+	cont, ok := t.resources[resource]
+	if !ok {
+		return nil, fmt.Errorf("oh no")
+	}
+	return strings.NewReader(cont), nil
 }

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"io"
 	"io/ioutil"
@@ -18,6 +19,8 @@ import (
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
+var syslimportRegex = `(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)`
+
 // AppConfig ...
 type AppConfig struct {
 	StartingBalance int64 `yaml:"startingBalance"`
@@ -27,6 +30,7 @@ type AppConfig struct {
 
 func main() {
 	log.Fatal(pbmod.Serve(context.Background(), LoadService))
+
 }
 
 func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, error) {
@@ -35,9 +39,9 @@ func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, err
 	}, nil
 }
 
-type retrieveFile func(repo, resource, version string) (contents []byte, err error)
+type retrieveFile func(repo, resource, version string) (contents io.Reader, err error)
 
-func (a AppConfig) getFromGit(repo, resource, version string) ([]byte, error) {
+func (a AppConfig) getFromGit(repo, resource, version string) (io.Reader, error) {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	if a.username != "" {
@@ -71,22 +75,41 @@ func (a AppConfig) getFromGit(repo, resource, version string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return ioutil.ReadAll(reader)
+	return reader, nil
 }
 
 type server struct {
 	retrieveFile
 }
 
+func doImport(initialrepo, initialImport string, retriever retrieveFile) ([]string, error) {
+	var final []string
+	var re = regexp.MustCompile(syslimportRegex)
+	var imports = []string{initialImport}
+	for {
+		var newImports []string
+		for _, imp := range imports {
+			file, err := retriever(initialrepo, imp, "")
+			if err != nil {
+				return nil, err
+			}
+			contents, err := ioutil.ReadAll(file)
+			newImports = append(newImports, findImports(syslimportRegex, contents)...)
+			contents = re.ReplaceAll(contents, []byte{})
+			final = append(final, string(contents))
+		}
+		imports = newImports
+		if len(imports) == 0 {
+			break
+		}
+	}
+	return final, nil
+}
+
 func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, client pbmod.GetResourceClient) (*pbmod.RetrieveResponse, error) {
 	repo, resource := processRequest(req.Resource)
-	contents, err := s.retrieveFile(repo, resource, req.Version)
-	if err != nil {
-		return nil, err
-	}
-	return &pbmod.RetrieveResponse{
-		Content: contents,
-	}, nil
+	files, err := doImport(repo, resource, s.retrieveFile)
+	return &pbmod.RetrieveResponse{Content: files}, err
 }
 
 /*
@@ -103,9 +126,9 @@ func processRequest(resource string) (string, string) {
 }
 
 /* re is the regex that matches the import statements, and  */
-func findImports(importRegex string, file io.Reader) []string {
+func findImports(importRegex string, file []byte) []string {
 	var re = regexp.MustCompile(importRegex)
-	scanner := bufio.NewScanner(file)
+	scanner := bufio.NewScanner(bytes.NewReader(file))
 	var imports []string
 	for scanner.Scan() {
 		for _, match := range re.FindAllStringSubmatch(scanner.Text(), -1) {

@@ -17,7 +17,7 @@ var _ = date.Parse
 
 // RetrieveResponse ...
 type RetrieveResponse struct {
-	Content []byte `json:"content"`
+	Content []string `json:"content"`
 }
 
 // GetResourceRequest ...

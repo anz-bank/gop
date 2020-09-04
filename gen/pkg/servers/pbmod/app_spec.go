@@ -93,7 +93,20 @@ const AppSpec = `{
      "tuple": {
       "attrDefs": {
        "content": {
-        "primitive": "BYTES",
+        "sequence": {
+         "primitive": "STRING",
+         "sourceContext": {
+          "file": "pbmod.sysl",
+          "start": {
+           "line": 4,
+           "col": 19
+          },
+          "end": {
+           "line": 4,
+           "col": 31
+          }
+         }
+        },
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
@@ -102,7 +115,7 @@ const AppSpec = `{
          },
          "end": {
           "line": 4,
-          "col": 19
+          "col": 31
          }
         }
        }
