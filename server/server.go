@@ -21,9 +21,15 @@ type Server struct {
 func (s Server) GetResource(ctx context.Context, req *pbmod.GetResourceListRequest, client pbmod.GetResourceListClient) (*pbmod.Module, error) {
 	repo, resource := processRequest(req.Resource)
 	files, err := ImportFile(repo, resource, req.Version, s.Retrieve)
+	if err != nil {
+		return nil, err
+	}
 	if !files.Imported {
 		s.Process.Processor(files)
 		s.Save.Saver(files)
+	}
+	if files.Extra == nil || *files.Extra == "" {
+		files.Extra = nil
 	}
 	return files, err
 }

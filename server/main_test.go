@@ -44,7 +44,7 @@ func TestGetRetrieveWithDeps(t *testing.T) {
 	p := processor.ProcessorSysl{}
 	serve := Server{
 		Retrieve: r,
-		Process:  p,
+		Process:  &p,
 		Save:     s,
 	}
 	res, err := serve.GetResource(context.Background(), req, client)
