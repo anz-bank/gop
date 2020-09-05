@@ -30,7 +30,7 @@ func processRequest(resource string) (string, string) {
 //	}
 //}
 
-///* re is the regex that matches the import statements, and  */
+/* re is the regex that matches the import statements, and  */
 //func findImports(importRegex string, file []byte) []string {
 //	var re = regexp.MustCompile(importRegex)
 //	scanner := bufio.NewScanner(bytes.NewReader(file))

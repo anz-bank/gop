@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"regexp"
 
 	retrieve2 "github.com/joshcarp/pb-mod/config"
 
@@ -24,10 +25,10 @@ func main() {
 func LoadService(ctx context.Context, a retrieve2.AppConfig) (*pbmod.ServiceInterface, error) {
 	r := retrieve.RetrieveFilePBJsonGit{AppConfig: a}
 	s := saver.SaveToFile{AppConfig: a}
-	p := processor.ProcessorSysl{}
+	p := processor.ProcessorSysl{SyslimportRegex: regexp.MustCompile(processor.SyslImportRegexStr)}
 	serve := server.Server{
 		Retrieve: r,
-		Process:  p,
+		Process:  &p,
 		Save:     s,
 	}
 	return &pbmod.ServiceInterface{
