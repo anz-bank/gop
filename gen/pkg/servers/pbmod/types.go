@@ -15,8 +15,8 @@ var _ = time.Parse
 // Reference imports to suppress unused errors
 var _ = date.Parse
 
-// KeyValue ...
-type KeyValue struct {
+// Module ...
+type Module struct {
 	Extra    *string `json:"extra,omitempty"`
 	Imported bool    `json:"imported"`
 	Repo     string  `json:"repo"`
@@ -27,7 +27,7 @@ type KeyValue struct {
 
 // RetrieveResponse ...
 type RetrieveResponse struct {
-	Content []KeyValue `json:"content"`
+	Content []Module `json:"content"`
 }
 
 // GetResourceListRequest ...
@@ -36,8 +36,8 @@ type GetResourceListRequest struct {
 	Version  string
 }
 
-// *KeyValue validator
-func (s *KeyValue) Validate() error {
+// *Module validator
+func (s *Module) Validate() error {
 	return validator.Validate(s)
 }
 

@@ -14,7 +14,7 @@ import (
 
 // Service interface for pbmod
 type Service interface {
-	GetResourceList(ctx context.Context, req *GetResourceListRequest) (*KeyValue, error)
+	GetResourceList(ctx context.Context, req *GetResourceListRequest) (*Module, error)
 }
 
 // Client for pbmod API
@@ -29,9 +29,9 @@ func NewClient(client *http.Client, serviceURL string) *Client {
 }
 
 // GetResourceList ...
-func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListRequest) (*KeyValue, error) {
+func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListRequest) (*Module, error) {
 	required := []string{}
-	var okResponse KeyValue
+	var okResponse Module
 	u, err := url.Parse(fmt.Sprintf("%s/resource", s.url))
 	if err != nil {
 		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
@@ -52,7 +52,7 @@ func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListReques
 	if result.HTTPResponse.StatusCode == http.StatusUnauthorized {
 		return nil, common.CreateDownstreamError(ctx, common.DownstreamUnauthorizedError, result.HTTPResponse, result.Body, nil)
 	}
-	OkKeyValueResponse, ok := result.Response.(*KeyValue)
+	OkKeyValueResponse, ok := result.Response.(*Module)
 	if ok {
 		valErr := validator.Validate(OkKeyValueResponse)
 		if valErr != nil {

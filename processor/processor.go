@@ -1,4 +1,4 @@
-package main
+package processor
 
 import (
 	"github.com/anz-bank/sysl/pkg/parse"
@@ -6,10 +6,15 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type post func(pre *pbmod.KeyValue) (err error)
+type Processor interface {
+	Processor(pre *pbmod.Module) (err error)
+}
 
-func processSysl(a *pbmod.KeyValue) error {
-	if *a.Extra != "" {
+type ProcessorSysl struct {
+}
+
+func (ProcessorSysl) Processor(a *pbmod.Module) error {
+	if a.Extra != nil && *a.Extra != "" {
 		return nil
 	}
 	m, err := parse.NewParser().ParseString(a.Value)
