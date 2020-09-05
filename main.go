@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -40,6 +41,7 @@ func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, err
 }
 
 type retrieveFile func(repo, resource, version string) (contents io.Reader, err error)
+type saveFile func(repo, resource, version string, contents []byte) (err error)
 
 func (a AppConfig) getFromGit(repo, resource, version string) (io.Reader, error) {
 	var auth *http.BasicAuth
@@ -82,18 +84,27 @@ type server struct {
 	retrieveFile
 }
 
-func doImport(initialrepo, initialImport string, retriever retrieveFile) ([]string, error) {
+func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever ...retrieveFile) ([]string, error) {
 	var final []string
 	var re = regexp.MustCompile(syslimportRegex)
 	var imports = []string{initialImport}
+	var file io.Reader
 	for {
 		var newImports []string
 		for _, imp := range imports {
-			file, err := retriever(initialrepo, imp, "")
+			for _, r := range retriever {
+				file, _ = r(initialrepo, imp, ver)
+				if file != nil {
+					break
+				}
+			}
+			contents, err := ioutil.ReadAll(file)
 			if err != nil {
 				return nil, err
 			}
-			contents, err := ioutil.ReadAll(file)
+			if err := saver(initialrepo, imp, ver, contents); err != nil {
+				return nil, err
+			}
 			newImports = append(newImports, findImports(syslimportRegex, contents)...)
 			contents = re.ReplaceAll(contents, []byte{})
 			final = append(final, string(contents))
@@ -108,7 +119,7 @@ func doImport(initialrepo, initialImport string, retriever retrieveFile) ([]stri
 
 func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, client pbmod.GetResourceClient) (*pbmod.RetrieveResponse, error) {
 	repo, resource := processRequest(req.Resource)
-	files, err := doImport(repo, resource, s.retrieveFile)
+	files, err := doImport(repo, resource, req.Version, save, retrieveFromMap, s.retrieveFile)
 	return &pbmod.RetrieveResponse{Content: files}, err
 }
 
@@ -123,6 +134,21 @@ func processRequest(resource string) (string, string) {
 	repo := "https://" + path.Join(parts[0], parts[1], parts[2]) + ".git"
 	relresource := path.Join(parts[3:]...)
 	return repo, relresource
+}
+
+var files = map[string]string{}
+
+func save(repo, resource, version string, contents []byte) (err error) {
+	files[repo+resource+"@"+version] = string(contents)
+	return nil
+}
+
+func retrieveFromMap(repo, resource, version string) (io.Reader, error) {
+	contents, ok := files[repo+resource+"@"+version]
+	if !ok {
+		return nil, fmt.Errorf("Can't find file %s%s@%s", repo, resource, version)
+	}
+	return strings.NewReader(contents), nil
 }
 
 /* re is the regex that matches the import statements, and  */

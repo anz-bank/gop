@@ -55,20 +55,23 @@ import b.sysl`: {"a.sysl", "b.sysl"},
 func TestDoImport(t *testing.T) {
 	resources := map[string]string{
 		`a.sysl`: `import b.sysl
-App:
+import d.sysl
+
+Appa:
 	endpoint:
 		...`,
 		`b.sysl`: `
 import c.sysl
-	_:
-		...`,
+Appb:
+	...`,
 		`c.sysl`: `
-App3:
+Appc:
+	endpoint:
+		...`, `d.sysl`: `Appd:
 	endpoint:
 		...`,
 	}
-	content, err := doImport("", `a.sysl`, tester{resources: resources}.importerTest)
-	fmt.Println(content, err)
+	content, _ := doImport("", `a.sysl`, "", save, retrieveFromMap, tester{resources: resources}.importerTest)
 	var fullFile []byte
 	for _, file := range content {
 		fullFile = append(fullFile, []byte("\n")...)
@@ -76,15 +79,20 @@ App3:
 	}
 	require.Equal(t, `
 
-App:
+
+
+Appa:
 	endpoint:
 		...
 
 
-	_:
+Appb:
+	...
+Appd:
+	endpoint:
 		...
 
-App3:
+Appc:
 	endpoint:
 		...`, string(fullFile))
 }
