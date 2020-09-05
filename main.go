@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"os"
 	"path"
 	"regexp"
 	"strings"
@@ -27,6 +28,7 @@ type AppConfig struct {
 	StartingBalance int64 `yaml:"startingBalance"`
 	username        string
 	token           string
+	saveLocation    string
 }
 
 func main() {
@@ -36,14 +38,26 @@ func main() {
 
 func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, error) {
 	return &pbmod.ServiceInterface{
-		GetResource: server{a.getFromGit}.GetResource,
+		GetResource: server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResource,
 	}, nil
 }
 
-type retrieveFile func(repo, resource, version string) (contents io.Reader, err error)
-type saveFile func(repo, resource, version string, contents []byte) (err error)
+type retriever func(repo, resource, version string) (contents io.Reader, err error)
+type saver func(repo, resource, version string, contents []byte) (err error)
 
-func (a AppConfig) getFromGit(repo, resource, version string) (io.Reader, error) {
+func (a AppConfig) saveToFile(repo, resource, version string, contents []byte) (err error) {
+	location := path.Join(a.saveLocation, key(repo, resource, version))
+	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(location, contents, os.ModePerm)
+}
+
+func (a AppConfig) retrieveFie(repo, resource, version string) (io.Reader, error) {
+	return os.Open(path.Join(a.saveLocation, key(repo, resource, version)))
+}
+
+func (a AppConfig) retrieveGit(repo, resource, version string) (io.Reader, error) {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	if a.username != "" {
@@ -54,7 +68,7 @@ func (a AppConfig) getFromGit(repo, resource, version string) (io.Reader, error)
 	}
 	r, err := git.Clone(store, nil, &git.CloneOptions{
 		ReferenceName: plumbing.ReferenceName(version),
-		URL:           repo,
+		URL:           "https://" + repo + ".git",
 		Depth:         1,
 		Auth:          auth,
 	})
@@ -81,19 +95,21 @@ func (a AppConfig) getFromGit(repo, resource, version string) (io.Reader, error)
 }
 
 type server struct {
-	retrieveFile
+	retriever []retriever
+	saver
 }
 
-func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever ...retrieveFile) (map[string]string, error) {
+func doImport(initialrepo, initialImport, ver string, saver saver, retrievers ...retriever) (map[string]string, error) {
 	var final = make(map[string]string)
+	var err error
 	var imports = []string{initialImport}
 	var file io.Reader
 	for {
 		var newImports []string
 		for _, imp := range imports {
-			for _, r := range retriever {
-				file, _ = r(initialrepo, imp, ver)
-				if file != nil {
+			for _, r := range retrievers {
+				file, err = r(initialrepo, imp, ver)
+				if file != nil && err == nil {
 					break
 				}
 			}
@@ -116,12 +132,15 @@ func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever 
 }
 
 func key(repo, resource, version string) string {
+	if version == "" {
+		return fmt.Sprintf("%s/%s", repo, resource)
+	}
 	return fmt.Sprintf("%s/%s@%s", repo, resource, version)
 }
 func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, client pbmod.GetResourceClient) (*pbmod.RetrieveResponse, error) {
 	repo, resource := processRequest(req.Resource)
-	files, err := doImport(repo, resource, req.Version, save, retrieveFromMap, s.retrieveFile)
-	contents := make([]pbmod.KeyValue, len(files))
+	files, err := doImport(repo, resource, req.Version, s.saver, s.retriever...)
+	contents := make([]pbmod.KeyValue, 0, len(files))
 	for imp, file := range files {
 		contents = append(contents, pbmod.KeyValue{Key: imp, Value: file})
 	}
@@ -136,7 +155,7 @@ func processRequest(resource string) (string, string) {
 	if len(parts) < 3 {
 		return "", ""
 	}
-	repo := "https://" + path.Join(parts[0], parts[1], parts[2]) + ".git"
+	repo := path.Join(parts[0], parts[1], parts[2])
 	relresource := path.Join(parts[3:]...)
 	return repo, relresource
 }

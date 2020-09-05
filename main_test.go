@@ -14,8 +14,8 @@ import (
 
 func TestRepo(t *testing.T) {
 	tests := map[string][]string{
-		"github.com/a/b/c.d":   {"https://github.com/a/b.git", "c.d"},
-		"github.com/a/b/c/d.e": {"https://github.com/a/b.git", "c/d.e"},
+		"github.com/a/b/c.d":   {"github.com/a/b", "c.d"},
+		"github.com/a/b/c/d.e": {"github.com/a/b", "c/d.e"},
 	}
 	for in, out := range tests {
 		t.Run(in, func(t *testing.T) {
@@ -30,10 +30,11 @@ func TestGetRetrieve(t *testing.T) {
 		Version:  "",
 	}
 	client := pbmod.GetResourceClient{}
-	s := &server{retrieveFile: AppConfig{}.getFromGit}
+	a := &AppConfig{saveLocation: "output"}
+	s := &server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}
 	res, err := s.GetResource(context.Background(), req, client)
 	require.NoError(t, err)
-	banana := []string{"Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}
+	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
 	require.Equal(t, banana, res.Content)
 }
 
