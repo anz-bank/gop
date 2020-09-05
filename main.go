@@ -13,6 +13,10 @@ import (
 	"regexp"
 	"strings"
 
+	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/anz-bank/sysl/pkg/parse"
+
 	"github.com/go-git/go-git/v5/plumbing"
 
 	"github.com/go-git/go-git/v5"
@@ -37,29 +41,101 @@ func main() {
 
 }
 
+func NewKeyValue() *pbmod.KeyValue {
+	var a string
+	return &pbmod.KeyValue{
+		Extra:    &a,
+		Repo:     "",
+		Resource: "",
+		Value:    "",
+		Version:  "",
+	}
+}
+
 func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, error) {
 	return &pbmod.ServiceInterface{
-		GetResourceList: server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResource,
-		GetResources:    server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResources,
+		GetResourceList: server{retrievers: []retriever{a.retrieveSyslPb, a.retrieveGit}, savers: []saver{a.saveToFile, a.saveToPbJsonFile}, posts: []post{processSysl}}.GetResource,
 	}, nil
 }
 
-type retriever func(repo, resource, version string) (contents io.Reader, err error)
-type saver func(repo, resource, version string, contents []byte) (err error)
+type retriever func(res *pbmod.KeyValue) (err error)
+type saver func(res *pbmod.KeyValue) (err error)
+type post func(pre *pbmod.KeyValue) (err error)
 
-func (a AppConfig) saveToFile(repo, resource, version string, contents []byte) (err error) {
-	location := path.Join(a.saveLocation, key(repo, resource, version))
+func (a AppConfig) saveToFile(res *pbmod.KeyValue) (err error) {
+	location := path.Join(a.saveLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(location, contents, os.ModePerm)
+	return ioutil.WriteFile(location, []byte(res.Value), os.ModePerm)
 }
 
-func (a AppConfig) retrieveFie(repo, resource, version string) (io.Reader, error) {
-	return os.Open(path.Join(a.saveLocation, key(repo, resource, version)))
+func (a AppConfig) saveToPbJsonFile(res *pbmod.KeyValue) (err error) {
+	location := path.Join(a.saveLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version))
+	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
+		return err
+	}
+	return ioutil.WriteFile(location, []byte(*res.Extra), os.ModePerm)
 }
 
-func (a AppConfig) retrieveGit(repo, resource, version string) (io.Reader, error) {
+func retrieveFie(res *string, file io.Reader) error {
+	contents, err := ioutil.ReadAll(file)
+	if err != nil {
+		return err
+	}
+	fin := string(contents)
+	*res = fin
+	return nil
+}
+
+func (a AppConfig) retrieveSyslPB(res *pbmod.KeyValue) error {
+	file, err := os.Open(path.Join(a.saveLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)))
+	if file == nil {
+		return err
+	}
+	res.Imported = true
+	return retrieveFie(res.Extra, file)
+}
+
+func (a AppConfig) retrieveFile(res *pbmod.KeyValue) error {
+	file, err := os.Open(path.Join(a.saveLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)))
+	if file == nil {
+		return err
+	}
+	res.Imported = true
+	return retrieveFie(&res.Value, file)
+}
+
+func (a AppConfig) retrieveSyslPb(res *pbmod.KeyValue) error {
+	file, err := os.Open(path.Join(a.saveLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)))
+	if file == nil {
+		return err
+	}
+	if err := retrieveFie(&res.Value, file); err != nil {
+		return err
+	}
+	return a.retrieveFile(res)
+}
+
+func processSysl(a *pbmod.KeyValue) error {
+	if *a.Extra != "" {
+		return nil
+	}
+	m, err := parse.NewParser().ParseString(a.Value)
+	if err != nil {
+		return err
+	}
+	ma := protojson.MarshalOptions{Multiline: false, Indent: " ", EmitUnpopulated: false}
+	mb, err := ma.Marshal(m)
+	if err != nil {
+		return err
+	}
+	extra := string(mb)
+	a.Extra = &extra
+	return nil
+}
+
+func (a AppConfig) retrieveGit(res *pbmod.KeyValue) error {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	if a.username != "" {
@@ -69,117 +145,66 @@ func (a AppConfig) retrieveGit(repo, resource, version string) (io.Reader, error
 		}
 	}
 	r, err := git.Clone(store, nil, &git.CloneOptions{
-		URL:   "https://" + repo + ".git",
+		URL:   "https://" + res.Repo + ".git",
 		Depth: 1,
 		Auth:  auth,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
-	commit, err := r.CommitObject(plumbing.NewHash(version))
+	commit, err := r.CommitObject(plumbing.NewHash(res.Version))
 	if err != nil {
-		return nil, err
+		return err
 	}
-	f, err := commit.File(resource)
+	f, err := commit.File(res.Resource)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	reader, err := f.Reader()
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return reader, nil
+	return retrieveFie(&res.Value, reader)
 }
 
 type server struct {
-	retriever []retriever
-	saver
+	retrievers []retriever
+	savers     []saver
+	posts      []post
 }
 
-func doImport(initialrepo, initialImport, ver string, saver saver, retrievers ...retriever) (map[string]string, error) {
-	var final = make(map[string]string)
-	var err error
-	var imports = []string{initialImport}
-	var file io.Reader
-	for {
-		var newImports []string
-		for _, imp := range imports {
-			for _, r := range retrievers {
-				file, err = r(initialrepo, imp, ver)
-				if file != nil && err == nil {
-					break
-				}
-			}
-			if file == nil {
-				return nil, fmt.Errorf("Error loading file")
-			}
-			contents, err := ioutil.ReadAll(file)
-			if err != nil {
-				return nil, err
-			}
-			if err := saver(initialrepo, imp, ver, contents); err != nil {
-				return nil, err
-			}
-			newImports = append(newImports, findImports(syslimportRegex, contents)...)
-			for i, e := range newImports {
-				if newrepo, _ := processRequest(e); newrepo == "" {
-					newImports[i] = path.Join(path.Dir(imp), e)
-				}
+func importFile(initialrepo, initialImport, ver string, retrievers []retriever) (*pbmod.KeyValue, error) {
+	var file = NewKeyValue()
+	file.Repo = initialrepo
+	file.Resource = initialImport
+	file.Version = ver
 
-			}
-			final[key(initialrepo, imp, ver)] = string(contents)
-		}
-		imports = newImports
-		if len(imports) == 0 {
-			break
-		}
-	}
-	return final, nil
-}
-
-func importFile(initialrepo, initialImport, ver string, saver saver, retrievers ...retriever) (pbmod.KeyValue, error) {
-	var err error
-	var file io.Reader
 	for _, r := range retrievers {
-		file, err = r(initialrepo, initialImport, ver)
-		if file != nil && err == nil {
+		_ = r(file)
+		if file.Value != "" {
 			break
 		}
 	}
-	if file == nil {
-		return pbmod.KeyValue{}, fmt.Errorf("Error loading file")
+	if file.Value == "" {
+		return nil, fmt.Errorf("Error loading file")
 	}
-	contents, err := ioutil.ReadAll(file)
-	if err != nil {
-		return pbmod.KeyValue{}, err
-	}
-	if err := saver(initialrepo, initialImport, ver, contents); err != nil {
-		return pbmod.KeyValue{}, err
-	}
-	return pbmod.KeyValue{Key: key(initialrepo, initialImport, ver), Value: string(contents)}, nil
-}
-
-func key(repo, resource, version string) string {
-	if version == "" {
-		return fmt.Sprintf("%s/%s", repo, resource)
-	}
-	return fmt.Sprintf("%s/%s@%s", repo, resource, version)
-}
-
-func (s server) GetResources(ctx context.Context, req *pbmod.GetResourcesRequest, client pbmod.GetResourcesClient) (*pbmod.RetrieveResponse, error) {
-	repo, resource := processRequest(req.Resource)
-	files, err := doImport(repo, resource, req.Version, s.saver, s.retriever...)
-	contents := make([]pbmod.KeyValue, 0, len(files))
-	for imp, file := range files {
-		contents = append(contents, pbmod.KeyValue{Key: imp, Value: file})
-	}
-	return &pbmod.RetrieveResponse{Content: contents}, err
+	return file, nil
 }
 
 func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceListRequest, client pbmod.GetResourceListClient) (*pbmod.KeyValue, error) {
-	repo, resource := processRequest(string(req.Resource))
-	files, err := importFile(repo, resource, string(req.Version), s.saver, s.retriever...)
-	return &files, err
+	repo, resource := processRequest(req.Resource)
+	files, err := importFile(repo, resource, req.Version, s.retrievers)
+	if !files.Imported {
+		for _, p := range s.posts {
+			p(files)
+		}
+		for _, s := range s.savers {
+			if err := s(files); err != nil {
+				fmt.Println(err)
+			}
+		}
+	}
+	return files, err
 }
 
 /*
@@ -198,12 +223,12 @@ func processRequest(resource string) (string, string) {
 var files = map[string]string{}
 
 func save(repo, resource, version string, contents []byte) (err error) {
-	files[key(repo, resource, version)] = string(contents)
+	files[fmt.Sprintf("%s/%s@%s", repo, resource, version)] = string(contents)
 	return nil
 }
 
 func retrieveFromMap(repo, resource, version string) (io.Reader, error) {
-	contents, ok := files[key(repo, resource, version)]
+	contents, ok := files[fmt.Sprintf("%s/%s@%s", repo, resource, version)]
 	if !ok {
 		return nil, fmt.Errorf("Can't find file %s%s@%s", repo, resource, version)
 	}

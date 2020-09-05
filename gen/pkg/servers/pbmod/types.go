@@ -17,8 +17,12 @@ var _ = date.Parse
 
 // KeyValue ...
 type KeyValue struct {
-	Key   string `json:"key"`
-	Value string `json:"value"`
+	Extra    *string `json:"extra,omitempty"`
+	Imported bool    `json:"imported"`
+	Repo     string  `json:"repo"`
+	Resource string  `json:"resource"`
+	Value    string  `json:"value"`
+	Version  string  `json:"version"`
 }
 
 // RetrieveResponse ...
@@ -32,12 +36,6 @@ type GetResourceListRequest struct {
 	Version  string
 }
 
-// GetResourcesRequest ...
-type GetResourcesRequest struct {
-	Resource string
-	Version  string
-}
-
 // *KeyValue validator
 func (s *KeyValue) Validate() error {
 	return validator.Validate(s)
@@ -47,6 +45,3 @@ func (s *KeyValue) Validate() error {
 func (s *RetrieveResponse) Validate() error {
 	return validator.Validate(s)
 }
-
-// Str ...
-type Str string

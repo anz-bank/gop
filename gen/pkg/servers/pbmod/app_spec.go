@@ -86,95 +86,66 @@ const AppSpec = `{
        "col": 33
       }
      }
-    },
-    "GET /resources/{resource}/{version}": {
-     "name": "GET /resources/{resource}/{version}",
-     "attrs": {
-      "patterns": {
-       "a": {
-        "elt": [
-         {
-          "s": "rest"
-         }
-        ]
-       }
-      }
-     },
-     "stmt": [
-      {
-       "ret": {
-        "payload": "ok <: retrieveResponse"
-       }
-      }
-     ],
-     "restParams": {
-      "method": "GET",
-      "path": "/resources/{resource}/{version}",
-      "urlParam": [
-       {
-        "name": "resource",
-        "type": {
-         "primitive": "STRING",
-         "sourceContext": {
-          "file": "pbmod.sysl",
-          "start": {
-           "line": 9,
-           "col": 15
-          },
-          "end": {
-           "line": 9,
-           "col": 34
-          }
-         }
-        }
-       },
-       {
-        "name": "version",
-        "type": {
-         "primitive": "STRING",
-         "sourceContext": {
-          "file": "pbmod.sysl",
-          "start": {
-           "line": 9,
-           "col": 36
-          },
-          "end": {
-           "line": 9,
-           "col": 54
-          }
-         }
-        }
-       }
-      ]
-     },
-     "sourceContext": {
-      "file": "pbmod.sysl",
-      "start": {
-       "line": 10,
-       "col": 8
-      },
-      "end": {
-       "line": 12,
-       "col": 4
-      }
-     }
     }
    },
    "types": {
     "keyValue": {
      "tuple": {
       "attrDefs": {
-       "key": {
+       "extra": {
+        "primitive": "STRING",
+        "opt": true,
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 8,
+          "col": 17
+         },
+         "end": {
+          "line": 8,
+          "col": 23
+         }
+        }
+       },
+       "imported": {
+        "primitive": "BOOL",
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 11,
+          "col": 20
+         },
+         "end": {
+          "line": 11,
+          "col": 20
+         }
+        }
+       },
+       "repo": {
         "primitive": "STRING",
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 6,
-          "col": 15
+          "line": 9,
+          "col": 16
          },
          "end": {
-          "line": 6,
-          "col": 15
+          "line": 9,
+          "col": 16
+         }
+        }
+       },
+       "resource": {
+        "primitive": "STRING",
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 10,
+          "col": 20
+         },
+         "end": {
+          "line": 10,
+          "col": 20
          }
         }
        },
@@ -191,6 +162,20 @@ const AppSpec = `{
           "col": 17
          }
         }
+       },
+       "version": {
+        "primitive": "STRING",
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 6,
+          "col": 19
+         },
+         "end": {
+          "line": 6,
+          "col": 19
+         }
+        }
        }
       }
      },
@@ -201,7 +186,7 @@ const AppSpec = `{
        "col": 4
       },
       "end": {
-       "line": 8,
+       "line": 12,
        "col": 4
       }
      }
@@ -263,20 +248,6 @@ const AppSpec = `{
       "end": {
        "line": 5,
        "col": 4
-      }
-     }
-    },
-    "str": {
-     "primitive": "STRING",
-     "sourceContext": {
-      "file": "pbmod.sysl",
-      "start": {
-       "line": 8,
-       "col": 4
-      },
-      "end": {
-       "line": 8,
-       "col": 16
       }
      }
     }

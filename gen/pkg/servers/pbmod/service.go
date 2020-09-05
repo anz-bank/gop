@@ -15,7 +15,6 @@ import (
 // Service interface for pbmod
 type Service interface {
 	GetResourceList(ctx context.Context, req *GetResourceListRequest) (*KeyValue, error)
-	GetResources(ctx context.Context, req *GetResourcesRequest) (*RetrieveResponse, error)
 }
 
 // Client for pbmod API
@@ -61,37 +60,6 @@ func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListReques
 		}
 
 		return OkKeyValueResponse, nil
-	}
-
-	return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, nil)
-}
-
-// GetResources ...
-func (s *Client) GetResources(ctx context.Context, req *GetResourcesRequest) (*RetrieveResponse, error) {
-	required := []string{}
-	var okResponse RetrieveResponse
-	u, err := url.Parse(fmt.Sprintf("%s/resources/%v/%v", s.url, req.Resource, req.Version))
-	if err != nil {
-		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
-	}
-
-	result, err := restlib.DoHTTPRequest(ctx, s.client, "GET", u.String(), nil, required, &okResponse, nil)
-	restlib.OnRestResultHTTPResult(ctx, result, err)
-	if err != nil {
-		return nil, common.CreateError(ctx, common.DownstreamUnavailableError, "call failed: pbmod <- GET "+u.String(), err)
-	}
-
-	if result.HTTPResponse.StatusCode == http.StatusUnauthorized {
-		return nil, common.CreateDownstreamError(ctx, common.DownstreamUnauthorizedError, result.HTTPResponse, result.Body, nil)
-	}
-	OkRetrieveResponseResponse, ok := result.Response.(*RetrieveResponse)
-	if ok {
-		valErr := validator.Validate(OkRetrieveResponseResponse)
-		if valErr != nil {
-			return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, valErr)
-		}
-
-		return OkRetrieveResponseResponse, nil
 	}
 
 	return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, nil)

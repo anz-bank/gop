@@ -42,7 +42,6 @@ func (s *ServiceRouter) WireRoutes(ctx context.Context, r chi.Router) {
 	r.Route(core.SelectBasePath(s.basePathFromSpec, s.gc.BasePath()), func(r chi.Router) {
 		s.gc.AddMiddleware(ctx, r)
 		r.Get("/resource", s.svcHandler.GetResourceListHandler)
-		r.Get("/resources/{resource}/{version}", s.svcHandler.GetResourcesHandler)
 	})
 }
 

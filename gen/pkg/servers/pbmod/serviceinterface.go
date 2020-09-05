@@ -21,15 +21,9 @@ type GetResourceListClient struct {
 	Conn *sql.Conn
 }
 
-// GetResources Client
-type GetResourcesClient struct {
-	Conn *sql.Conn
-}
-
 // ServiceInterface for pbmod
 type ServiceInterface struct {
 	GetResourceList func(ctx context.Context, req *GetResourceListRequest, client GetResourceListClient) (*KeyValue, error)
-	GetResources    func(ctx context.Context, req *GetResourcesRequest, client GetResourcesClient) (*RetrieveResponse, error)
 }
 
 // DownstreamConfig for pbmod

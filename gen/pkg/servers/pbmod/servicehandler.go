@@ -17,7 +17,6 @@ import (
 // Handler interface for pbmod
 type Handler interface {
 	GetResourceListHandler(w http.ResponseWriter, r *http.Request)
-	GetResourcesHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // ServiceHandler for pbmod API
@@ -119,80 +118,4 @@ func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.R
 	}
 	restlib.SetHeaders(w, headermap)
 	restlib.SendHTTPResponse(w, httpstatus, keyvalue)
-}
-
-// GetResourcesHandler ...
-func (s *ServiceHandler) GetResourcesHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetResources == nil {
-		common.HandleError(r.Context(), w, common.InternalError, "not implemented", nil, s.genCallback.MapError)
-		return
-	}
-
-	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
-	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetResourcesRequest
-
-	req.Resource = restlib.GetURLParam(r, "resource")
-	req.Version = restlib.GetURLParam(r, "version")
-
-	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
-	defer cancel()
-	valErr := validator.Validate(&req)
-	if valErr != nil {
-		common.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr, s.genCallback.MapError)
-		return
-	}
-
-	conn, dberr := s.DB.Conn(ctx)
-	if dberr != nil {
-		common.HandleError(ctx, w, common.InternalError, "Database connection could not be retrieved", dberr, s.genCallback.MapError)
-		return
-	}
-
-	defer conn.Close()
-
-	tx, dberr := conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
-	if dberr != nil {
-		common.HandleError(ctx, w, common.DownstreamUnavailableError, "DB Transaction could not be created", dberr, s.genCallback.MapError)
-		return
-	}
-
-	client := GetResourcesClient{
-
-		Conn: conn,
-	}
-
-	defer func() {
-		if rec := recover(); rec != nil {
-			tx.Rollback()
-
-			var err error
-			switch rec := rec.(type) {
-			case error:
-				err = rec
-			default:
-				err = fmt.Errorf("Unknown error: %v", rec)
-			}
-			common.HandleError(ctx, w, common.InternalError, "Unexpected panic", err, s.genCallback.MapError)
-		}
-	}()
-	retrieveresponse, err := s.serviceInterface.GetResources(ctx, &req, client)
-	if err != nil {
-		tx.Rollback()
-		common.HandleError(ctx, w, common.InternalError, "Handler error", err, s.genCallback.MapError)
-		return
-	}
-
-	commitErr := tx.Commit()
-	if commitErr != nil {
-		common.HandleError(ctx, w, common.InternalError, "Failed to commit the transaction", commitErr, s.genCallback.MapError)
-		return
-	}
-
-	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
-	if headermap.Get("Content-Type") == "" {
-		headermap.Set("Content-Type", "application/json")
-	}
-	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, retrieveresponse)
 }

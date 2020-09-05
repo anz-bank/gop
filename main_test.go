@@ -31,7 +31,7 @@ func TestGetRetrieve(t *testing.T) {
 	}
 	client := pbmod.GetResourceClient{}
 	a := &AppConfig{saveLocation: "output"}
-	s := &server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}
+	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
 	res, err := s.GetResource(context.Background(), req, client)
 	require.NoError(t, err)
 	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
@@ -45,7 +45,7 @@ func TestGetRetrieveWithDeps(t *testing.T) {
 	}
 	client := pbmod.GetResourceClient{}
 	a := &AppConfig{saveLocation: "output"}
-	s := &server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}
+	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
 	res, err := s.GetResource(context.Background(), req, client)
 	require.NoError(t, err)
 	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
@@ -59,7 +59,7 @@ func TestGetRetrieveWithDeps2(t *testing.T) {
 	}
 	client := pbmod.GetResourceClient{}
 	a := &AppConfig{saveLocation: "output"}
-	s := &server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}
+	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
 	res, err := s.GetResource(context.Background(), req, client)
 	require.NoError(t, err)
 	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}

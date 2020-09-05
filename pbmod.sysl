@@ -3,12 +3,12 @@ pbmod:
     !type retrieveResponse:
         content <: sequence of keyValue
     !type keyValue:
-        key <: string
+        version <: string
         value <: string
-    !alias str: string
-    /resources/{resource <: string}/{version <: string}:
-        GET:
-            return ok <: retrieveResponse
+        extra <: string?
+        repo <: string
+        resource <: string
+        imported <: bool
     /resource:
         GET ?resource=string&version=string:
             return ok <: keyValue
