@@ -26,8 +26,14 @@ type RetrieveResponse struct {
 	Content []KeyValue `json:"content"`
 }
 
-// GetResourceRequest ...
-type GetResourceRequest struct {
+// GetResourceListRequest ...
+type GetResourceListRequest struct {
+	Resource string
+	Version  string
+}
+
+// GetResourcesRequest ...
+type GetResourcesRequest struct {
 	Resource string
 	Version  string
 }
@@ -41,3 +47,6 @@ func (s *KeyValue) Validate() error {
 func (s *RetrieveResponse) Validate() error {
 	return validator.Validate(s)
 }
+
+// Str ...
+type Str string

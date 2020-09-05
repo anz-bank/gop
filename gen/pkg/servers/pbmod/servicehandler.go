@@ -16,7 +16,8 @@ import (
 
 // Handler interface for pbmod
 type Handler interface {
-	GetResourceHandler(w http.ResponseWriter, r *http.Request)
+	GetResourceListHandler(w http.ResponseWriter, r *http.Request)
+	GetResourcesHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // ServiceHandler for pbmod API
@@ -44,16 +45,92 @@ func NewServiceHandler(
 	}, nil
 }
 
-// GetResourceHandler ...
-func (s *ServiceHandler) GetResourceHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetResource == nil {
+// GetResourceListHandler ...
+func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetResourceList == nil {
 		common.HandleError(r.Context(), w, common.InternalError, "not implemented", nil, s.genCallback.MapError)
 		return
 	}
 
 	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
 	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetResourceRequest
+	var req GetResourceListRequest
+
+	req.Resource = restlib.GetQueryParam(r, "resource")
+	req.Version = restlib.GetQueryParam(r, "version")
+
+	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
+	defer cancel()
+	valErr := validator.Validate(&req)
+	if valErr != nil {
+		common.HandleError(ctx, w, common.BadRequestError, "Invalid request", valErr, s.genCallback.MapError)
+		return
+	}
+
+	conn, dberr := s.DB.Conn(ctx)
+	if dberr != nil {
+		common.HandleError(ctx, w, common.InternalError, "Database connection could not be retrieved", dberr, s.genCallback.MapError)
+		return
+	}
+
+	defer conn.Close()
+
+	tx, dberr := conn.BeginTx(ctx, &sql.TxOptions{Isolation: sql.LevelSerializable})
+	if dberr != nil {
+		common.HandleError(ctx, w, common.DownstreamUnavailableError, "DB Transaction could not be created", dberr, s.genCallback.MapError)
+		return
+	}
+
+	client := GetResourceListClient{
+
+		Conn: conn,
+	}
+
+	defer func() {
+		if rec := recover(); rec != nil {
+			tx.Rollback()
+
+			var err error
+			switch rec := rec.(type) {
+			case error:
+				err = rec
+			default:
+				err = fmt.Errorf("Unknown error: %v", rec)
+			}
+			common.HandleError(ctx, w, common.InternalError, "Unexpected panic", err, s.genCallback.MapError)
+		}
+	}()
+	keyvalue, err := s.serviceInterface.GetResourceList(ctx, &req, client)
+	if err != nil {
+		tx.Rollback()
+		common.HandleError(ctx, w, common.InternalError, "Handler error", err, s.genCallback.MapError)
+		return
+	}
+
+	commitErr := tx.Commit()
+	if commitErr != nil {
+		common.HandleError(ctx, w, common.InternalError, "Failed to commit the transaction", commitErr, s.genCallback.MapError)
+		return
+	}
+
+	headermap, httpstatus := common.RespHeaderAndStatusFromContext(ctx)
+	if headermap.Get("Content-Type") == "" {
+		headermap.Set("Content-Type", "application/json")
+	}
+	restlib.SetHeaders(w, headermap)
+	restlib.SendHTTPResponse(w, httpstatus, keyvalue)
+}
+
+// GetResourcesHandler ...
+func (s *ServiceHandler) GetResourcesHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.GetResources == nil {
+		common.HandleError(r.Context(), w, common.InternalError, "not implemented", nil, s.genCallback.MapError)
+		return
+	}
+
+	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
+	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
+	var req GetResourcesRequest
 
 	req.Resource = restlib.GetURLParam(r, "resource")
 	req.Version = restlib.GetURLParam(r, "version")
@@ -80,7 +157,7 @@ func (s *ServiceHandler) GetResourceHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	client := GetResourceClient{
+	client := GetResourcesClient{
 
 		Conn: conn,
 	}
@@ -99,7 +176,7 @@ func (s *ServiceHandler) GetResourceHandler(w http.ResponseWriter, r *http.Reque
 			common.HandleError(ctx, w, common.InternalError, "Unexpected panic", err, s.genCallback.MapError)
 		}
 	}()
-	retrieveresponse, err := s.serviceInterface.GetResource(ctx, &req, client)
+	retrieveresponse, err := s.serviceInterface.GetResources(ctx, &req, client)
 	if err != nil {
 		tx.Rollback()
 		common.HandleError(ctx, w, common.InternalError, "Handler error", err, s.genCallback.MapError)

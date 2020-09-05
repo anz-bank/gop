@@ -5,6 +5,10 @@ pbmod:
     !type keyValue:
         key <: string
         value <: string
-    /resource/{resource <: string}/{version <: string}:
+    !alias str: string
+    /resources/{resource <: string}/{version <: string}:
         GET:
             return ok <: retrieveResponse
+    /resource:
+        GET ?resource=string&version=string:
+            return ok <: keyValue

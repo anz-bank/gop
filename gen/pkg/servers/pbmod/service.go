@@ -14,7 +14,8 @@ import (
 
 // Service interface for pbmod
 type Service interface {
-	GetResource(ctx context.Context, req *GetResourceRequest) (*RetrieveResponse, error)
+	GetResourceList(ctx context.Context, req *GetResourceListRequest) (*KeyValue, error)
+	GetResources(ctx context.Context, req *GetResourcesRequest) (*RetrieveResponse, error)
 }
 
 // Client for pbmod API
@@ -28,11 +29,48 @@ func NewClient(client *http.Client, serviceURL string) *Client {
 	return &Client{client, serviceURL}
 }
 
-// GetResource ...
-func (s *Client) GetResource(ctx context.Context, req *GetResourceRequest) (*RetrieveResponse, error) {
+// GetResourceList ...
+func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListRequest) (*KeyValue, error) {
+	required := []string{}
+	var okResponse KeyValue
+	u, err := url.Parse(fmt.Sprintf("%s/resource", s.url))
+	if err != nil {
+		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
+	}
+
+	q := u.Query()
+	q.Add("resource", req.Resource)
+
+	q.Add("version", req.Version)
+
+	u.RawQuery = q.Encode()
+	result, err := restlib.DoHTTPRequest(ctx, s.client, "GET", u.String(), nil, required, &okResponse, nil)
+	restlib.OnRestResultHTTPResult(ctx, result, err)
+	if err != nil {
+		return nil, common.CreateError(ctx, common.DownstreamUnavailableError, "call failed: pbmod <- GET "+u.String(), err)
+	}
+
+	if result.HTTPResponse.StatusCode == http.StatusUnauthorized {
+		return nil, common.CreateDownstreamError(ctx, common.DownstreamUnauthorizedError, result.HTTPResponse, result.Body, nil)
+	}
+	OkKeyValueResponse, ok := result.Response.(*KeyValue)
+	if ok {
+		valErr := validator.Validate(OkKeyValueResponse)
+		if valErr != nil {
+			return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, valErr)
+		}
+
+		return OkKeyValueResponse, nil
+	}
+
+	return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, nil)
+}
+
+// GetResources ...
+func (s *Client) GetResources(ctx context.Context, req *GetResourcesRequest) (*RetrieveResponse, error) {
 	required := []string{}
 	var okResponse RetrieveResponse
-	u, err := url.Parse(fmt.Sprintf("%s/resource/%v/%v", s.url, req.Resource, req.Version))
+	u, err := url.Parse(fmt.Sprintf("%s/resources/%v/%v", s.url, req.Resource, req.Version))
 	if err != nil {
 		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
 	}

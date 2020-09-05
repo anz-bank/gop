@@ -13,8 +13,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+
+	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 
@@ -38,7 +39,8 @@ func main() {
 
 func LoadService(ctx context.Context, a AppConfig) (*pbmod.ServiceInterface, error) {
 	return &pbmod.ServiceInterface{
-		GetResource: server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResource,
+		GetResourceList: server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResource,
+		GetResources:    server{retriever: []retriever{a.retrieveFie, a.retrieveGit}, saver: a.saveToFile}.GetResources,
 	}, nil
 }
 
@@ -67,19 +69,14 @@ func (a AppConfig) retrieveGit(repo, resource, version string) (io.Reader, error
 		}
 	}
 	r, err := git.Clone(store, nil, &git.CloneOptions{
-		ReferenceName: plumbing.ReferenceName(version),
-		URL:           "https://" + repo + ".git",
-		Depth:         1,
-		Auth:          auth,
+		URL:   "https://" + repo + ".git",
+		Depth: 1,
+		Auth:  auth,
 	})
 	if err != nil {
 		return nil, err
 	}
-	ref, err := r.Head()
-	if err != nil {
-		return nil, err
-	}
-	commit, err := r.CommitObject(ref.Hash())
+	commit, err := r.CommitObject(plumbing.NewHash(version))
 	if err != nil {
 		return nil, err
 	}
@@ -113,6 +110,9 @@ func doImport(initialrepo, initialImport, ver string, saver saver, retrievers ..
 					break
 				}
 			}
+			if file == nil {
+				return nil, fmt.Errorf("Error loading file")
+			}
 			contents, err := ioutil.ReadAll(file)
 			if err != nil {
 				return nil, err
@@ -121,6 +121,12 @@ func doImport(initialrepo, initialImport, ver string, saver saver, retrievers ..
 				return nil, err
 			}
 			newImports = append(newImports, findImports(syslimportRegex, contents)...)
+			for i, e := range newImports {
+				if newrepo, _ := processRequest(e); newrepo == "" {
+					newImports[i] = path.Join(path.Dir(imp), e)
+				}
+
+			}
 			final[key(initialrepo, imp, ver)] = string(contents)
 		}
 		imports = newImports
@@ -131,13 +137,36 @@ func doImport(initialrepo, initialImport, ver string, saver saver, retrievers ..
 	return final, nil
 }
 
+func importFile(initialrepo, initialImport, ver string, saver saver, retrievers ...retriever) (pbmod.KeyValue, error) {
+	var err error
+	var file io.Reader
+	for _, r := range retrievers {
+		file, err = r(initialrepo, initialImport, ver)
+		if file != nil && err == nil {
+			break
+		}
+	}
+	if file == nil {
+		return pbmod.KeyValue{}, fmt.Errorf("Error loading file")
+	}
+	contents, err := ioutil.ReadAll(file)
+	if err != nil {
+		return pbmod.KeyValue{}, err
+	}
+	if err := saver(initialrepo, initialImport, ver, contents); err != nil {
+		return pbmod.KeyValue{}, err
+	}
+	return pbmod.KeyValue{Key: key(initialrepo, initialImport, ver), Value: string(contents)}, nil
+}
+
 func key(repo, resource, version string) string {
 	if version == "" {
 		return fmt.Sprintf("%s/%s", repo, resource)
 	}
 	return fmt.Sprintf("%s/%s@%s", repo, resource, version)
 }
-func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, client pbmod.GetResourceClient) (*pbmod.RetrieveResponse, error) {
+
+func (s server) GetResources(ctx context.Context, req *pbmod.GetResourcesRequest, client pbmod.GetResourcesClient) (*pbmod.RetrieveResponse, error) {
 	repo, resource := processRequest(req.Resource)
 	files, err := doImport(repo, resource, req.Version, s.saver, s.retriever...)
 	contents := make([]pbmod.KeyValue, 0, len(files))
@@ -145,6 +174,12 @@ func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, 
 		contents = append(contents, pbmod.KeyValue{Key: imp, Value: file})
 	}
 	return &pbmod.RetrieveResponse{Content: contents}, err
+}
+
+func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceListRequest, client pbmod.GetResourceListClient) (*pbmod.KeyValue, error) {
+	repo, resource := processRequest(string(req.Resource))
+	files, err := importFile(repo, resource, string(req.Version), s.saver, s.retriever...)
+	return &files, err
 }
 
 /*
@@ -187,6 +222,9 @@ func findImports(importRegex string, file []byte) []string {
 			}
 			for i, name := range re.SubexpNames() {
 				if name == "import" && match[i] != "" {
+					if path.Ext(match[i]) != ".sysl" {
+						match[i] += ".sysl"
+					}
 					imports = append(imports, match[i])
 				}
 			}
