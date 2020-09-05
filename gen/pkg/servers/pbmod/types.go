@@ -15,15 +15,26 @@ var _ = time.Parse
 // Reference imports to suppress unused errors
 var _ = date.Parse
 
+// KeyValue ...
+type KeyValue struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 // RetrieveResponse ...
 type RetrieveResponse struct {
-	Content []string `json:"content"`
+	Content []KeyValue `json:"content"`
 }
 
 // GetResourceRequest ...
 type GetResourceRequest struct {
 	Resource string
 	Version  string
+}
+
+// *KeyValue validator
+func (s *KeyValue) Validate() error {
+	return validator.Validate(s)
 }
 
 // *RetrieveResponse validator

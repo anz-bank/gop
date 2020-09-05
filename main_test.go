@@ -71,30 +71,11 @@ Appc:
 	endpoint:
 		...`,
 	}
-	content, _ := doImport("", `a.sysl`, "", save, retrieveFromMap, tester{resources: resources}.importerTest)
-	var fullFile []byte
-	for _, file := range content {
-		fullFile = append(fullFile, []byte("\n")...)
-		fullFile = append(fullFile, file...)
+	content, err := doImport("", `a.sysl`, "", save, retrieveFromMap, tester{resources: resources}.importerTest)
+	require.NoError(t, err)
+	for i, e := range content {
+		require.Equal(t, resources[strings.TrimRight(strings.TrimLeft(i, "/"), "@")], e)
 	}
-	require.Equal(t, `
-
-
-
-Appa:
-	endpoint:
-		...
-
-
-Appb:
-	...
-Appd:
-	endpoint:
-		...
-
-Appc:
-	endpoint:
-		...`, string(fullFile))
 }
 
 type tester struct {

@@ -1,7 +1,10 @@
 pbmod:
     @package = "pbmod"
     !type retrieveResponse:
-        content <: sequence of string
+        content <: sequence of keyValue
+    !type keyValue:
+        key <: string
+        value <: string
     /resource/{resource <: string}/{version <: string}:
         GET:
             return ok <: retrieveResponse

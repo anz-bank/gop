@@ -84,9 +84,8 @@ type server struct {
 	retrieveFile
 }
 
-func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever ...retrieveFile) ([]string, error) {
-	var final []string
-	var re = regexp.MustCompile(syslimportRegex)
+func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever ...retrieveFile) (map[string]string, error) {
+	var final = make(map[string]string)
 	var imports = []string{initialImport}
 	var file io.Reader
 	for {
@@ -106,8 +105,7 @@ func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever 
 				return nil, err
 			}
 			newImports = append(newImports, findImports(syslimportRegex, contents)...)
-			contents = re.ReplaceAll(contents, []byte{})
-			final = append(final, string(contents))
+			final[key(initialrepo, imp, ver)] = string(contents)
 		}
 		imports = newImports
 		if len(imports) == 0 {
@@ -117,10 +115,17 @@ func doImport(initialrepo, initialImport, ver string, saver saveFile, retriever 
 	return final, nil
 }
 
+func key(repo, resource, version string) string {
+	return fmt.Sprintf("%s/%s@%s", repo, resource, version)
+}
 func (s server) GetResource(ctx context.Context, req *pbmod.GetResourceRequest, client pbmod.GetResourceClient) (*pbmod.RetrieveResponse, error) {
 	repo, resource := processRequest(req.Resource)
 	files, err := doImport(repo, resource, req.Version, save, retrieveFromMap, s.retrieveFile)
-	return &pbmod.RetrieveResponse{Content: files}, err
+	contents := make([]pbmod.KeyValue, len(files))
+	for imp, file := range files {
+		contents = append(contents, pbmod.KeyValue{Key: imp, Value: file})
+	}
+	return &pbmod.RetrieveResponse{Content: contents}, err
 }
 
 /*
@@ -139,12 +144,12 @@ func processRequest(resource string) (string, string) {
 var files = map[string]string{}
 
 func save(repo, resource, version string, contents []byte) (err error) {
-	files[repo+resource+"@"+version] = string(contents)
+	files[key(repo, resource, version)] = string(contents)
 	return nil
 }
 
 func retrieveFromMap(repo, resource, version string) (io.Reader, error) {
-	contents, ok := files[repo+resource+"@"+version]
+	contents, ok := files[key(repo, resource, version)]
 	if !ok {
 		return nil, fmt.Errorf("Can't find file %s%s@%s", repo, resource, version)
 	}

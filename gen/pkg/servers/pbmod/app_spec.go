@@ -46,11 +46,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "pbmod.sysl",
           "start": {
-           "line": 5,
+           "line": 8,
            "col": 14
           },
           "end": {
-           "line": 5,
+           "line": 8,
            "col": 33
           }
          }
@@ -63,11 +63,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "pbmod.sysl",
           "start": {
-           "line": 5,
+           "line": 8,
            "col": 35
           },
           "end": {
-           "line": 5,
+           "line": 8,
            "col": 53
           }
          }
@@ -78,23 +78,84 @@ const AppSpec = `{
      "sourceContext": {
       "file": "pbmod.sysl",
       "start": {
-       "line": 6,
+       "line": 9,
        "col": 8
       },
       "end": {
-       "line": 7,
+       "line": 10,
        "col": 41
       }
      }
     }
    },
    "types": {
+    "keyValue": {
+     "tuple": {
+      "attrDefs": {
+       "key": {
+        "primitive": "STRING",
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 6,
+          "col": 15
+         },
+         "end": {
+          "line": 6,
+          "col": 15
+         }
+        }
+       },
+       "value": {
+        "primitive": "STRING",
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 7,
+          "col": 17
+         },
+         "end": {
+          "line": 7,
+          "col": 17
+         }
+        }
+       }
+      }
+     },
+     "sourceContext": {
+      "file": "pbmod.sysl",
+      "start": {
+       "line": 5,
+       "col": 4
+      },
+      "end": {
+       "line": 8,
+       "col": 4
+      }
+     }
+    },
     "retrieveResponse": {
      "tuple": {
       "attrDefs": {
        "content": {
         "sequence": {
-         "primitive": "STRING",
+         "typeRef": {
+          "context": {
+           "appname": {
+            "part": [
+             "pbmod"
+            ]
+           },
+           "path": [
+            "retrieveResponse"
+           ]
+          },
+          "ref": {
+           "path": [
+            "keyValue"
+           ]
+          }
+         },
          "sourceContext": {
           "file": "pbmod.sysl",
           "start": {
