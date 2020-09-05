@@ -24,46 +24,26 @@ func TestRepo(t *testing.T) {
 		})
 	}
 }
-func TestGetRetrieve(t *testing.T) {
-	req := &pbmod.GetResourceRequest{
+
+func TestGetRetrieveWithDeps(t *testing.T) {
+	req := &pbmod.GetResourceListRequest{
 		Resource: "github.com/anz-bank/sysl/tests/bananatree.sysl",
 		Version:  "e78f4afc524ad8d1a1a4740779731d706b7b079b",
 	}
-	client := pbmod.GetResourceClient{}
-	a := &AppConfig{saveLocation: "output"}
-	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
+	client := pbmod.GetResourceListClient{}
+	s := server{AppConfig: AppConfig{saveLocation: "/dev/null"}}
+	s.retrievers = []retriever{s.retrieveSyslPb, s.retrieveGit}
+	s.savers = []saver{s.saveToFile, s.saveToPbJsonFile}
+	s.posts = []post{processSysl}
 	res, err := s.GetResource(context.Background(), req, client)
 	require.NoError(t, err)
-	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
-	require.Equal(t, banana, res.Content)
-}
-
-func TestGetRetrieveWithDeps(t *testing.T) {
-	req := &pbmod.GetResourceRequest{
-		Resource: "github.com/anz-bank/sysl/tests/model_with_deps.sysl",
-		Version:  "e78f4afc524ad8d1a1a4740779731d706b7b079b",
-	}
-	client := pbmod.GetResourceClient{}
-	a := &AppConfig{saveLocation: "output"}
-	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
-	res, err := s.GetResource(context.Background(), req, client)
+	pb := "{\"apps\":{\"Bananatree\":{\"name\":{\"part\":[\"Bananatree\"]},\"attrs\":{\"package\":{\"s\":\"bananatree\"}},\"endpoints\":{\"GET /banana/{id}\":{\"name\":\"GET /banana/{id}\",\"attrs\":{\"patterns\":{\"a\":{\"elt\":[{\"s\":\"rest\"}]}}},\"stmt\":[{\"ret\":{\"payload\":\"Banana\"}}],\"restParams\":{\"method\":\"GET\",\"path\":\"/banana/{id}\",\"urlParam\":[{\"name\":\"id\",\"type\":{\"primitive\":\"INT\",\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":7,\"col\":5},\"end\":{\"line\":7,\"col\":13}}}}]},\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":8,\"col\":6},\"end\":{\"line\":11,\"col\":2}}},\"GET /morebanana/{id}\":{\"name\":\"GET /morebanana/{id}\",\"attrs\":{\"patterns\":{\"a\":{\"elt\":[{\"s\":\"rest\"}]}}},\"stmt\":[{\"ret\":{\"payload\":\"Banana\"}}],\"restParams\":{\"method\":\"GET\",\"path\":\"/morebanana/{id}\",\"urlParam\":[{\"name\":\"id\",\"type\":{\"primitive\":\"INT\",\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":12,\"col\":5},\"end\":{\"line\":12,\"col\":13}}}}]},\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":13,\"col\":6},\"end\":{\"line\":15}}}},\"types\":{\"Banana\":{\"tuple\":{\"attrDefs\":{\"id\":{\"primitive\":\"INT\",\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":3,\"col\":10},\"end\":{\"line\":3,\"col\":10}}},\"title\":{\"primitive\":\"STRING\",\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":4,\"col\":13},\"end\":{\"line\":4,\"col\":13}}}}},\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":2,\"col\":2},\"end\":{\"line\":6,\"col\":2}}}},\"sourceContext\":{\"file\":\"temp.sysl\",\"start\":{\"line\":1,\"col\":1},\"end\":{\"line\":1,\"col\":32}}}}}"
+	banana := &pbmod.KeyValue{Repo: "github.com/anz-bank/sysl", Version: "e78f4afc524ad8d1a1a4740779731d706b7b079b", Resource: "tests/bananatree.sysl", Extra: &pb, Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id \u003c: int\n    title \u003c: string\n\n  /banana:\n    /{id\u003c:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id\u003c:int}:\n      GET:\n        return Banana\n"}
+	require.Equal(t, *banana.Extra, *res.Extra)
+	banana.Extra = nil
+	res.Extra = nil
 	require.NoError(t, err)
-	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
-	require.Equal(t, banana, res.Content)
-}
-
-func TestGetRetrieveWithDeps2(t *testing.T) {
-	req := &pbmod.GetResourceRequest{
-		Resource: "github.com/anz-bank/sysl/demo/examples/Modules/model_with_deps.sysl",
-		Version:  "e78f4afc524ad8d1a1a4740779731d706b7b079b",
-	}
-	client := pbmod.GetResourceClient{}
-	a := &AppConfig{saveLocation: "output"}
-	s := &server{retrievers: []retriever{a.retrieveFie, a.retrieveGit}, savers: a.saveToFile}
-	res, err := s.GetResource(context.Background(), req, client)
-	require.NoError(t, err)
-	banana := []pbmod.KeyValue{{Key: "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b", Value: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id <: int\n    title <: string\n\n  /banana:\n    /{id<:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id<:int}:\n      GET:\n        return Banana\n"}}
-	require.Equal(t, banana, res.Content)
+	require.Equal(t, banana, res)
 }
 
 func TestFindImport(t *testing.T) {
@@ -78,32 +58,6 @@ import b.sysl`: {"a.sysl", "b.sysl"},
 			a := findImports(syslimportRegex, []byte(in))
 			require.Equal(t, out, a)
 		})
-	}
-}
-
-func TestDoImport(t *testing.T) {
-	resources := map[string]string{
-		`a.sysl`: `import b.sysl
-import d.sysl
-
-Appa:
-	endpoint:
-		...`,
-		`b.sysl`: `
-import c.sysl
-Appb:
-	...`,
-		`c.sysl`: `
-Appc:
-	endpoint:
-		...`, `d.sysl`: `Appd:
-	endpoint:
-		...`,
-	}
-	content, err := doImport("", `a.sysl`, "", save, retrieveFromMap, tester{resources: resources}.importerTest)
-	require.NoError(t, err)
-	for i, e := range content {
-		require.Equal(t, resources[strings.TrimRight(strings.TrimLeft(i, "/"), "@")], e)
 	}
 }
 
