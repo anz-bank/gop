@@ -15,8 +15,8 @@ var _ = time.Parse
 // Reference imports to suppress unused errors
 var _ = date.Parse
 
-// Module ...
-type Module struct {
+// Object ...
+type Object struct {
 	Extra    *string `json:"extra,omitempty"`
 	Imported bool    `json:"imported"`
 	Repo     string  `json:"repo"`
@@ -27,7 +27,7 @@ type Module struct {
 
 // RetrieveResponse ...
 type RetrieveResponse struct {
-	Content []Module `json:"content"`
+	Content []Object `json:"content"`
 }
 
 // GetResourceListRequest ...
@@ -36,8 +36,8 @@ type GetResourceListRequest struct {
 	Version  string
 }
 
-// *Module validator
-func (s *Module) Validate() error {
+// *Object validator
+func (s *Object) Validate() error {
 	return validator.Validate(s)
 }
 

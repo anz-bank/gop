@@ -1,4 +1,4 @@
-package processor
+package processorsysl
 
 import (
 	"regexp"
@@ -8,17 +8,13 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
-type Processor interface {
-	Processor(pre *pbmod.Module) (err error)
-}
-
 var SyslImportRegexStr = `(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)`
 
 type ProcessorSysl struct {
 	SyslimportRegex *regexp.Regexp
 }
 
-func (p *ProcessorSysl) Processor(a *pbmod.Module) error {
+func (p *ProcessorSysl) Process(a *pbmod.Object) error {
 	if a.Extra != nil && *a.Extra != "" {
 		return nil
 	}

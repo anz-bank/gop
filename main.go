@@ -5,15 +5,14 @@ import (
 	"log"
 	"regexp"
 
-	retrieve2 "github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/processor/processorsysl"
+	"github.com/joshcarp/pb-mod/saver/saverfs"
 
-	"github.com/joshcarp/pb-mod/processor"
+	"github.com/joshcarp/pb-mod/gop"
 
-	"github.com/joshcarp/pb-mod/retrieve"
+	"github.com/joshcarp/pb-mod/retrieve/retrieverpbjsongit"
 
-	"github.com/joshcarp/pb-mod/saver"
-
-	"github.com/joshcarp/pb-mod/server"
+	"github.com/joshcarp/pb-mod/config"
 
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
@@ -22,14 +21,14 @@ func main() {
 	log.Fatal(pbmod.Serve(context.Background(), LoadService))
 }
 
-func LoadService(ctx context.Context, a retrieve2.AppConfig) (*pbmod.ServiceInterface, error) {
-	r := retrieve.RetrieveFilePBJsonGit{AppConfig: a}
-	s := saver.SaveToFile{AppConfig: a}
-	p := processor.ProcessorSysl{SyslimportRegex: regexp.MustCompile(processor.SyslImportRegexStr)}
-	serve := server.Server{
-		Retrieve: r,
-		Process:  &p,
-		Save:     s,
+func LoadService(ctx context.Context, a config.AppConfig) (*pbmod.ServiceInterface, error) {
+	r := retrieverpbjsongit.RetrieveFilePBJsonGit{AppConfig: a}
+	s := saverfs.SaverFs{AppConfig: a}
+	p := processorsysl.ProcessorSysl{SyslimportRegex: regexp.MustCompile(processorsysl.SyslImportRegexStr)}
+	serve := gop.Server{
+		Retriever: r,
+		Saver:     s,
+		Processor: &p,
 	}
 	return &pbmod.ServiceInterface{
 		GetResourceList: serve.GetResource,

@@ -1,0 +1,53 @@
+package savergcs
+
+import (
+	"context"
+	"fmt"
+	"io"
+	"strings"
+	"time"
+
+	"cloud.google.com/go/storage"
+	retrieve "github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+)
+
+type SaverGCS struct {
+	AppConfig  retrieve.AppConfig
+	bucketname string
+	projectID  string
+	pathPrefix string
+}
+
+func (a SaverGCS) Save(res *pbmod.Object) (err error) {
+	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
+	if err := UploadFile(a.bucketname, filename, strings.NewReader(res.Value)); err != nil {
+		return err
+	}
+	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
+	if err := UploadFile(a.bucketname, filename, strings.NewReader(*res.Extra)); err != nil {
+		return err
+	}
+	return nil
+}
+
+func UploadFile(bucket string, object string, r io.Reader) error {
+	ctx := context.Background()
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return fmt.Errorf("storage.NewClient: %v", err)
+	}
+	defer client.Close()
+
+	// Open local file.
+	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
+	defer cancel()
+	wc := client.Bucket(bucket).Object(object).NewWriter(ctx)
+	if _, err = io.Copy(wc, r); err != nil {
+		return fmt.Errorf("io.Copy: %v", err)
+	}
+	if err := wc.Close(); err != nil {
+		return fmt.Errorf("Writer.Close: %v", err)
+	}
+	return nil
+}

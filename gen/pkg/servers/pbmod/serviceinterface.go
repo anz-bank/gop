@@ -23,7 +23,7 @@ type GetResourceListClient struct {
 
 // ServiceInterface for pbmod
 type ServiceInterface struct {
-	GetResourceList func(ctx context.Context, req *GetResourceListRequest, client GetResourceListClient) (*Module, error)
+	GetResourceList func(ctx context.Context, req *GetResourceListRequest, client GetResourceListClient) (*Object, error)
 }
 
 // DownstreamConfig for pbmod

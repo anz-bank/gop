@@ -1,5 +1,5 @@
-# pb-mod
-modules for sysl/protobuf objects
+# GOP
+Git Object Proxy
 
 ## Requirements
 - Ability to easily import from and git service (github/gitlab/bitbucket)
