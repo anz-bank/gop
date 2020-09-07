@@ -99,7 +99,7 @@ func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.R
 			common.HandleError(ctx, w, common.InternalError, "Unexpected panic", err, s.genCallback.MapError)
 		}
 	}()
-	keyvalue, err := s.serviceInterface.GetResourceList(ctx, &req, client)
+	object, err := s.serviceInterface.GetResourceList(ctx, &req, client)
 	if err != nil {
 		tx.Rollback()
 		common.HandleError(ctx, w, common.InternalError, "Handler error", err, s.genCallback.MapError)
@@ -117,5 +117,5 @@ func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.R
 		headermap.Set("Content-Type", "application/json")
 	}
 	restlib.SetHeaders(w, headermap)
-	restlib.SendHTTPResponse(w, httpstatus, keyvalue)
+	restlib.SendHTTPResponse(w, httpstatus, object)
 }

@@ -15,7 +15,7 @@ type Processor struct {
 }
 
 func (p *Processor) Process(a *pbmod.Object) error {
-	if a.Extra != nil && *a.Extra != "" {
+	if a.Processed != nil && *a.Processed != "" {
 		return nil
 	}
 	withoutImports := p.ImportRegex.ReplaceAllString(a.Content, "")
@@ -29,6 +29,6 @@ func (p *Processor) Process(a *pbmod.Object) error {
 		return err
 	}
 	extra := string(mb)
-	a.Extra = &extra
+	a.Processed = &extra
 	return nil
 }

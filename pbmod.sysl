@@ -1,14 +1,12 @@
 pbmod:
     @package = "pbmod"
-    !type retrieveResponse:
-        content <: sequence of keyValue
-    !type keyValue:
+    !type object:
         version <: string
-        value <: string
-        extra <: string?
+        content <: string
+        processed <: string?
         repo <: string
         resource <: string
         imported <: bool
     /resource:
         GET ?resource=string&version=string:
-            return ok <: keyValue
+            return ok <: object

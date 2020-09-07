@@ -52,14 +52,14 @@ func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListReques
 	if result.HTTPResponse.StatusCode == http.StatusUnauthorized {
 		return nil, common.CreateDownstreamError(ctx, common.DownstreamUnauthorizedError, result.HTTPResponse, result.Body, nil)
 	}
-	OkKeyValueResponse, ok := result.Response.(*Object)
+	OkObjectResponse, ok := result.Response.(*Object)
 	if ok {
-		valErr := validator.Validate(OkKeyValueResponse)
+		valErr := validator.Validate(OkObjectResponse)
 		if valErr != nil {
 			return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, valErr)
 		}
 
-		return OkKeyValueResponse, nil
+		return OkObjectResponse, nil
 	}
 
 	return nil, common.CreateDownstreamError(ctx, common.DownstreamUnexpectedResponseError, result.HTTPResponse, result.Body, nil)

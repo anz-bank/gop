@@ -4,3 +4,7 @@ genCode:
       common:
         hostName: localhost
         port: 5751
+app:
+  username: "123"
+  token: "1234"
+  cachelocation: "1234"

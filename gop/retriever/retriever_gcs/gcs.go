@@ -13,17 +13,16 @@ import (
 )
 
 type Retriever struct {
-	AppConfig  config.AppConfig
-	Bucketname string
+	AppConfig config.AppConfig
 }
 
 func (a Retriever) Retrieve(res *pbmod.Object) error {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.Bucketname, filename, &res.Content); err != nil {
+	if err := downloadToString(a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.Bucketname, filename, res.Extra); err != nil {
+	if err := downloadToString(a.AppConfig.CacheLocation, filename, res.Processed); err != nil {
 		return err
 	}
 	return nil

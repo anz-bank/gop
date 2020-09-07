@@ -19,15 +19,15 @@ func (s Server) GetResource(ctx context.Context, req *pbmod.GetResourceListReque
 	if err := s.Retrieve(object); err != nil {
 		return nil, err
 	}
-	if object.Value == "" {
+	if object.Content == "" {
 		return nil, fmt.Errorf("Error loading object")
 	}
 	if !object.Imported {
 		s.Process(object)
 		s.Cache(object)
 	}
-	if object.Extra == nil || *object.Extra == "" {
-		object.Extra = nil
+	if object.Processed == nil || *object.Processed == "" {
+		object.Processed = nil
 	}
 	return object, nil
 }

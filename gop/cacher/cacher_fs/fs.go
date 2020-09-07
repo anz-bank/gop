@@ -15,7 +15,7 @@ type Cacher struct {
 }
 
 func (a Cacher) Cache(res *pbmod.Object) (err error) {
-	location := path.Join(a.AppConfig.SaveLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
+	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
@@ -26,9 +26,9 @@ func (a Cacher) Cache(res *pbmod.Object) (err error) {
 }
 
 func (a Cacher) SaveToPbJsonFile(res *pbmod.Object) (err error) {
-	location := path.Join(a.AppConfig.SaveLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version))
+	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(location, []byte(*res.Extra), os.ModePerm)
+	return ioutil.WriteFile(location, []byte(*res.Processed), os.ModePerm)
 }

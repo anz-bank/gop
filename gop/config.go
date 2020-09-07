@@ -8,10 +8,10 @@ func NewObject(resource, version string) *pbmod.Object {
 	var a string
 	repo, resource := processRequest(resource)
 	return &pbmod.Object{
-		Repo:     repo,
-		Resource: resource,
-		Version:  version,
-		Extra:    &a,
-		Value:    "",
+		Repo:      repo,
+		Resource:  resource,
+		Version:   version,
+		Processed: &a,
+		Content:   "",
 	}
 }

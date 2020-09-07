@@ -31,7 +31,7 @@ const AppSpec = `{
      "stmt": [
       {
        "ret": {
-        "payload": "ok <: keyValue"
+        "payload": "ok <: object"
        }
       }
      ],
@@ -46,11 +46,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "pbmod.sysl",
           "start": {
-           "line": 13,
+           "line": 11,
            "col": 13
           },
           "end": {
-           "line": 13,
+           "line": 11,
            "col": 22
           }
          }
@@ -63,11 +63,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "pbmod.sysl",
           "start": {
-           "line": 13,
+           "line": 11,
            "col": 29
           },
           "end": {
-           "line": 13,
+           "line": 11,
            "col": 37
           }
          }
@@ -78,32 +78,31 @@ const AppSpec = `{
      "sourceContext": {
       "file": "pbmod.sysl",
       "start": {
-       "line": 13,
+       "line": 11,
        "col": 8
       },
       "end": {
-       "line": 14,
-       "col": 33
+       "line": 12,
+       "col": 31
       }
      }
     }
    },
    "types": {
-    "keyValue": {
+    "object": {
      "tuple": {
       "attrDefs": {
-       "extra": {
+       "content": {
         "primitive": "STRING",
-        "opt": true,
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 8,
-          "col": 17
+          "line": 5,
+          "col": 19
          },
          "end": {
-          "line": 8,
-          "col": 23
+          "line": 5,
+          "col": 19
          }
         }
        },
@@ -112,12 +111,27 @@ const AppSpec = `{
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 11,
+          "line": 9,
           "col": 20
          },
          "end": {
-          "line": 11,
+          "line": 9,
           "col": 20
+         }
+        }
+       },
+       "processed": {
+        "primitive": "STRING",
+        "opt": true,
+        "sourceContext": {
+         "file": "pbmod.sysl",
+         "start": {
+          "line": 6,
+          "col": 21
+         },
+         "end": {
+          "line": 6,
+          "col": 27
          }
         }
        },
@@ -126,11 +140,11 @@ const AppSpec = `{
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 9,
+          "line": 7,
           "col": 16
          },
          "end": {
-          "line": 9,
+          "line": 7,
           "col": 16
          }
         }
@@ -140,26 +154,12 @@ const AppSpec = `{
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 10,
+          "line": 8,
           "col": 20
          },
          "end": {
-          "line": 10,
+          "line": 8,
           "col": 20
-         }
-        }
-       },
-       "value": {
-        "primitive": "STRING",
-        "sourceContext": {
-         "file": "pbmod.sysl",
-         "start": {
-          "line": 7,
-          "col": 17
-         },
-         "end": {
-          "line": 7,
-          "col": 17
          }
         }
        },
@@ -168,72 +168,12 @@ const AppSpec = `{
         "sourceContext": {
          "file": "pbmod.sysl",
          "start": {
-          "line": 6,
-          "col": 19
-         },
-         "end": {
-          "line": 6,
-          "col": 19
-         }
-        }
-       }
-      }
-     },
-     "sourceContext": {
-      "file": "pbmod.sysl",
-      "start": {
-       "line": 5,
-       "col": 4
-      },
-      "end": {
-       "line": 12,
-       "col": 4
-      }
-     }
-    },
-    "retrieveResponse": {
-     "tuple": {
-      "attrDefs": {
-       "content": {
-        "sequence": {
-         "typeRef": {
-          "context": {
-           "appname": {
-            "part": [
-             "pbmod"
-            ]
-           },
-           "path": [
-            "retrieveResponse"
-           ]
-          },
-          "ref": {
-           "path": [
-            "keyValue"
-           ]
-          }
-         },
-         "sourceContext": {
-          "file": "pbmod.sysl",
-          "start": {
-           "line": 4,
-           "col": 19
-          },
-          "end": {
-           "line": 4,
-           "col": 31
-          }
-         }
-        },
-        "sourceContext": {
-         "file": "pbmod.sysl",
-         "start": {
           "line": 4,
           "col": 19
          },
          "end": {
           "line": 4,
-          "col": 31
+          "col": 19
          }
         }
        }
@@ -246,7 +186,7 @@ const AppSpec = `{
        "col": 4
       },
       "end": {
-       "line": 5,
+       "line": 10,
        "col": 4
       }
      }

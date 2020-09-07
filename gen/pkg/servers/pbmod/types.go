@@ -17,17 +17,12 @@ var _ = date.Parse
 
 // Object ...
 type Object struct {
-	Extra    *string `json:"extra,omitempty"`
-	Imported bool    `json:"imported"`
-	Repo     string  `json:"repo"`
-	Resource string  `json:"resource"`
-	Value    string  `json:"value"`
-	Version  string  `json:"version"`
-}
-
-// RetrieveResponse ...
-type RetrieveResponse struct {
-	Content []Object `json:"content"`
+	Content   string  `json:"content"`
+	Imported  bool    `json:"imported"`
+	Processed *string `json:"processed,omitempty"`
+	Repo      string  `json:"repo"`
+	Resource  string  `json:"resource"`
+	Version   string  `json:"version"`
 }
 
 // GetResourceListRequest ...
@@ -38,10 +33,5 @@ type GetResourceListRequest struct {
 
 // *Object validator
 func (s *Object) Validate() error {
-	return validator.Validate(s)
-}
-
-// *RetrieveResponse validator
-func (s *RetrieveResponse) Validate() error {
 	return validator.Validate(s)
 }

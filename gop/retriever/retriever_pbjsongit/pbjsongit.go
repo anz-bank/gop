@@ -3,8 +3,8 @@ package retriever_pbjsongit
 import (
 	"fmt"
 
-	retriever_fs "github.com/joshcarp/pb-mod/gop/retriever/retriever-fs"
-	retriever_git "github.com/joshcarp/pb-mod/gop/retriever/retriever-git"
+	retriever_fs "github.com/joshcarp/pb-mod/gop/retriever/retriever_fs"
+	retriever_git "github.com/joshcarp/pb-mod/gop/retriever/retriever_git"
 
 	"github.com/joshcarp/pb-mod/config"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"

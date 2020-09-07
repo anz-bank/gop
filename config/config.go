@@ -6,9 +6,9 @@ import (
 )
 
 type AppConfig struct {
-	Username     string `yaml:"username"`
-	Token        string `yaml:"token"`
-	SaveLocation string `yaml:"savelocation"`
+	Username      string `yaml:"username"`
+	Token         string `yaml:"token"`
+	CacheLocation string `yaml:"cachelocation"`
 }
 
 func ScanIntoString(res *string, file io.Reader) error {
