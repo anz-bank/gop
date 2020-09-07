@@ -13,7 +13,7 @@ import (
 
 	"github.com/joshcarp/gop/gop/cacher/cacher_gcs"
 
-	"github.com/joshcarp/gop/gop"
+	gop2 "github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/processor/processor_sysl"
 
 	"github.com/joshcarp/gop/app"
@@ -33,7 +33,7 @@ func LoadService(ctx context.Context, a app.AppConfig) (*gop.ServiceInterface, e
 	p := processor_sysl.New(a)
 	c := cacher_gcs.New(a)
 
-	serve := gop.Server{
+	serve := gop2.Server{
 		Logger:    logrus.New(),
 		Retriever: r,
 		Processor: &p,
