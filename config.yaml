@@ -3,8 +3,6 @@ genCode:
     http:
       common:
         hostName: localhost
-        port: 5751
+        port: 8080
 app:
-  username: "123"
-  token: "1234"
-  cachelocation: "1234"
+  cachelocation: "gop1234"

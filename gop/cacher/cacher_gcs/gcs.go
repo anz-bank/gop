@@ -14,21 +14,25 @@ import (
 
 type Cacher struct {
 	AppConfig app.AppConfig
+	upload    uploader
 }
+
+type uploader func(bucket string, object string, r io.Reader) error
 
 func New(appconfig app.AppConfig) Cacher {
 	return Cacher{
 		AppConfig: appconfig,
+		upload:    UploadFile,
 	}
 }
 
 func (a Cacher) Cache(res *pbmod.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := UploadFile(a.AppConfig.CacheLocation, filename, strings.NewReader(res.Content)); err != nil {
+	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(res.Content)); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := UploadFile(a.AppConfig.CacheLocation, filename, strings.NewReader(*res.Processed)); err != nil {
+	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(*res.Processed)); err != nil {
 		return err
 	}
 	return nil

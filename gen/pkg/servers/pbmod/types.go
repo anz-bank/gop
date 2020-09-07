@@ -25,8 +25,8 @@ type Object struct {
 	Version   string  `json:"version"`
 }
 
-// GetResourceListRequest ...
-type GetResourceListRequest struct {
+// GetRequest ...
+type GetRequest struct {
 	Resource string
 	Version  string
 }

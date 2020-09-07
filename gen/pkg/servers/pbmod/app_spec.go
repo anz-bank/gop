@@ -15,8 +15,8 @@ const AppSpec = `{
     }
    },
    "endpoints": {
-    "GET /resource": {
-     "name": "GET /resource",
+    "GET /": {
+     "name": "GET /",
      "attrs": {
       "patterns": {
        "a": {
@@ -37,7 +37,7 @@ const AppSpec = `{
      ],
      "restParams": {
       "method": "GET",
-      "path": "/resource",
+      "path": "/",
       "queryParam": [
        {
         "name": "resource",

@@ -16,14 +16,14 @@ func NewDefaultPbmodImpl() *DefaultPbmodImpl {
 	return &DefaultPbmodImpl{}
 }
 
-// GetResourceList Client
-type GetResourceListClient struct {
+// Get Client
+type GetClient struct {
 	Conn *sql.Conn
 }
 
 // ServiceInterface for pbmod
 type ServiceInterface struct {
-	GetResourceList func(ctx context.Context, req *GetResourceListRequest, client GetResourceListClient) (*Object, error)
+	Get func(ctx context.Context, req *GetRequest, client GetClient) (*Object, error)
 }
 
 // DownstreamConfig for pbmod

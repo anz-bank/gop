@@ -40,7 +40,7 @@ func LoadService(ctx context.Context, a app.AppConfig) (*pbmod.ServiceInterface,
 		Cacher:    c,
 	}
 	return &pbmod.ServiceInterface{
-		GetResourceList: serve.GetResource,
+		Get: serve.Get,
 	}, nil
 }
 

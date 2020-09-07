@@ -7,6 +7,6 @@ pbmod:
         repo <: string
         resource <: string
         imported <: bool
-    /resource:
+    /:
         GET ?resource=string&version=string:
             return ok <: object

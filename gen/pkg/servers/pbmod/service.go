@@ -14,7 +14,7 @@ import (
 
 // Service interface for pbmod
 type Service interface {
-	GetResourceList(ctx context.Context, req *GetResourceListRequest) (*Object, error)
+	Get(ctx context.Context, req *GetRequest) (*Object, error)
 }
 
 // Client for pbmod API
@@ -28,11 +28,11 @@ func NewClient(client *http.Client, serviceURL string) *Client {
 	return &Client{client, serviceURL}
 }
 
-// GetResourceList ...
-func (s *Client) GetResourceList(ctx context.Context, req *GetResourceListRequest) (*Object, error) {
+// Get ...
+func (s *Client) Get(ctx context.Context, req *GetRequest) (*Object, error) {
 	required := []string{}
 	var okResponse Object
-	u, err := url.Parse(fmt.Sprintf("%s/resource", s.url))
+	u, err := url.Parse(fmt.Sprintf("%s/", s.url))
 	if err != nil {
 		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
 	}

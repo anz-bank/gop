@@ -16,7 +16,7 @@ import (
 
 // Handler interface for pbmod
 type Handler interface {
-	GetResourceListHandler(w http.ResponseWriter, r *http.Request)
+	GetHandler(w http.ResponseWriter, r *http.Request)
 }
 
 // ServiceHandler for pbmod API
@@ -44,16 +44,16 @@ func NewServiceHandler(
 	}, nil
 }
 
-// GetResourceListHandler ...
-func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.Request) {
-	if s.serviceInterface.GetResourceList == nil {
+// GetHandler ...
+func (s *ServiceHandler) GetHandler(w http.ResponseWriter, r *http.Request) {
+	if s.serviceInterface.Get == nil {
 		common.HandleError(r.Context(), w, common.InternalError, "not implemented", nil, s.genCallback.MapError)
 		return
 	}
 
 	ctx := common.RequestHeaderToContext(r.Context(), r.Header)
 	ctx = common.RespHeaderAndStatusToContext(ctx, make(http.Header), http.StatusOK)
-	var req GetResourceListRequest
+	var req GetRequest
 
 	req.Resource = restlib.GetQueryParam(r, "resource")
 	req.Version = restlib.GetQueryParam(r, "version")
@@ -80,7 +80,7 @@ func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	client := GetResourceListClient{
+	client := GetClient{
 
 		Conn: conn,
 	}
@@ -99,7 +99,7 @@ func (s *ServiceHandler) GetResourceListHandler(w http.ResponseWriter, r *http.R
 			common.HandleError(ctx, w, common.InternalError, "Unexpected panic", err, s.genCallback.MapError)
 		}
 	}()
-	object, err := s.serviceInterface.GetResourceList(ctx, &req, client)
+	object, err := s.serviceInterface.Get(ctx, &req, client)
 	if err != nil {
 		tx.Rollback()
 		common.HandleError(ctx, w, common.InternalError, "Handler error", err, s.genCallback.MapError)

@@ -18,7 +18,7 @@ type Server struct {
 	Cacher
 }
 
-func (s *Server) GetResource(ctx context.Context, req *pbmod.GetResourceListRequest, client pbmod.GetResourceListClient) (*pbmod.Object, error) {
+func (s *Server) Get(ctx context.Context, req *pbmod.GetRequest, client pbmod.GetClient) (*pbmod.Object, error) {
 	var object = app.NewObject(req.Resource, req.Version)
 	object.Version = req.Version
 	if err := s.Retrieve(object); err != nil {
