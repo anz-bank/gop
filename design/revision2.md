@@ -67,16 +67,16 @@ type Retriever interface {
 
 - Used to retrieve a specified resource
  
-Required Object fields:
+- Required Object fields:
     - `Repo`
     - `Resource`
     - `Version`
-Should populate:
+- Should populate:
     - `Content`
     - `Imported` should be set tp true so that later caching steps will not execute
     - `Processed` if applicable 
     
-Examples:
+- Examples:
     - [../gop/gop_filesystem/retriever.go](../gop/gop_filesystem/retriever.go) Retrieve from a filesystem
     - [../gop/gop_gcs/retriever.go](../gop/gop_gcs/retriever.go) Retrieve from google cloud storage
     - [../gop/retriever/retriever_git/git.go](../gop/retriever/retriever_git/git.go) Retrieve from a git repository
@@ -90,11 +90,11 @@ type Processor interface {
 ```
 
 - Used to process an object and populate the `Object.Processed` field
-Required Object fields:
+- Required Object fields:
     - `Content`
-Should populate:
+- Should populate:
     - `Processed`
-Examples:
+- Examples:
     - [../gop/processor/processor_sysl/sysl.go](../gop/processor/processor_sysl/sysl.go) Process a sysl source file into parsed sysl protobuf json  
 
 ### Cacher interface
@@ -106,14 +106,14 @@ type Cacher interface {
 ```
 
 - Used to cache the given Object to a data source
-Required Object fields:
+- Required Object fields:
     - `Repo`
     - `Resource`
     - `Version`
     - `Content` and/or `Processed` 
 
-Should populate: Read only: Doesn't populate
-Examples:
+- Should populate: Read only: Doesn't populate
+- Examples:
     - [../gop/gop_filesystem/cacher.go](../gop/gop_filesystem/cacher.go) Cache a file to a file system
     - [../gop/gop_gcs/cacher.go](../gop/gop_gcs/cacher.go) Cache a file to a gcs bucket
 
