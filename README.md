@@ -1,7 +1,7 @@
 # GOP
 Git Object Proxy
 GOP, is a generic tool that allows for git objects to be retrieved, processed and cached. It can be used as a generic package or can be started as a service.
-See [/design/revision2.md]() for a detailed explanation about how GOP works and is implemented
+See [design/revision2.md](design/revision2.md) for a detailed explanation about how GOP works and is implemented
 
 ### Requirements
     - go version 1.14

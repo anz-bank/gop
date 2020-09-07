@@ -79,9 +79,9 @@ Should populate:
     - `Processed` if applicable 
     
 Examples:
-    - [../gop/retriever/retriever_fs/fs.go]() Retrieve from a filesystem
-    - [../gop/retriever/retriever_gcs/gcs.go]() Retrieve from google cloud storage
-    - [../gop/retriever/retriever_git/git.go]() Retrieve from a git repository
+    - [../gop/retriever/retriever_fs/fs.go](../gop/retriever/retriever_fs/fs.go) Retrieve from a filesystem
+    - [../gop/retriever/retriever_gcs/gcs.go](../gop/retriever/retriever_gcs/gcs.go) Retrieve from google cloud storage
+    - [../gop/retriever/retriever_git/git.go](../gop/retriever/retriever_git/git.go) Retrieve from a git repository
 
 #### Processor interface
 ```go
@@ -95,7 +95,7 @@ Required Object fields:
 Should populate:
     - `Processed`
 Examples:
-    - [../gop/processor/processor_sysl/sysl.go]() Process a sysl source file into parsed sysl protobuf json  
+    - [../gop/processor/processor_sysl/sysl.go](../gop/processor/processor_sysl/sysl.go) Process a sysl source file into parsed sysl protobuf json  
 
 #### Cacher interface
 ```go
@@ -111,8 +111,8 @@ Required Object fields:
     - `Content` and/or `Processed` 
 Should populate: Read only: Doesn't populate
 Examples:
-    - [../gop/cacher/cacher_fs/fs.go]() Cache a file to a file system
-    - [../gop/cacher/cacher_gcs/gcs.go]() Cache a file to a gcs bucket
+    - [../gop/cacher/cacher_fs/fs.go](../gop/cacher/cacher_fs/fs.go) Cache a file to a file system
+    - [../gop/cacher/cacher_gcs/gcs.go](../gop/cacher/cacher_gcs/gcs.go) Cache a file to a gcs bucket
 
 ## Sequence Diagram
 
