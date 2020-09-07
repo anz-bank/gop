@@ -1,4 +1,4 @@
-package processorsysl
+package processor_sysl
 
 import (
 	"regexp"
@@ -10,15 +10,15 @@ import (
 
 var SyslImportRegexStr = `(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)`
 
-type ProcessorSysl struct {
-	SyslimportRegex *regexp.Regexp
+type Processor struct {
+	ImportRegex *regexp.Regexp
 }
 
-func (p *ProcessorSysl) Process(a *pbmod.Object) error {
+func (p *Processor) Process(a *pbmod.Object) error {
 	if a.Extra != nil && *a.Extra != "" {
 		return nil
 	}
-	withoutImports := p.SyslimportRegex.ReplaceAllString(a.Value, "")
+	withoutImports := p.ImportRegex.ReplaceAllString(a.Content, "")
 	m, err := parse.NewParser().ParseString(withoutImports)
 	if err != nil {
 		return err

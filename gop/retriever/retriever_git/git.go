@@ -1,4 +1,4 @@
-package retrievergit
+package retriever_git
 
 import (
 	"github.com/go-git/go-git/v5"
@@ -9,11 +9,11 @@ import (
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
-type RetrieverGit struct {
+type Retriever struct {
 	AppConfig config.AppConfig
 }
 
-func (a RetrieverGit) Retrieve(res *pbmod.Object) error {
+func (a Retriever) Retrieve(res *pbmod.Object) error {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	if a.AppConfig.Username != "" {
@@ -42,5 +42,5 @@ func (a RetrieverGit) Retrieve(res *pbmod.Object) error {
 	if err != nil {
 		return err
 	}
-	return config.ScanIntoString(&res.Value, reader)
+	return config.ScanIntoString(&res.Content, reader)
 }

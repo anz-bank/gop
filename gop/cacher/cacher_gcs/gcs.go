@@ -1,4 +1,4 @@
-package savergcs
+package cacher_gcs
 
 import (
 	"context"
@@ -12,14 +12,14 @@ import (
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
-type SaverGCS struct {
+type Cacher struct {
 	AppConfig  retrieve.AppConfig
 	Bucketname string
 }
 
-func (a SaverGCS) Cache(res *pbmod.Object) (err error) {
+func (a Cacher) Cache(res *pbmod.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := UploadFile(a.Bucketname, filename, strings.NewReader(res.Value)); err != nil {
+	if err := UploadFile(a.Bucketname, filename, strings.NewReader(res.Content)); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
