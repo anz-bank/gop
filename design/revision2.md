@@ -24,13 +24,13 @@ GOP, or Git Object Proxy is a generic tool that allows for git objects to be ret
 
 ## Architecture
 
-There are 4 main parts:
+- There are 4 main parts:
     - Client
     - Proxy
     - VCS
     - Data store
 
-These responsibilities have been split into 3 Interfaces:
+- These responsibilities have been split into 3 Interfaces:
     - Retriever
     - Processor
     - Cacher
