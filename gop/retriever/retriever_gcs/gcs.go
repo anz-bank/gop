@@ -6,34 +6,41 @@ import (
 	"io"
 	"time"
 
-	"github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/app"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 
 	"cloud.google.com/go/storage"
 )
 
 type Retriever struct {
-	AppConfig config.AppConfig
+	AppConfig  app.AppConfig
+	downloader downloader
 }
+
+func New(appConfig app.AppConfig) Retriever {
+	return Retriever{AppConfig: appConfig, downloader: download}
+}
+
+type downloader func(bucket, object string) (io.Reader, error)
 
 func (a Retriever) Retrieve(res *pbmod.Object) error {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
+	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.AppConfig.CacheLocation, filename, res.Processed); err != nil {
+	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, res.Processed); err != nil {
 		return err
 	}
 	return nil
 }
 
-func downloadToString(bucketName string, filename string, target *string) error {
+func downloadToString(download downloader, bucketName string, filename string, target *string) error {
 	file, err := download(bucketName, filename)
 	if err != nil {
 		return err
 	}
-	if err := config.ScanIntoString(target, file); err != nil {
+	if err := app.ScanIntoString(target, file); err != nil {
 		return err
 	}
 	return nil

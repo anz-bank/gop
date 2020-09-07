@@ -8,12 +8,18 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	retrieve "github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/app"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
 type Cacher struct {
-	AppConfig retrieve.AppConfig
+	AppConfig app.AppConfig
+}
+
+func New(appconfig app.AppConfig) Cacher {
+	return Cacher{
+		AppConfig: appconfig,
+	}
 }
 
 func (a Cacher) Cache(res *pbmod.Object) (err error) {

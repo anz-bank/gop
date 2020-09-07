@@ -6,12 +6,29 @@ import (
 	"os"
 	"path"
 
-	retrieve "github.com/joshcarp/pb-mod/config"
+	"github.com/spf13/afero"
+
+	"github.com/joshcarp/pb-mod/app"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
 type Cacher struct {
-	AppConfig retrieve.AppConfig
+	AppConfig app.AppConfig
+	fs        afero.Fs
+}
+
+func New(appconfig app.AppConfig) Cacher {
+	var fs afero.Fs
+	switch appconfig.FsType {
+	case "os":
+		fs = afero.NewOsFs()
+	case "memory", "mem":
+		fs = afero.NewMemMapFs()
+	}
+	return Cacher{
+		AppConfig: appconfig,
+		fs:        fs,
+	}
 }
 
 func (a Cacher) Cache(res *pbmod.Object) (err error) {

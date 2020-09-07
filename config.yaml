@@ -8,3 +8,4 @@ app:
   username: "123"
   token: "1234"
   cachelocation: "1234"
+  importregex: "(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)"

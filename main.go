@@ -4,7 +4,8 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"regexp"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/joshcarp/pb-mod/gop/retriever/retriever_git"
 
@@ -15,7 +16,7 @@ import (
 	"github.com/joshcarp/pb-mod/gop"
 	"github.com/joshcarp/pb-mod/gop/processor/processor_sysl"
 
-	"github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/app"
 
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
@@ -24,14 +25,19 @@ func main() {
 	log.Fatal(pbmod.Serve(context.Background(), LoadService))
 }
 
-func LoadService(ctx context.Context, a config.AppConfig) (*pbmod.ServiceInterface, error) {
-	r := RetrieverGitGCS{retriever_gcs.Retriever{AppConfig: a}, retriever_git.Retriever{AppConfig: a}}
-	s := cacher_gcs.Cacher{AppConfig: a}
-	p := processor_sysl.Processor{ImportRegex: regexp.MustCompile(processor_sysl.SyslImportRegexStr)}
+func LoadService(ctx context.Context, a app.AppConfig) (*pbmod.ServiceInterface, error) {
+	r := RetrieverGitGCS{
+		gcs: retriever_gcs.New(a),
+		git: retriever_git.New(a),
+	}
+	p := processor_sysl.New(a)
+	c := cacher_gcs.New(a)
+
 	serve := gop.Server{
+		Logger:    logrus.New(),
 		Retriever: r,
-		Cacher:    s,
 		Processor: &p,
+		Cacher:    c,
 	}
 	return &pbmod.ServiceInterface{
 		GetResourceList: serve.GetResource,

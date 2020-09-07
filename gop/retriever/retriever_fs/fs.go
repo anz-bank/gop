@@ -2,33 +2,49 @@ package retriever_fs
 
 import (
 	"fmt"
-	"os"
 	"path"
 
-	"github.com/joshcarp/pb-mod/config"
+	"github.com/spf13/afero"
+
+	"github.com/joshcarp/pb-mod/app"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
 type Retriever struct {
-	AppConfig config.AppConfig
+	AppConfig app.AppConfig
+	fs        afero.Fs
+}
+
+func New(appconfig app.AppConfig) Retriever {
+	var fs afero.Fs
+	switch appconfig.FsType {
+	case "os":
+		fs = afero.NewOsFs()
+	case "memory", "mem":
+		fs = afero.NewMemMapFs()
+	}
+	return Retriever{
+		AppConfig: appconfig,
+		fs:        fs,
+	}
 }
 
 func (a Retriever) Retrieve(res *pbmod.Object) error {
-	file, err := os.Open(path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)))
+	file, err := a.fs.Open(path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)))
 	if file == nil {
 		return err
 	}
-	if err := config.ScanIntoString(res.Processed, file); err != nil {
+	if err := app.ScanIntoString(res.Processed, file); err != nil {
 		return err
 	}
 	return a.RetrieverFile(res)
 }
 
 func (a Retriever) RetrieverFile(res *pbmod.Object) error {
-	file, err := os.Open(path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)))
+	file, err := a.fs.Open(path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)))
 	if file == nil {
 		return err
 	}
 	res.Imported = true
-	return config.ScanIntoString(&res.Content, file)
+	return app.ScanIntoString(&res.Content, file)
 }

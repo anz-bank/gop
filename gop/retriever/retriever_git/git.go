@@ -5,12 +5,16 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/joshcarp/pb-mod/config"
+	"github.com/joshcarp/pb-mod/app"
 	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
 )
 
 type Retriever struct {
-	AppConfig config.AppConfig
+	AppConfig app.AppConfig
+}
+
+func New(appConfig app.AppConfig) Retriever {
+	return Retriever{AppConfig: appConfig}
 }
 
 func (a Retriever) Retrieve(res *pbmod.Object) error {
@@ -42,5 +46,5 @@ func (a Retriever) Retrieve(res *pbmod.Object) error {
 	if err != nil {
 		return err
 	}
-	return config.ScanIntoString(&res.Content, reader)
+	return app.ScanIntoString(&res.Content, reader)
 }
