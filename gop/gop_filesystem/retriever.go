@@ -1,4 +1,4 @@
-package filesystem
+package gop_filesystem
 
 import (
 	"fmt"

@@ -1,8 +1,7 @@
-package filesystem
+package gop_filesystem
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 
@@ -18,20 +17,22 @@ type GOP struct {
 }
 
 func (a GOP) Cache(res *gop.Object) (err error) {
-	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
-	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
+	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s", res.Repo, res.Resource))
+	if err := a.fs.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
+	location += "@" + res.Version
 	if err := a.SaveToPbJsonFile(res); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(location, []byte(res.Content), os.ModePerm)
+	return afero.WriteFile(a.fs, location, []byte(res.Content), os.ModePerm)
 }
 
 func (a GOP) SaveToPbJsonFile(res *gop.Object) (err error) {
-	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version))
-	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
+	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json", res.Repo, res.Resource))
+	if err := a.fs.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
-	return ioutil.WriteFile(location, []byte(*res.Processed), os.ModePerm)
+	location += "@" + res.Version
+	return afero.WriteFile(a.fs, location, []byte(*res.Processed), os.ModePerm)
 }

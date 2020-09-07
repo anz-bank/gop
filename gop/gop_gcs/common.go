@@ -1,4 +1,4 @@
-package gcs
+package gop_gcs
 
 import "github.com/joshcarp/gop/app"
 

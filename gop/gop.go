@@ -13,3 +13,8 @@ type Retriever interface {
 type Cacher interface {
 	Cache(res *gop.Object) (err error)
 }
+
+type Gopper interface {
+	Retriever
+	Cacher
+}
