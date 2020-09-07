@@ -1,4 +1,4 @@
-package cacher_gcs
+package gcs
 
 import (
 	"context"

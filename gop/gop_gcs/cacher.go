@@ -1,4 +1,4 @@
-package cacher_gcs
+package gcs
 
 import (
 	"context"
@@ -8,25 +8,12 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/joshcarp/gop/app"
 	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
-type Cacher struct {
-	AppConfig app.AppConfig
-	upload    uploader
-}
-
 type uploader func(bucket string, object string, r io.Reader) error
 
-func New(appconfig app.AppConfig) Cacher {
-	return Cacher{
-		AppConfig: appconfig,
-		upload:    UploadFile,
-	}
-}
-
-func (a Cacher) Cache(res *gop.Object) (err error) {
+func (a GOP) Cache(res *gop.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(res.Content)); err != nil {
 		return err

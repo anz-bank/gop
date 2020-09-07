@@ -1,4 +1,4 @@
-package retriever_gcs
+package gcs
 
 import (
 	"context"
@@ -12,18 +12,9 @@ import (
 	"cloud.google.com/go/storage"
 )
 
-type Retriever struct {
-	AppConfig  app.AppConfig
-	downloader downloader
-}
-
-func New(appConfig app.AppConfig) Retriever {
-	return Retriever{AppConfig: appConfig, downloader: download}
-}
-
 type downloader func(bucket, object string) (io.Reader, error)
 
-func (a Retriever) Retrieve(res *gop.Object) error {
+func (a GOP) Retrieve(res *gop.Object) error {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
 		return err
