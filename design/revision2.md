@@ -1,7 +1,5 @@
 # GOP
-## Git
-# Object
-# Proxy
+*Git Object Proxy*
 
 Continuing on from revision1.md, this is the updated design doc, 
 GOP, or Git Object Proxy is a generic tool that allows for git objects to be retrieved, processed and cached. It can be used as a generic package or can be started as a service.
