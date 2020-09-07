@@ -1,15 +1,15 @@
 package gop
 
-import "github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+import "github.com/joshcarp/gop/gen/pkg/servers/gop"
 
 type Processor interface {
-	Process(pre *pbmod.Object) (err error)
+	Process(pre *gop.Object) (err error)
 }
 
 type Retriever interface {
-	Retrieve(res *pbmod.Object) (err error)
+	Retrieve(res *gop.Object) (err error)
 }
 
 type Cacher interface {
-	Cache(res *pbmod.Object) (err error)
+	Cache(res *gop.Object) (err error)
 }

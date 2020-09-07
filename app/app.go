@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 type AppConfig struct {
@@ -37,10 +37,10 @@ func ProcessRequest(resource string) (string, string) {
 	return repo, relresource
 }
 
-func NewObject(resource, version string) *pbmod.Object {
+func NewObject(resource, version string) *gop.Object {
 	var a string
 	repo, resource := ProcessRequest(resource)
-	return &pbmod.Object{
+	return &gop.Object{
 		Repo:      repo,
 		Resource:  resource,
 		Version:   version,

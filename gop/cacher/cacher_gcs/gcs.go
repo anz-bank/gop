@@ -8,8 +8,8 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/joshcarp/pb-mod/app"
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 type Cacher struct {
@@ -26,7 +26,7 @@ func New(appconfig app.AppConfig) Cacher {
 	}
 }
 
-func (a Cacher) Cache(res *pbmod.Object) (err error) {
+func (a Cacher) Cache(res *gop.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(res.Content)); err != nil {
 		return err

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/joshcarp/pb-mod/app"
+	"github.com/joshcarp/gop/app"
 	"github.com/stretchr/testify/require"
 )
 

@@ -1,5 +1,5 @@
-pbmod:
-    @package = "pbmod"
+gop:
+    @package = "gop"
     !type object:
         version <: string
         content <: string

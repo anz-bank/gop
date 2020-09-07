@@ -4,11 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/joshcarp/pb-mod/app"
+	"github.com/joshcarp/gop/app"
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 type Server struct {
@@ -18,7 +18,7 @@ type Server struct {
 	Cacher
 }
 
-func (s *Server) Get(ctx context.Context, req *pbmod.GetRequest, client pbmod.GetClient) (*pbmod.Object, error) {
+func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetClient) (*gop.Object, error) {
 	var object = app.NewObject(req.Resource, req.Version)
 	object.Version = req.Version
 	if err := s.Retrieve(object); err != nil {

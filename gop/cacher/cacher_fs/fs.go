@@ -8,8 +8,8 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/joshcarp/pb-mod/app"
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 type Cacher struct {
@@ -31,7 +31,7 @@ func New(appconfig app.AppConfig) Cacher {
 	}
 }
 
-func (a Cacher) Cache(res *pbmod.Object) (err error) {
+func (a Cacher) Cache(res *gop.Object) (err error) {
 	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
@@ -42,7 +42,7 @@ func (a Cacher) Cache(res *pbmod.Object) (err error) {
 	return ioutil.WriteFile(location, []byte(res.Content), os.ModePerm)
 }
 
-func (a Cacher) SaveToPbJsonFile(res *pbmod.Object) (err error) {
+func (a Cacher) SaveToPbJsonFile(res *gop.Object) (err error) {
 	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err

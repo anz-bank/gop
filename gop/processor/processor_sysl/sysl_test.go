@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/joshcarp/pb-mod/app"
+	"github.com/joshcarp/gop/app"
 )
 
 func TestFsRetrieve(t *testing.T) {

@@ -6,8 +6,8 @@ import (
 	"io"
 	"time"
 
-	"github.com/joshcarp/pb-mod/app"
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 
 	"cloud.google.com/go/storage"
 )
@@ -23,7 +23,7 @@ func New(appConfig app.AppConfig) Retriever {
 
 type downloader func(bucket, object string) (io.Reader, error)
 
-func (a Retriever) Retrieve(res *pbmod.Object) error {
+func (a Retriever) Retrieve(res *gop.Object) error {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
 		return err

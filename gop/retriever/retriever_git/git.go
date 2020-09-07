@@ -5,8 +5,8 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
-	"github.com/joshcarp/pb-mod/app"
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 type Retriever struct {
@@ -17,7 +17,7 @@ func New(appConfig app.AppConfig) Retriever {
 	return Retriever{AppConfig: appConfig}
 }
 
-func (a Retriever) Retrieve(res *pbmod.Object) error {
+func (a Retriever) Retrieve(res *gop.Object) error {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	if a.AppConfig.Username != "" {

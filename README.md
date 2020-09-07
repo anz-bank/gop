@@ -13,5 +13,5 @@ See [design/revision2.md](design/revision2.md) for a detailed explanation about 
 `curl localhost:8080/?resource=<resource>&version=<hash>`
 Where:
  - `<resource>` is the repo + path of the resource (eg `github.com/joshcarp/gop/pbmod.sysl`)
- - `<hash>` is the hash of the commit to retrieve
+ - `<hash>` is the hash of the commit to retrieve (eg `31ea3ea066c353c84c7a5cefce1a548674b87987`)
  

@@ -1,4 +1,4 @@
-module github.com/joshcarp/pb-mod
+module github.com/joshcarp/gop
 
 go 1.14
 

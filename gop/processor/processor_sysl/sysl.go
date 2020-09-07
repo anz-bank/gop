@@ -3,10 +3,10 @@ package processor_sysl
 import (
 	"regexp"
 
-	"github.com/joshcarp/pb-mod/app"
+	"github.com/joshcarp/gop/app"
 
 	"github.com/anz-bank/sysl/pkg/parse"
-	"github.com/joshcarp/pb-mod/gen/pkg/servers/pbmod"
+	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -23,7 +23,7 @@ func New(appConfig app.AppConfig) Processor {
 	return Processor{importRegex: regexp.MustCompile(appConfig.ImportRegex)}
 }
 
-func (p *Processor) Process(a *pbmod.Object) error {
+func (p *Processor) Process(a *gop.Object) error {
 	if a.Processed != nil && *a.Processed != "" {
 		return nil
 	}
