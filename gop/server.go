@@ -10,7 +10,7 @@ import (
 type Server struct {
 	Retriever
 	Processor
-	Saver
+	Cacher
 }
 
 func (s Server) GetResource(ctx context.Context, req *pbmod.GetResourceListRequest, client pbmod.GetResourceListClient) (*pbmod.Object, error) {
@@ -24,7 +24,7 @@ func (s Server) GetResource(ctx context.Context, req *pbmod.GetResourceListReque
 	}
 	if !object.Imported {
 		s.Process(object)
-		s.Save(object)
+		s.Cache(object)
 	}
 	if object.Extra == nil || *object.Extra == "" {
 		object.Extra = nil

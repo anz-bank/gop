@@ -14,18 +14,18 @@ import (
 
 type RetrieverGCS struct {
 	AppConfig  config.AppConfig
-	bucketname string
+	Bucketname string
 	projectID  string
 	pathPrefix string
 }
 
 func (a RetrieverGCS) Retrieve(res *pbmod.Object) error {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.bucketname, filename, &res.Value); err != nil {
+	if err := downloadToString(a.Bucketname, filename, &res.Value); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.bucketname, filename, res.Extra); err != nil {
+	if err := downloadToString(a.Bucketname, filename, res.Extra); err != nil {
 		return err
 	}
 	return nil

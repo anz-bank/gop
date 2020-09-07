@@ -10,6 +10,6 @@ type Retriever interface {
 	Retrieve(res *pbmod.Object) (err error)
 }
 
-type Saver interface {
-	Save(res *pbmod.Object) (err error)
+type Cacher interface {
+	Cache(res *pbmod.Object) (err error)
 }

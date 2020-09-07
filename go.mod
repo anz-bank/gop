@@ -3,6 +3,7 @@ module github.com/joshcarp/pb-mod
 go 1.14
 
 require (
+	cloud.google.com/go/storage v1.6.0
 	github.com/anz-bank/sysl v0.187.0
 	github.com/anz-bank/sysl-go v0.80.1-0.20200825221533-887db0e737fd
 	github.com/go-chi/chi v4.1.2+incompatible

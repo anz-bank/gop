@@ -14,7 +14,7 @@ type SaverFs struct {
 	AppConfig retrieve.AppConfig
 }
 
-func (a SaverFs) Save(res *pbmod.Object) (err error) {
+func (a SaverFs) Cache(res *pbmod.Object) (err error) {
 	location := path.Join(a.AppConfig.SaveLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version))
 	if err := os.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err

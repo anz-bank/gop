@@ -14,18 +14,16 @@ import (
 
 type SaverGCS struct {
 	AppConfig  retrieve.AppConfig
-	bucketname string
-	projectID  string
-	pathPrefix string
+	Bucketname string
 }
 
-func (a SaverGCS) Save(res *pbmod.Object) (err error) {
+func (a SaverGCS) Cache(res *pbmod.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := UploadFile(a.bucketname, filename, strings.NewReader(res.Value)); err != nil {
+	if err := UploadFile(a.Bucketname, filename, strings.NewReader(res.Value)); err != nil {
 		return err
 	}
 	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := UploadFile(a.bucketname, filename, strings.NewReader(*res.Extra)); err != nil {
+	if err := UploadFile(a.Bucketname, filename, strings.NewReader(*res.Extra)); err != nil {
 		return err
 	}
 	return nil
