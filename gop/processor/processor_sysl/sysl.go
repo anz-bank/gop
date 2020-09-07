@@ -24,7 +24,7 @@ func New(appConfig app.AppConfig) Processor {
 	return Processor{importRegex: regexp.MustCompile(appConfig.ImportRegex)}
 }
 
-func (p *Processor) Process(a *gop.Object) error {
+func (p Processor) Process(a *gop.Object) error {
 	if *a.Processed != "" || filepath.Ext(a.Resource) != ".sysl" {
 		return nil
 	}
