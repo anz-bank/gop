@@ -10,11 +10,16 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
+const default_regex = `(?:#import.*)|(?:import )(?:\/\/)?(?P<import>.*)`
+
 type Processor struct {
 	importRegex *regexp.Regexp
 }
 
 func New(appConfig app.AppConfig) Processor {
+	if appConfig.ImportRegex == "" {
+		appConfig.ImportRegex = default_regex
+	}
 	return Processor{importRegex: regexp.MustCompile(appConfig.ImportRegex)}
 }
 
