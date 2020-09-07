@@ -1,6 +1,7 @@
 package processor_sysl
 
 import (
+	"path/filepath"
 	"regexp"
 
 	"github.com/joshcarp/gop/app"
@@ -24,8 +25,12 @@ func New(appConfig app.AppConfig) Processor {
 }
 
 func (p *Processor) Process(a *gop.Object) error {
-	if a.Processed != nil && *a.Processed != "" {
+	if *a.Processed != "" || filepath.Ext(a.Resource) != ".sysl" {
 		return nil
+	}
+	if a.Processed == nil {
+		str := ""
+		a.Processed = &str
 	}
 	withoutImports := p.importRegex.ReplaceAllString(a.Content, "")
 	m, err := parse.NewParser().ParseString(withoutImports)

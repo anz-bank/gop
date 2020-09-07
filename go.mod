@@ -8,6 +8,7 @@ require (
 	github.com/anz-bank/sysl-go v0.80.1-0.20200825221533-887db0e737fd
 	github.com/fsouza/fake-gcs-server v1.20.0
 	github.com/go-chi/chi v4.1.2+incompatible
+	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git v4.7.0+incompatible
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/kr/pretty v0.2.1 // indirect

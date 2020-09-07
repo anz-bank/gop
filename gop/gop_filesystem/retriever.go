@@ -16,7 +16,10 @@ func (a GOP) Retrieve(res *gop.Object) error {
 	if err := app.ScanIntoString(res.Processed, file); err != nil {
 		return err
 	}
-	return a.RetrieverFile(res)
+	if path.Ext(res.Resource) == "sysl" {
+		return a.RetrieverFile(res)
+	}
+	return nil
 }
 
 func (a GOP) RetrieverFile(res *gop.Object) error {
