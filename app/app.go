@@ -15,6 +15,7 @@ type AppConfig struct {
 	CacheLocation string `yaml:"cachelocation"`
 	FsType        string `yaml:"fstype"` // one of "os", "mem"
 	ImportRegex   string `yaml:"importregex"`
+	Proxy         string `yaml:"proxy"`
 }
 
 func ScanIntoString(res *[]byte, file io.Reader) error {

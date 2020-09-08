@@ -77,6 +77,7 @@ type Retriever interface {
     - [../gop/gop_filesystem/retriever.go](../gop/gop_filesystem/retriever.go) Retrieve from a filesystem
     - [../gop/gop_gcs/retriever.go](../gop/gop_gcs/retriever.go) Retrieve from google cloud storage
     - [../gop/retriever/retriever_git/git.go](../gop/retriever/retriever_git/git.go) Retrieve from a git repository
+    - [../client/main.go](../client/main.go) Retrieve from a GOP proxy
 
 ### Cacher interface
 
