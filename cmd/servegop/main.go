@@ -5,7 +5,7 @@ import (
 	"net"
 	"net/http"
 
-	gop "github.com/joshcarp/gop"
+	"github.com/joshcarp/gop"
 )
 
 func main() {
