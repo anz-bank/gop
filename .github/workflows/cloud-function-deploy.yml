@@ -2,8 +2,7 @@ name: cloud-function-deploy
 
 on:
   push:
-    branches: [ main ]
-    paths: backend/pkg/functions
+    branches: [ master ]
 jobs:
   build:
     runs-on: ubuntu-latest
