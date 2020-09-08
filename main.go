@@ -5,11 +5,11 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/joshcarp/gop/gop"
+	"github.com/joshcarp/gop/gop/server"
 )
 
 func main() {
-	http.HandleFunc("/", gop.ServeHTTP)
+	http.HandleFunc("/", server.ServeHTTP)
 	lis, err := net.Listen("tcp", ":8080")
 	if err != nil {
 		log.Fatal(err)

@@ -46,7 +46,7 @@ func (s *Retriever) Get(ctx context.Context, req *gop.GetRequest) (*gop.Object, 
 	var okResponse gop.Object
 	u, err := url.Parse(fmt.Sprintf("%s/", s.AppConfig.Proxy))
 	if err != nil {
-		return nil, common.CreateError(ctx, common.InternalError, "failed to parse url", err)
+		return nil, app.CreateError(app.BadRequestError, "failed to parse url", err)
 	}
 
 	q := u.Query()

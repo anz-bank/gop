@@ -4,6 +4,7 @@ go 1.14
 
 require (
 	cloud.google.com/go/storage v1.10.0
+	github.com/anz-bank/pkg v0.0.12
 	github.com/anz-bank/sysl v0.187.0
 	github.com/anz-bank/sysl-go v0.80.1-0.20200825221533-887db0e737fd
 	github.com/fsouza/fake-gcs-server v1.20.0

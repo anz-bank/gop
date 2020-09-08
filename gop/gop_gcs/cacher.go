@@ -7,6 +7,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/joshcarp/gop/app"
+
 	"cloud.google.com/go/storage"
 	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
@@ -16,7 +18,7 @@ type uploader func(bucket string, object string, r io.Reader) error
 func (a GOP) Cache(res gop.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := a.upload(a.AppConfig.CacheLocation, filename, bytes.NewReader(res.Content)); err != nil {
-		return err
+		return app.CreateError(app.CacheWriteError, "Error uploading file to cache", err)
 	}
 	return nil
 }

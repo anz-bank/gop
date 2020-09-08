@@ -18,7 +18,7 @@ func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) 
 	res := app.New(repo, resource, version)
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
-		return res, false, err
+		return res, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
 	}
 
 	return res, true, nil

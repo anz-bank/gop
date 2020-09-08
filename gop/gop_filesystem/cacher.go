@@ -22,5 +22,5 @@ func (a GOP) Cache(res gop.Object) (err error) {
 		return err
 	}
 	location += "@" + res.Version
-	return afero.WriteFile(a.fs, location, []byte(res.Content), os.ModePerm)
+	return afero.WriteFile(a.fs, location, res.Content, os.ModePerm)
 }

@@ -1,8 +1,10 @@
-package gop
+package server
 
 import (
 	"net/http"
 	"os"
+
+	gop3 "github.com/joshcarp/gop/gop"
 
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
 
@@ -36,7 +38,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 /* GitGopper is an implementation of Gopper that will fall back to a git retriever if the file can't be found in
 its data source */
 type GitGopper struct {
-	Gopper
+	gop3.Gopper
 	retriever_git.Retriever
 }
 
@@ -75,7 +77,6 @@ func ServiceHandler(a app.AppConfig) (*gop2.ServiceHandler, error) {
 		return nil, err
 	}
 	serve := Server{
-		Logger: logrus.New(),
 		Gopper: g,
 	}
 	handler, err := gop2.NewServiceHandler(common.DefaultCallback(), &gop2.ServiceInterface{Get: serve.Get})

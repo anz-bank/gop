@@ -34,31 +34,31 @@ func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, e
 		Auth: auth,
 	})
 	if err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)
 	}
 	w, err := r.Worktree()
 	if err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)
 	}
 	if err = w.Checkout(&git.CheckoutOptions{
 		Hash: plumbing.NewHash(version),
 	}); err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to checkout version", err)
 	}
 	commit, err := r.CommitObject(plumbing.NewHash(version))
 	if err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to checkout version", err)
 	}
 	f, err := commit.File(resource)
 	if err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "File does not exist", err)
 	}
 	reader, err := f.Reader()
 	if err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheReadError, "Error reading file", err)
 	}
 	if err := app.ScanIntoString(&res.Content, reader); err != nil {
-		return gop.Object{}, false, err
+		return gop.Object{}, false, app.CreateError(app.CacheReadError, "Error reading file", err)
 	}
 	return res, false, nil
 }

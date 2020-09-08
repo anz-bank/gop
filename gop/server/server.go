@@ -1,20 +1,20 @@
-package gop
+package server
 
 import (
 	"context"
-	"fmt"
+
+	gop2 "github.com/joshcarp/gop/gop"
+
+	"github.com/anz-bank/pkg/log"
 
 	"github.com/joshcarp/gop/app"
-
-	"github.com/sirupsen/logrus"
 
 	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
 /* Server is a struct that has a logger and a gopper*/
 type Server struct {
-	*logrus.Logger
-	Gopper
+	gop2.Gopper
 }
 
 /* Get implements the get endpoint*/
@@ -23,16 +23,14 @@ func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetCli
 	var cached bool
 	var err error
 	repo, resource := app.ProcessRequest(req.Resource)
-	if res, cached, err = s.Retrieve(repo, resource, req.Version); err != nil {
+	res, cached, err = s.Retrieve(repo, resource, req.Version)
+	if err != nil || res.Content == nil || len(res.Content) == 0 {
+		log.Info(ctx, "Resource not found", err)
 		return nil, err
-	}
-	if res.Content == nil {
-		s.Logger.Info("Resource not found", err)
-		return nil, fmt.Errorf("Error loading object")
 	}
 	if !cached {
 		if err := s.Cache(res); err != nil {
-			s.Logger.Info("Caching failed", err)
+			log.Info(ctx, "Resource not found", err)
 		}
 	}
 	return &res, nil
