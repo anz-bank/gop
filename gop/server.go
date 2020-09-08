@@ -11,11 +11,13 @@ import (
 	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 )
 
+/* Server is a struct that has a logger and a gopper*/
 type Server struct {
 	*logrus.Logger
 	Gopper
 }
 
+/* Get implements the get endpoint*/
 func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetClient) (*gop.Object, error) {
 	var res gop.Object
 	var cached bool
@@ -25,11 +27,12 @@ func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetCli
 		return nil, err
 	}
 	if res.Content == nil {
+		s.Logger.Info("Resource not found", err)
 		return nil, fmt.Errorf("Error loading object")
 	}
 	if !cached {
 		if err := s.Cache(res); err != nil {
-			s.Logger.Println(err)
+			s.Logger.Info("Caching failed", err)
 		}
 	}
 	return &res, nil

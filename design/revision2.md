@@ -61,47 +61,28 @@ Where:
 
 ```go
 type Retriever interface {
-	Retrieve(res *pbmod.Object) (err error)
+	Retrieve(repo, resource, version string) (res gop.Object, cached bool, err error)
 }
 ```
 
 - Used to retrieve a specified resource
  
-- Required Object fields:
+- Fields:
     - `Repo`
     - `Resource`
     - `Version`
-- Should populate:
-    - `Content`
-    - `Imported` should be set tp true so that later caching steps will not execute
-    - `Processed` if applicable 
+- Should return a populated gop.Object, and `caches` which determines if later steps run or not
     
 - Examples:
     - [../gop/gop_filesystem/retriever.go](../gop/gop_filesystem/retriever.go) Retrieve from a filesystem
     - [../gop/gop_gcs/retriever.go](../gop/gop_gcs/retriever.go) Retrieve from google cloud storage
     - [../gop/retriever/retriever_git/git.go](../gop/retriever/retriever_git/git.go) Retrieve from a git repository
 
-### Processor interface
-
-```go
-type Processor interface {
-	Process(pre *pbmod.Object) (err error)
-}
-```
-
-- Used to process an object and populate the `Object.Processed` field
-- Required Object fields:
-    - `Content`
-- Should populate:
-    - `Processed`
-- Examples:
-    - [../gop/processor/processor_sysl/sysl.go](../gop/processor/processor_sysl/sysl.go) Process a sysl source file into parsed sysl protobuf json  
-
 ### Cacher interface
 
 ```go
 type Cacher interface {
-	Cache(res *pbmod.Object) (err error)
+	Cache(res gop.Object) (err error)
 }
 ```
 
@@ -110,7 +91,7 @@ type Cacher interface {
     - `Repo`
     - `Resource`
     - `Version`
-    - `Content` and/or `Processed` 
+    - `Content`
 
 - Should populate: Read only: Doesn't populate
 - Examples:

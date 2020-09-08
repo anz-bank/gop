@@ -20,6 +20,7 @@ import (
 
 var fs afero.Fs
 
+/* ServeHTTP is a http.HandlerFunc, can be used in deployments like cloud functions*/
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	server, err := ServiceHandler(app.AppConfig{
@@ -32,20 +33,25 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	server.GetHandler(w, r)
 }
 
-type GOPPER struct {
+/* GitGopper is an implementation of Gopper that will fall back to a git retriever if the file can't be found in
+its data source */
+type GitGopper struct {
 	Gopper
 	retriever_git.Retriever
 }
 
-func (a GOPPER) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
+/* Retrieve attempts to retrieve a file from GitGopper.Gopper, if this fails then it will fall back to using a
+git retriever */
+func (a GitGopper) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
 	if res, cached, err := a.Gopper.Retrieve(repo, resource, version); err == nil {
 		return res, cached, nil
 	}
 	return a.Retriever.Retrieve(repo, resource, version)
 }
 
-func NewGopper(a app.AppConfig) (*GOPPER, error) {
-	r := GOPPER{}
+/* NewGopper returns a GitGopper for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
+func NewGopper(a app.AppConfig) (*GitGopper, error) {
+	r := GitGopper{}
 	switch a.FsType {
 	case "os":
 		r.Gopper = gop_filesystem.New(afero.NewOsFs(), a)
@@ -62,6 +68,7 @@ func NewGopper(a app.AppConfig) (*GOPPER, error) {
 	return &r, nil
 }
 
+/* ServiceHandler sets up a service handler (Http handler) with a GitGopper */
 func ServiceHandler(a app.AppConfig) (*gop2.ServiceHandler, error) {
 	g, err := NewGopper(a)
 	if err != nil {
