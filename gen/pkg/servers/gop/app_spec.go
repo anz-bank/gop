@@ -46,11 +46,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "gop.sysl",
           "start": {
-           "line": 11,
+           "line": 10,
            "col": 13
           },
           "end": {
-           "line": 11,
+           "line": 10,
            "col": 22
           }
          }
@@ -63,11 +63,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "gop.sysl",
           "start": {
-           "line": 11,
+           "line": 10,
            "col": 29
           },
           "end": {
-           "line": 11,
+           "line": 10,
            "col": 37
           }
          }
@@ -78,11 +78,11 @@ const AppSpec = `{
      "sourceContext": {
       "file": "gop.sysl",
       "start": {
-       "line": 11,
+       "line": 10,
        "col": 8
       },
       "end": {
-       "line": 12,
+       "line": 11,
        "col": 31
       }
      }
@@ -106,32 +106,34 @@ const AppSpec = `{
          }
         }
        },
-       "imported": {
-        "primitive": "BOOL",
-        "sourceContext": {
-         "file": "gop.sysl",
-         "start": {
-          "line": 9,
-          "col": 20
+       "more": {
+        "typeRef": {
+         "context": {
+          "appname": {
+           "part": [
+            "gop"
+           ]
+          },
+          "path": [
+           "object"
+          ]
          },
-         "end": {
-          "line": 9,
-          "col": 20
+         "ref": {
+          "path": [
+           "object"
+          ]
          }
-        }
-       },
-       "processed": {
-        "primitive": "STRING",
+        },
         "opt": true,
         "sourceContext": {
          "file": "gop.sysl",
          "start": {
-          "line": 6,
-          "col": 21
+          "line": 8,
+          "col": 16
          },
          "end": {
-          "line": 6,
-          "col": 27
+          "line": 8,
+          "col": 22
          }
         }
        },
@@ -140,11 +142,11 @@ const AppSpec = `{
         "sourceContext": {
          "file": "gop.sysl",
          "start": {
-          "line": 7,
+          "line": 6,
           "col": 16
          },
          "end": {
-          "line": 7,
+          "line": 6,
           "col": 16
          }
         }
@@ -154,11 +156,11 @@ const AppSpec = `{
         "sourceContext": {
          "file": "gop.sysl",
          "start": {
-          "line": 8,
+          "line": 7,
           "col": 20
          },
          "end": {
-          "line": 8,
+          "line": 7,
           "col": 20
          }
         }
@@ -186,7 +188,7 @@ const AppSpec = `{
        "col": 4
       },
       "end": {
-       "line": 10,
+       "line": 9,
        "col": 4
       }
      }

@@ -13,13 +13,9 @@ import (
 
 type uploader func(bucket string, object string, r io.Reader) error
 
-func (a GOP) Cache(res *gop.Object) (err error) {
+func (a GOP) Cache(res gop.Object) (err error) {
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(res.Content)); err != nil {
-		return err
-	}
-	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := a.upload(a.AppConfig.CacheLocation, filename, strings.NewReader(*res.Processed)); err != nil {
 		return err
 	}
 	return nil

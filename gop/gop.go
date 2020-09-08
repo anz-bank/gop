@@ -2,16 +2,12 @@ package gop
 
 import "github.com/joshcarp/gop/gen/pkg/servers/gop"
 
-type Processor interface {
-	Process(pre *gop.Object) (err error)
-}
-
 type Retriever interface {
-	Retrieve(res *gop.Object) (err error)
+	Retrieve(repo, resource, version string) (res gop.Object, cache bool, err error)
 }
 
 type Cacher interface {
-	Cache(res *gop.Object) (err error)
+	Cache(res gop.Object) (err error)
 }
 
 type Gopper interface {

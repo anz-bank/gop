@@ -4,15 +4,29 @@ import (
 	"testing"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGitRetrieve(t *testing.T) {
 	r := New(app.AppConfig{})
-	req := app.NewObject("github.com/anz-bank/sysl/tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
-	require.NoError(t, r.Retrieve(req))
-	banana := &gop.Object{Repo: "github.com/anz-bank/sysl", Version: "e78f4afc524ad8d1a1a4740779731d706b7b079b", Resource: "tests/bananatree.sysl", Content: "Bananatree [package=\"bananatree\"]:\n  !type Banana:\n    id \u003c: int\n    title \u003c: string\n\n  /banana:\n    /{id\u003c:int}:\n      GET:\n        return Banana\n\n  /morebanana:\n    /{id\u003c:int}:\n      GET:\n        return Banana\n"}
-	req.Processed = nil
-	require.Equal(t, banana, req)
+	obj, cached, err := r.Retrieve("github.com/anz-bank/sysl", "tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
+	require.NoError(t, err)
+	require.False(t, cached)
+	require.Equal(t, bananatree, obj.Content)
 }
+
+const bananatree = `Bananatree [package="bananatree"]:
+  !type Banana:
+    id <: int
+    title <: string
+
+  /banana:
+    /{id<:int}:
+      GET:
+        return Banana
+
+  /morebanana:
+    /{id<:int}:
+      GET:
+        return Banana
+`

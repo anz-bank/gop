@@ -14,16 +14,14 @@ import (
 
 type downloader func(bucket, object string) (io.Reader, error)
 
-func (a GOP) Retrieve(res *gop.Object) error {
+func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
+	res := app.New(repo, resource, version)
 	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
 	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
-		return err
+		return res, false, err
 	}
-	filename = fmt.Sprintf("%s/%s.pb.json@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, res.Processed); err != nil {
-		return err
-	}
-	return nil
+
+	return res, true, nil
 }
 
 func downloadToString(download downloader, bucketName string, filename string, target *string) error {

@@ -16,23 +16,11 @@ type GOP struct {
 	fs        afero.Fs
 }
 
-func (a GOP) Cache(res *gop.Object) (err error) {
+func (a GOP) Cache(res gop.Object) (err error) {
 	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s", res.Repo, res.Resource))
 	if err := a.fs.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
 	location += "@" + res.Version
-	if err := a.SaveToPbJsonFile(res); err != nil {
-		return err
-	}
 	return afero.WriteFile(a.fs, location, []byte(res.Content), os.ModePerm)
-}
-
-func (a GOP) SaveToPbJsonFile(res *gop.Object) (err error) {
-	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s.pb.json", res.Repo, res.Resource))
-	if err := a.fs.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
-		return err
-	}
-	location += "@" + res.Version
-	return afero.WriteFile(a.fs, location, []byte(*res.Processed), os.ModePerm)
 }

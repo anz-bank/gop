@@ -38,13 +38,20 @@ func ProcessRequest(resource string) (string, string) {
 }
 
 func NewObject(resource, version string) *gop.Object {
-	var a string
 	repo, resource := ProcessRequest(resource)
 	return &gop.Object{
-		Repo:      repo,
-		Resource:  resource,
-		Version:   version,
-		Processed: &a,
-		Content:   "",
+		Repo:     repo,
+		Resource: resource,
+		Version:  version,
+		Content:  "",
+	}
+}
+
+func New(repo, resource, version string) gop.Object {
+	return gop.Object{
+		Repo:     repo,
+		Resource: resource,
+		Version:  version,
+		Content:  "",
 	}
 }

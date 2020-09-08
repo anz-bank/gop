@@ -13,30 +13,24 @@ import (
 
 type Server struct {
 	*logrus.Logger
-	Retriever
-	Processor
-	Cacher
+	Gopper
 }
 
 func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetClient) (*gop.Object, error) {
-	var object = app.NewObject(req.Resource, req.Version)
-	object.Version = req.Version
-	if err := s.Retrieve(object); err != nil {
+	var res gop.Object
+	var cached bool
+	var err error
+	repo, resource := app.ProcessRequest(req.Resource)
+	if res, cached, err = s.Retrieve(repo, resource, req.Version); err != nil {
 		return nil, err
 	}
-	if object.Content == "" {
+	if res.Content == "" {
 		return nil, fmt.Errorf("Error loading object")
 	}
-	if !object.Imported {
-		if err := s.Process(object); err != nil {
-			s.Logger.Println(err)
-		}
-		if err := s.Cache(object); err != nil {
+	if !cached {
+		if err := s.Cache(res); err != nil {
 			s.Logger.Println(err)
 		}
 	}
-	if object.Processed == nil || *object.Processed == "" {
-		object.Processed = nil
-	}
-	return object, nil
+	return &res, nil
 }

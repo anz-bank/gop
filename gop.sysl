@@ -3,10 +3,9 @@ gop:
     !type object:
         version <: string
         content <: string
-        processed <: string?
         repo <: string
         resource <: string
-        imported <: bool
+        more <: object?
     /:
         GET ?resource=string&version=string:
             return ok <: object

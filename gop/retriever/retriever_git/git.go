@@ -18,8 +18,9 @@ func New(appConfig app.AppConfig) Retriever {
 	return Retriever{AppConfig: appConfig}
 }
 
-func (a Retriever) Retrieve(res *gop.Object) error {
+func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
 	var auth *http.BasicAuth
+	res := app.New(repo, resource, version)
 	store := memory.NewStorage()
 	fs := memfs.New()
 	if a.AppConfig.Username != "" {
@@ -29,32 +30,35 @@ func (a Retriever) Retrieve(res *gop.Object) error {
 		}
 	}
 	r, err := git.Clone(store, fs, &git.CloneOptions{
-		URL:  "https://" + res.Repo + ".git",
+		URL:  "https://" + repo + ".git",
 		Auth: auth,
 	})
 	if err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
 	w, err := r.Worktree()
 	if err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
 	if err = w.Checkout(&git.CheckoutOptions{
-		Hash: plumbing.NewHash(res.Version),
+		Hash: plumbing.NewHash(version),
 	}); err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
-	commit, err := r.CommitObject(plumbing.NewHash(res.Version))
+	commit, err := r.CommitObject(plumbing.NewHash(version))
 	if err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
-	f, err := commit.File(res.Resource)
+	f, err := commit.File(resource)
 	if err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
 	reader, err := f.Reader()
 	if err != nil {
-		return err
+		return gop.Object{}, false, err
 	}
-	return app.ScanIntoString(&res.Content, reader)
+	if err := app.ScanIntoString(&res.Content, reader); err != nil {
+		return gop.Object{}, false, err
+	}
+	return res, false, nil
 }
