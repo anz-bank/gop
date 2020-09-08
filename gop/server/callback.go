@@ -84,7 +84,31 @@ func MapError(ctx context.Context, err error) common.HTTPError {
 		default:
 			httpCode = 500
 		}
-
+	case *common.ServerError:
+		switch e := e.Unwrap().(type) {
+		case app.Error:
+			desc = e.String()
+			switch e.Kind {
+			case app.BadRequestError:
+				httpCode = 400
+			case app.UnauthorizedError:
+				httpCode = 401
+			case app.TimeoutError:
+				httpCode = 408
+			case app.CacheAccessError, app.CacheWriteError:
+				httpCode = 503
+			case app.CacheReadError, app.FileNotFoundError:
+				httpCode = 404
+			default:
+				httpCode = 500
+			}
+		default:
+			httpCode = 500
+			desc = "Unknown"
+		}
+	default:
+		httpCode = 500
+		desc = "Unknown"
 	}
 	return common.HTTPError{
 		HTTPCode:    httpCode,

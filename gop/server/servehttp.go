@@ -8,8 +8,6 @@ import (
 
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
 
-	"github.com/anz-bank/sysl-go/common"
-
 	"github.com/sirupsen/logrus"
 
 	"github.com/joshcarp/gop/app"
@@ -79,7 +77,7 @@ func ServiceHandler(a app.AppConfig) (*gop2.ServiceHandler, error) {
 	serve := Server{
 		Gopper: g,
 	}
-	handler, err := gop2.NewServiceHandler(common.DefaultCallback(), &gop2.ServiceInterface{Get: serve.Get})
+	handler, err := gop2.NewServiceHandler(CallBack(), &gop2.ServiceInterface{Get: serve.Get})
 	if err != nil {
 		return nil, err
 	}
