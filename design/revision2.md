@@ -42,9 +42,7 @@ type Object struct {
 	Repo      string  `json:"repo"`
 	Resource  string  `json:"resource"`
 	Version   string  `json:"version"`
-	Content   string  `json:"content"`
-	Imported  bool    `json:"imported"`
-	Processed *string `json:"processed,omitempty"`
+	Content   []byte  `json:"content"`
 }
 ```
 
@@ -53,8 +51,6 @@ Where:
  - `Resource` is the target file (eg `pbmod.sysl`)
  - `Version` is the target commit hash (eg `165081dd92025fb5cae3fef575eca1ad9521e4cc`)
  - `Content` is the content of the file that will be returned
- - `Imported` is a flag to indicate whether any post processing jobs are required (for example is the Object should be cached by later steps)
- - `Processed` is an optional field that holds the result of any `Processor.Process` steps
 
 
 ### Retriever interface

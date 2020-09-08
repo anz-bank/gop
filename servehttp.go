@@ -1,4 +1,4 @@
-package server
+package pb_mod
 
 import (
 	"net/http"
