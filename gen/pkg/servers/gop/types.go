@@ -17,11 +17,10 @@ var _ = date.Parse
 
 // Object ...
 type Object struct {
-	Content  string  `json:"content"`
-	More     *Object `json:"more,omitempty"`
-	Repo     string  `json:"repo"`
-	Resource string  `json:"resource"`
-	Version  string  `json:"version"`
+	Content  []byte `json:"content"`
+	Repo     string `json:"repo"`
+	Resource string `json:"resource"`
+	Version  string `json:"version"`
 }
 
 // GetRequest ...

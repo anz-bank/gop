@@ -25,7 +25,7 @@ func TestGCSRetrieve(t *testing.T) {
 	obj, cached, err := r.Retrieve("github.com/anz-bank/sysl", "tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
 	require.True(t, cached)
-	require.Equal(t, bananatree, obj.Content)
+	require.Equal(t, []byte(bananatree), obj.Content)
 }
 
 func (s fakeServer) downloadInMem(bucket, object string) (io.Reader, error) {

@@ -24,7 +24,7 @@ func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetCli
 	if res, cached, err = s.Retrieve(repo, resource, req.Version); err != nil {
 		return nil, err
 	}
-	if res.Content == "" {
+	if res.Content == nil {
 		return nil, fmt.Errorf("Error loading object")
 	}
 	if !cached {

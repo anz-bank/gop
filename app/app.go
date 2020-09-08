@@ -17,13 +17,12 @@ type AppConfig struct {
 	ImportRegex   string `yaml:"importregex"`
 }
 
-func ScanIntoString(res *string, file io.Reader) error {
+func ScanIntoString(res *[]byte, file io.Reader) error {
 	contents, err := ioutil.ReadAll(file)
 	if err != nil {
 		return err
 	}
-	fin := string(contents)
-	*res = fin
+	*res = contents
 	return nil
 }
 
@@ -43,7 +42,6 @@ func NewObject(resource, version string) *gop.Object {
 		Repo:     repo,
 		Resource: resource,
 		Version:  version,
-		Content:  "",
 	}
 }
 
@@ -52,6 +50,5 @@ func New(repo, resource, version string) gop.Object {
 		Repo:     repo,
 		Resource: resource,
 		Version:  version,
-		Content:  "",
 	}
 }

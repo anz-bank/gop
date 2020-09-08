@@ -2,10 +2,9 @@ gop:
     @package = "gop"
     !type object:
         version <: string
-        content <: string
+        content <: bytes
         repo <: string
         resource <: string
-        more <: object?
     /:
         GET ?resource=string&version=string:
             return ok <: object

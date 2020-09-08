@@ -46,11 +46,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "gop.sysl",
           "start": {
-           "line": 10,
+           "line": 9,
            "col": 13
           },
           "end": {
-           "line": 10,
+           "line": 9,
            "col": 22
           }
          }
@@ -63,11 +63,11 @@ const AppSpec = `{
          "sourceContext": {
           "file": "gop.sysl",
           "start": {
-           "line": 10,
+           "line": 9,
            "col": 29
           },
           "end": {
-           "line": 10,
+           "line": 9,
            "col": 37
           }
          }
@@ -78,11 +78,11 @@ const AppSpec = `{
      "sourceContext": {
       "file": "gop.sysl",
       "start": {
-       "line": 10,
+       "line": 9,
        "col": 8
       },
       "end": {
-       "line": 11,
+       "line": 10,
        "col": 31
       }
      }
@@ -93,7 +93,7 @@ const AppSpec = `{
      "tuple": {
       "attrDefs": {
        "content": {
-        "primitive": "STRING",
+        "primitive": "BYTES",
         "sourceContext": {
          "file": "gop.sysl",
          "start": {
@@ -103,37 +103,6 @@ const AppSpec = `{
          "end": {
           "line": 5,
           "col": 19
-         }
-        }
-       },
-       "more": {
-        "typeRef": {
-         "context": {
-          "appname": {
-           "part": [
-            "gop"
-           ]
-          },
-          "path": [
-           "object"
-          ]
-         },
-         "ref": {
-          "path": [
-           "object"
-          ]
-         }
-        },
-        "opt": true,
-        "sourceContext": {
-         "file": "gop.sysl",
-         "start": {
-          "line": 8,
-          "col": 16
-         },
-         "end": {
-          "line": 8,
-          "col": 22
          }
         }
        },
@@ -188,7 +157,7 @@ const AppSpec = `{
        "col": 4
       },
       "end": {
-       "line": 9,
+       "line": 8,
        "col": 4
       }
      }

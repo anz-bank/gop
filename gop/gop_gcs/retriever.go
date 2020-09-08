@@ -24,7 +24,7 @@ func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) 
 	return res, true, nil
 }
 
-func downloadToString(download downloader, bucketName string, filename string, target *string) error {
+func downloadToString(download downloader, bucketName string, filename string, target *[]byte) error {
 	file, err := download(bucketName, filename)
 	if err != nil {
 		return err

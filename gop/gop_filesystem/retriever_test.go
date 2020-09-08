@@ -17,7 +17,7 @@ func TestFsRetrieve(t *testing.T) {
 	require.NoError(t, err)
 	obj, _, err := r.Retrieve("github.com/anz-bank/sysl", "tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
-	require.Equal(t, bananatree, obj.Content)
+	require.Equal(t, []byte(bananatree), obj.Content)
 }
 
 const bananatree = `Bananatree [package="bananatree"]:
