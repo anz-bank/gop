@@ -6,5 +6,5 @@ gop:
         repo <: string
         resource <: string
     /:
-        GET ?resource=string&version=string:
+        GET ?resource=string:
             return ok <: object

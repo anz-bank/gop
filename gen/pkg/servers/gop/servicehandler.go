@@ -56,7 +56,6 @@ func (s *ServiceHandler) GetHandler(w http.ResponseWriter, r *http.Request) {
 	var req GetRequest
 
 	req.Resource = restlib.GetQueryParam(r, "resource")
-	req.Version = restlib.GetQueryParam(r, "version")
 
 	ctx, cancel := s.genCallback.DownstreamTimeoutContext(ctx)
 	defer cancel()

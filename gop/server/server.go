@@ -22,8 +22,12 @@ func (s *Server) Get(ctx context.Context, req *gop.GetRequest, client gop.GetCli
 	var res gop.Object
 	var cached bool
 	var err error
-	repo, resource := app.ProcessRequest(req.Resource)
-	res, cached, err = s.Retrieve(repo, resource, req.Version)
+	repo, resource, version, err := app.ProcessRequest(req.Resource)
+	if err != nil {
+		log.Info(ctx, err)
+		return nil, err
+	}
+	res, cached, err = s.Retrieve(repo, resource, version)
 	if err != nil || res.Content == nil || len(res.Content) == 0 {
 		log.Info(ctx, "Resource not found", err)
 		return nil, err

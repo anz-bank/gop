@@ -30,8 +30,7 @@ func New(appConfig app.AppConfig) Retriever {
 
 func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
 	req := &gop.GetRequest{
-		Resource: path.Join(repo, resource),
-		Version:  version,
+		Resource: path.Join(repo, resource) + "@" + version,
 	}
 	ret, err := a.Get(context.Background(), req)
 	if err != nil {
@@ -52,9 +51,7 @@ func (s *Retriever) Get(ctx context.Context, req *gop.GetRequest) (*gop.Object, 
 	q := u.Query()
 	q.Add("resource", req.Resource)
 
-	q.Add("version", req.Version)
-
-	u.RawQuery = fmt.Sprintf("resource=%s&version=%s", req.Resource, req.Version)
+	u.RawQuery = fmt.Sprintf("resource=%s", req.Resource)
 	result, err := restlib.DoHTTPRequest(ctx, s.client, "GET", u.String(), nil, required, &okResponse, nil)
 	restlib.OnRestResultHTTPResult(ctx, result, err)
 	if err != nil {

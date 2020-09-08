@@ -40,8 +40,6 @@ func (s *Client) Get(ctx context.Context, req *GetRequest) (*Object, error) {
 	q := u.Query()
 	q.Add("resource", req.Resource)
 
-	q.Add("version", req.Version)
-
 	u.RawQuery = q.Encode()
 	result, err := restlib.DoHTTPRequest(ctx, s.client, "GET", u.String(), nil, required, &okResponse, nil)
 	restlib.OnRestResultHTTPResult(ctx, result, err)

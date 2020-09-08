@@ -55,23 +55,6 @@ const AppSpec = `{
           }
          }
         }
-       },
-       {
-        "name": "version",
-        "type": {
-         "primitive": "STRING",
-         "sourceContext": {
-          "file": "gop.sysl",
-          "start": {
-           "line": 9,
-           "col": 29
-          },
-          "end": {
-           "line": 9,
-           "col": 37
-          }
-         }
-        }
        }
       ]
      },

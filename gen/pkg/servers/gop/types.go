@@ -26,7 +26,6 @@ type Object struct {
 // GetRequest ...
 type GetRequest struct {
 	Resource string
-	Version  string
 }
 
 // *Object validator

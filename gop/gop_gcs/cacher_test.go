@@ -17,7 +17,7 @@ func TestGCSCache(t *testing.T) {
 	}
 	fakeGCS.s.CreateBucketWithOpts(fakestorage.CreateBucketOpts{Name: r.AppConfig.CacheLocation})
 	r.upload = fakeGCS.uploadinMem
-	req := app.NewObject("github.com/anz-bank/sysl/tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
+	req := app.NewObject("github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	req.Content = []byte(bananatree)
 	require.NoError(t, r.Cache(*req))
 	obj, err := fakeGCS.s.GetObject(r.AppConfig.CacheLocation, "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")

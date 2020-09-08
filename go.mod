@@ -12,6 +12,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/mattn/go-sqlite3 v2.0.3+incompatible
+	github.com/pkg/errors v0.9.1
 	github.com/rickb777/date v1.12.4
 	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/afero v1.3.4
