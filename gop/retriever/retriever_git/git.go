@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/storage/memory"
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
+	"github.com/joshcarp/gop/gop"
 )
 
 type Retriever struct {

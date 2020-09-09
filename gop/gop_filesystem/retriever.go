@@ -5,7 +5,7 @@ import (
 	"path"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
+	"github.com/joshcarp/gop/gop"
 )
 
 func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) {

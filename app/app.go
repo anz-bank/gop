@@ -6,7 +6,7 @@ import (
 	"path"
 	"strings"
 
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
+	"github.com/joshcarp/gop/gop"
 )
 
 type AppConfig struct {

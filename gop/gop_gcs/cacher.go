@@ -10,7 +10,7 @@ import (
 	"github.com/joshcarp/gop/app"
 
 	"cloud.google.com/go/storage"
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
+	"github.com/joshcarp/gop/gop"
 )
 
 type uploader func(bucket string, object string, r io.Reader) error

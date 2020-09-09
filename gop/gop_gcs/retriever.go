@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gen/pkg/servers/gop"
+	"github.com/joshcarp/gop/gop"
 
 	"cloud.google.com/go/storage"
 )
