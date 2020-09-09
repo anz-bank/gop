@@ -2,6 +2,7 @@ package gop
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 	"os"
 
@@ -59,6 +60,7 @@ func HandleErr(w http.ResponseWriter, err error) {
 	if err == nil {
 		return
 	}
+	log.Println(err)
 	switch e := err.(type) {
 	case app.Error:
 		desc = e.String()
