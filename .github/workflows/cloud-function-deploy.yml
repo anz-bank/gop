@@ -25,3 +25,8 @@ jobs:
                  --trigger-http \
                  --set-env-vars=CacheLocation=gopper-storage,FsType=gcs \
                  --allow-unauthenticated
+      - name: Set permissions
+        run: |-
+          gcloud functions add-iam-policy-binding upload\
+            --member="allUsers" \
+            --role="roles/cloudfunctions.invoker"
