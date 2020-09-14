@@ -13,7 +13,7 @@ func TestFsRetrieve(t *testing.T) {
 	r := New(afero.NewMemMapFs(), app.AppConfig{})
 	file, err := r.fs.Create("github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
-	file.Write([]byte(bananatree))
+	_, err = file.Write([]byte(bananatree))
 	require.NoError(t, err)
 	obj, _, err := r.Retrieve("github.com/anz-bank/sysl", "tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)

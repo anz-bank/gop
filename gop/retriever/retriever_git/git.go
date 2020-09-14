@@ -33,6 +33,9 @@ func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, e
 		URL:  "https://" + repo + ".git",
 		Auth: auth,
 	})
+	if err != nil {
+		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)
+	}
 	h, err := r.ResolveRevision(plumbing.Revision(version))
 	if err != nil {
 		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)

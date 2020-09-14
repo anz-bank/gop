@@ -51,7 +51,9 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		return
 	}
-	w.Write(b)
+	if _, err := w.Write(b); err != nil {
+		log.Println(err)
+	}
 }
 
 func HandleErr(w http.ResponseWriter, err error) {
