@@ -14,5 +14,5 @@ func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) 
 	if file == nil {
 		return res, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
 	}
-	return res, false, app.ScanIntoString(&res.Content, file)
+	return res, true, app.ScanIntoString(&res.Content, file)
 }
