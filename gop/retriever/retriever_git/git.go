@@ -20,7 +20,7 @@ func New(appConfig app.AppConfig) Retriever {
 
 func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
 	var auth *http.BasicAuth
-	res := app.New(repo, resource, version)
+	var res gop.Object
 	store := memory.NewStorage()
 	fs := memfs.New()
 	if a.AppConfig.Username != "" {
@@ -33,19 +33,21 @@ func (a Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, e
 		URL:  "https://" + repo + ".git",
 		Auth: auth,
 	})
+	h, err := r.ResolveRevision(plumbing.Revision(version))
 	if err != nil {
 		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)
 	}
+	res = app.New(repo, resource, h.String())
 	w, err := r.Worktree()
 	if err != nil {
 		return gop.Object{}, false, app.CreateError(app.CacheAccessError, "Failed to clone repository", err)
 	}
 	if err = w.Checkout(&git.CheckoutOptions{
-		Hash: plumbing.NewHash(version),
+		Hash: plumbing.NewHash(h.String()),
 	}); err != nil {
 		return gop.Object{}, false, app.CreateError(app.CacheReadError, "Failed to checkout version", err)
 	}
-	commit, err := r.CommitObject(plumbing.NewHash(version))
+	commit, err := r.CommitObject(*h)
 	if err != nil {
 		return gop.Object{}, false, app.CreateError(app.CacheReadError, "Failed to checkout version", err)
 	}
