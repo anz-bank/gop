@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"time"
 
 	"github.com/joshcarp/gop/app"
 	"github.com/joshcarp/gop/gop"
@@ -42,7 +41,5 @@ func download(bucket, object string) (io.Reader, error) {
 		return nil, fmt.Errorf("storage.NewClient: %v", err)
 	}
 	defer client.Close()
-	ctx, cancel := context.WithTimeout(ctx, time.Second*50)
-	defer cancel()
 	return client.Bucket(bucket).Object(object).NewReader(ctx)
 }
