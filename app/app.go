@@ -30,7 +30,7 @@ func ScanIntoString(res *[]byte, file io.Reader) error {
 func ProcessRequest(resource string) (string, string, string, error) {
 	location_version := strings.Split(resource, "@")
 	if len(location_version) != 2 {
-		return "", "", "", CreateError(BadRequestError, "resource must be in form gitx.com/repo/resource.ext@hash")
+		return "", resource, "", nil
 	}
 	repo_resource := location_version[0]
 	version := location_version[1]

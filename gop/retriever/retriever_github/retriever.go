@@ -1,7 +1,6 @@
 package retriever_github
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -31,9 +30,6 @@ func (a Retriever) Retrieve(repo, resource, version string) (res gop.Object, cac
 	if err != nil {
 		return res, false, err
 	}
-	err = json.Unmarshal(bytes, &res)
-	if err != nil {
-		return res, false, err
-	}
+	res.Content = bytes
 	return res, false, nil
 }
