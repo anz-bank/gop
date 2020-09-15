@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 )
 
 type Retriever struct {
@@ -18,8 +17,12 @@ func New(appConfig app.AppConfig) Retriever {
 	return Retriever{AppConfig: appConfig}
 }
 
-func (a Retriever) Retrieve(repo, resource, version string) (res gop.Object, cached bool, err error) {
+func (a Retriever) Retrieve(resource string) (res []byte, cached bool, err error) {
 	var resp *http.Response
+	repo, resource, version, err := app.ProcessRequest(resource)
+	if err != nil {
+		return nil, false, app.CreateError(app.BadRequestError, "Can't process request")
+	}
 	req := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s",
 		strings.ReplaceAll(repo, "github.com/", ""), version, resource)
 	resp, err = http.Get(req)
@@ -30,6 +33,5 @@ func (a Retriever) Retrieve(repo, resource, version string) (res gop.Object, cac
 	if err != nil {
 		return res, false, err
 	}
-	res.Content = bytes
-	return res, false, nil
+	return bytes, false, nil
 }

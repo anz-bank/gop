@@ -11,7 +11,6 @@ import (
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/gop_gcs"
 	"github.com/spf13/afero"
@@ -32,18 +31,14 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}()
 	reqestedResource := r.URL.Query().Get("resource")
 
-	var res gop.Object
+	var res []byte
 	var cached bool
-	repo, resource, version, err := app.ProcessRequest(reqestedResource)
-	if err != nil {
-		return
-	}
-	res, cached, err = s.Retrieve(repo, resource, version)
-	if err != nil || res.Content == nil || len(res.Content) == 0 {
+	res, cached, err = s.Retrieve(reqestedResource)
+	if err != nil || res == nil {
 		return
 	}
 	if !cached {
-		if err := s.Cache(res); err != nil {
+		if err := s.Cache(reqestedResource, res); err != nil {
 			return
 		}
 	}
@@ -96,11 +91,11 @@ type GitGopper struct {
 
 /* Retrieve attempts to retrieve a file from GitGopper.Gopper, if this fails then it will fall back to using a
 git retriever */
-func (a GitGopper) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
-	if res, cached, err := a.Gopper.Retrieve(repo, resource, version); err == nil {
+func (a GitGopper) Retrieve(resource string) ([]byte, bool, error) {
+	if res, cached, err := a.Gopper.Retrieve(resource); err == nil {
 		return res, cached, nil
 	}
-	return a.Retriever.Retrieve(repo, resource, version)
+	return a.Retriever.Retrieve(resource)
 }
 
 /* NewGopper returns a GitGopper for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/

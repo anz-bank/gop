@@ -1,14 +1,12 @@
 package gop_filesystem
 
 import (
-	"fmt"
 	"os"
 	"path"
 
 	"github.com/spf13/afero"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 )
 
 type GOP struct {
@@ -16,11 +14,10 @@ type GOP struct {
 	fs        afero.Fs
 }
 
-func (a GOP) Cache(res gop.Object) (err error) {
-	location := path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s", res.Repo, res.Resource))
+func (a GOP) Cache(resource string, content []byte) (err error) {
+	location := path.Join(a.AppConfig.CacheLocation, resource)
 	if err := a.fs.MkdirAll(path.Dir(location), os.ModePerm); err != nil {
 		return err
 	}
-	location += "@" + res.Version
-	return afero.WriteFile(a.fs, location, res.Content, os.ModePerm)
+	return afero.WriteFile(a.fs, location, content, os.ModePerm)
 }

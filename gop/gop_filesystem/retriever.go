@@ -1,18 +1,20 @@
 package gop_filesystem
 
 import (
-	"fmt"
+	"io/ioutil"
 	"path"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 )
 
-func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
-	res := app.New(repo, resource, version)
-	file, err := a.fs.Open(path.Join(a.AppConfig.CacheLocation, fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)))
+func (a GOP) Retrieve(resource string) ([]byte, bool, error) {
+	file, err := a.fs.Open(path.Join(a.AppConfig.CacheLocation, resource))
 	if file == nil {
-		return res, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
+		return nil, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
 	}
-	return res, true, app.ScanIntoString(&res.Content, file)
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
+	}
+	return b, true, nil
 }

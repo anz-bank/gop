@@ -9,10 +9,10 @@ import (
 
 func TestGitRetrieve(t *testing.T) {
 	r := New(app.AppConfig{})
-	obj, cached, err := r.Retrieve("github.com/anz-bank/sysl", "tests/bananatree.sysl", "e78f4afc524ad8d1a1a4740779731d706b7b079b")
+	obj, cached, err := r.Retrieve("github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
 	require.False(t, cached)
-	require.Equal(t, []byte(bananatree), obj.Content)
+	require.Equal(t, []byte(bananatree), obj)
 }
 
 const bananatree = `Bananatree [package="bananatree"]:

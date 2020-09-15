@@ -2,12 +2,12 @@ package gop
 
 /* Retriever is an interface that returns a Object and if the object should be cached in later steps */
 type Retriever interface {
-	Retrieve(repo, resource, version string) (res Object, cached bool, err error)
+	Retrieve(resource string) (content []byte, cached bool, err error)
 }
 
 /* Cacher is an interface that saves the res object to a data source */
 type Cacher interface {
-	Cache(res Object) (err error)
+	Cache(resource string, content []byte) (err error)
 }
 
 /* Gopper is the composition of both Retriever and Cacher */

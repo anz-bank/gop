@@ -4,34 +4,25 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 
 	"cloud.google.com/go/storage"
 )
 
 type downloader func(bucket, object string) (io.Reader, error)
 
-func (a GOP) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
-	res := app.New(repo, resource, version)
-	filename := fmt.Sprintf("%s/%s@%s", res.Repo, res.Resource, res.Version)
-	if err := downloadToString(a.downloader, a.AppConfig.CacheLocation, filename, &res.Content); err != nil {
-		return res, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
-	}
-
-	return res, true, nil
-}
-
-func downloadToString(download downloader, bucketName string, filename string, target *[]byte) error {
-	file, err := download(bucketName, filename)
+func (a GOP) Retrieve(resource string) ([]byte, bool, error) {
+	r, err := a.downloader(a.AppConfig.CacheLocation, resource)
 	if err != nil {
-		return err
+		return nil, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
 	}
-	if err := app.ScanIntoString(target, file); err != nil {
-		return err
+	b, err := ioutil.ReadAll(r)
+	if err != nil {
+		return nil, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
 	}
-	return nil
+	return b, true, nil
 }
 
 func download(bucket, object string) (io.Reader, error) {

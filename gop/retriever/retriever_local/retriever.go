@@ -1,8 +1,9 @@
 package retriever_local
 
 import (
+	"io/ioutil"
+
 	"github.com/joshcarp/gop/app"
-	"github.com/joshcarp/gop/gop"
 	"github.com/spf13/afero"
 )
 
@@ -16,11 +17,14 @@ func New(fs afero.Fs) Retriever {
 	}
 }
 
-func (r Retriever) Retrieve(repo, resource, version string) (gop.Object, bool, error) {
-	res := app.New(repo, resource, version)
-	file, err := r.fs.Open(res.Resource)
+func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
+	file, err := r.fs.Open(resource)
 	if file == nil {
-		return res, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
+		return nil, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
 	}
-	return res, true, app.ScanIntoString(&res.Content, file)
+	b, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, false, app.CreateError(app.CacheAccessError, "Error opening file", err)
+	}
+	return b, true, nil
 }
