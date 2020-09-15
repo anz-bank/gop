@@ -1,4 +1,4 @@
-package app
+package gop
 
 import (
 	"github.com/pkg/errors"

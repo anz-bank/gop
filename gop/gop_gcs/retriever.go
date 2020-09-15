@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 
-	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gop"
 
 	"cloud.google.com/go/storage"
 )
@@ -14,13 +14,13 @@ import (
 type downloader func(bucket, object string) (io.Reader, error)
 
 func (a GOP) Retrieve(resource string) ([]byte, bool, error) {
-	r, err := a.downloader(a.AppConfig.CacheLocation, resource)
+	r, err := a.downloader(a.bucket, resource)
 	if err != nil {
-		return nil, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
+		return nil, false, gop.CreateError(gop.FileNotFoundError, "Error finding resource in cache", err)
 	}
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
-		return nil, false, app.CreateError(app.FileNotFoundError, "Error finding resource in cache", err)
+		return nil, false, gop.CreateError(gop.FileNotFoundError, "Error finding resource in cache", err)
 	}
 	return b, true, nil
 }

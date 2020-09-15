@@ -7,17 +7,16 @@ import (
 	"time"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/joshcarp/gop/app"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGCSRetrieve(t *testing.T) {
-	r := New(app.AppConfig{CacheLocation: "bucket"})
+	r := New("bucket")
 	fakeGCS := fakeServer{
 		s: fakestorage.NewServer([]fakestorage.Object{}),
 	}
 	fakeGCS.s.CreateObject(fakestorage.Object{
-		BucketName: r.AppConfig.CacheLocation,
+		BucketName: r.bucket,
 		Name:       "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b",
 		Content:    []byte(bananatree),
 	})

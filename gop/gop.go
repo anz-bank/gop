@@ -15,16 +15,3 @@ type Gopper interface {
 	Retriever
 	Cacher
 }
-
-// Object ...
-type Object struct {
-	Content  []byte `json:"content"`
-	Repo     string `json:"repo"`
-	Resource string `json:"resource"`
-	Version  string `json:"version"`
-}
-
-// GetRequest ...
-type GetRequest struct {
-	Resource string
-}

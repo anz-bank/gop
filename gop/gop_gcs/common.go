@@ -1,18 +1,14 @@
 package gop_gcs
 
-import (
-	"github.com/joshcarp/gop/app"
-)
-
 type GOP struct {
-	AppConfig  app.AppConfig
 	upload     uploader
 	downloader downloader
+	bucket     string
 }
 
-func New(appconfig app.AppConfig) GOP {
+func New(bucket string) GOP {
 	return GOP{
-		AppConfig:  appconfig,
+		bucket:     bucket,
 		upload:     UploadFile,
 		downloader: download,
 	}

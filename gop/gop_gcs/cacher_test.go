@@ -6,24 +6,21 @@ import (
 	"testing"
 
 	"github.com/fsouza/fake-gcs-server/fakestorage"
-	"github.com/joshcarp/gop/app"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGCSCache(t *testing.T) {
-	r := New(app.AppConfig{CacheLocation: "bucket"})
+	r := New("bucket")
 	fakeGCS := fakeServer{
 		s: fakestorage.NewServer([]fakestorage.Object{}),
 	}
-	fakeGCS.s.CreateBucketWithOpts(fakestorage.CreateBucketOpts{Name: r.AppConfig.CacheLocation})
+	fakeGCS.s.CreateBucketWithOpts(fakestorage.CreateBucketOpts{Name: r.bucket})
 	r.upload = fakeGCS.uploadinMem
 	resourcename := "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b"
-	req := app.NewObject(resourcename)
-	req.Content = []byte(bananatree)
 	require.NoError(t, r.Cache(resourcename, []byte(bananatree)))
-	obj, err := fakeGCS.s.GetObject(r.AppConfig.CacheLocation, "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
+	obj, err := fakeGCS.s.GetObject(r.bucket, "github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
-	require.Equal(t, req.Content, obj.Content)
+	require.Equal(t, []byte(bananatree), obj.Content)
 }
 
 type fakeServer struct {

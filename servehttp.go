@@ -10,7 +10,6 @@ import (
 
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
 
-	"github.com/joshcarp/gop/app"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/gop_gcs"
 	"github.com/spf13/afero"
@@ -22,10 +21,7 @@ var fs afero.Fs
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	s, _ := NewGopper(app.AppConfig{
-		CacheLocation: os.Getenv("CacheLocation"),
-		FsType:        os.Getenv("FsType"),
-	})
+	s, _ := NewGopper(os.Getenv("CacheLocation"), os.Getenv("FsType"))
 	defer func() {
 		HandleErr(w, err)
 	}()
@@ -59,18 +55,18 @@ func HandleErr(w http.ResponseWriter, err error) {
 	}
 	log.Println(err)
 	switch e := err.(type) {
-	case app.Error:
+	case gop3.Error:
 		desc = e.String()
 		switch e.Kind {
-		case app.BadRequestError:
+		case gop3.BadRequestError:
 			httpCode = 400
-		case app.UnauthorizedError:
+		case gop3.UnauthorizedError:
 			httpCode = 401
-		case app.TimeoutError:
+		case gop3.TimeoutError:
 			httpCode = 408
-		case app.CacheAccessError, app.CacheWriteError:
+		case gop3.CacheAccessError, gop3.CacheWriteError:
 			httpCode = 503
-		case app.CacheReadError, app.FileNotFoundError:
+		case gop3.CacheReadError, gop3.FileNotFoundError:
 			httpCode = 404
 		default:
 			httpCode = 500
@@ -99,21 +95,21 @@ func (a GitGopper) Retrieve(resource string) ([]byte, bool, error) {
 }
 
 /* NewGopper returns a GitGopper for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
-func NewGopper(a app.AppConfig) (*GitGopper, error) {
+func NewGopper(cachelocation, fsType string) (*GitGopper, error) {
 	r := GitGopper{}
-	switch a.FsType {
+	switch fsType {
 	case "os":
-		r.Gopper = gop_filesystem.New(afero.NewOsFs(), a)
+		r.Gopper = gop_filesystem.New(afero.NewOsFs(), "")
 	case "mem", "memory", "":
 		if fs == nil {
 			fs = afero.NewMemMapFs()
 		}
-		r.Gopper = gop_filesystem.New(fs, a)
+		r.Gopper = gop_filesystem.New(fs, "/")
 	case "gcs":
-		gcs := gop_gcs.New(a)
+		gcs := gop_gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
-	r.Retriever = retriever_git.New(a)
+	r.Retriever = retriever_git.New("", "")
 	return &r, nil
 }
 

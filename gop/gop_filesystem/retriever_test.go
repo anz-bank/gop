@@ -5,12 +5,11 @@ import (
 
 	"github.com/spf13/afero"
 
-	"github.com/joshcarp/gop/app"
 	"github.com/stretchr/testify/require"
 )
 
 func TestFsRetrieve(t *testing.T) {
-	r := New(afero.NewMemMapFs(), app.AppConfig{})
+	r := New(afero.NewMemMapFs(), "")
 	file, err := r.fs.Create("github.com/anz-bank/sysl/tests/bananatree.sysl@e78f4afc524ad8d1a1a4740779731d706b7b079b")
 	require.NoError(t, err)
 	_, err = file.Write([]byte(bananatree))

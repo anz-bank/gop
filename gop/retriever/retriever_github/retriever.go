@@ -6,22 +6,21 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gop"
 )
 
 type Retriever struct {
-	AppConfig app.AppConfig
 }
 
-func New(appConfig app.AppConfig) Retriever {
-	return Retriever{AppConfig: appConfig}
+func New() Retriever {
+	return Retriever{}
 }
 
 func (a Retriever) Retrieve(resource string) (res []byte, cached bool, err error) {
 	var resp *http.Response
-	repo, resource, version, err := app.ProcessRequest(resource)
+	repo, resource, version, err := gop.ProcessRequest(resource)
 	if err != nil {
-		return nil, false, app.CreateError(app.BadRequestError, "Can't process request")
+		return nil, false, gop.CreateError(gop.BadRequestError, "Can't process request")
 	}
 	req := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s",
 		strings.ReplaceAll(repo, "github.com/", ""), version, resource)

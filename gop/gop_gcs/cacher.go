@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/joshcarp/gop/app"
+	"github.com/joshcarp/gop/gop"
 
 	"cloud.google.com/go/storage"
 )
@@ -14,8 +14,8 @@ import (
 type uploader func(bucket string, object string, r io.Reader) error
 
 func (a GOP) Cache(resource string, content []byte) (err error) {
-	if err := a.upload(a.AppConfig.CacheLocation, resource, bytes.NewReader(content)); err != nil {
-		return app.CreateError(app.CacheWriteError, "Error uploading file to cache", err)
+	if err := a.upload(a.bucket, resource, bytes.NewReader(content)); err != nil {
+		return gop.CreateError(gop.CacheWriteError, "Error uploading file to cache", err)
 	}
 	return nil
 }
