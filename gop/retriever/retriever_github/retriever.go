@@ -24,7 +24,9 @@ func (a Retriever) Retrieve(repo, resource, version string) (res gop.Object, cac
 	req := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s",
 		strings.ReplaceAll(repo, "github.com/", ""), version, resource)
 	resp, err = http.Get(req)
-
+	if err != nil {
+		return res, false, err
+	}
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return res, false, err
