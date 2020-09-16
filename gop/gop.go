@@ -15,3 +15,9 @@ type Gopper interface {
 	Retriever
 	Cacher
 }
+
+// Object ...
+type Object struct {
+	Content  []byte `json:"content"`
+	Resource string `json:"resource"`
+}

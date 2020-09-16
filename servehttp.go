@@ -38,7 +38,7 @@ func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	b, err := json.Marshal(res)
+	b, err := json.Marshal(gop3.Object{Content: res, Resource: reqestedResource})
 	if err != nil {
 		return
 	}
