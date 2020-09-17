@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"strings"
 
 	"github.com/joshcarp/gop/gop"
@@ -24,15 +25,26 @@ func (a Retriever) Retrieve(resource string) (res []byte, cached bool, err error
 		return nil, false, gop.CreateError(gop.BadRequestError, "Can't process request")
 	}
 
-	req := fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s?token=%s",
-		strings.ReplaceAll(repo, "github.com/", ""), version, resource, a.token)
-	resp, err = http.Get(req)
+	req, err := url.Parse(fmt.Sprintf("https://api.github.com/repos/%s/contents/%s?ref=%s",
+		strings.ReplaceAll(repo, "github.com/", ""), resource, version))
+	cl := http.DefaultClient
+	heder := http.Header{}
+	heder.Add("accept", "application/vnd.github.v3.raw+json")
+	if a.token != "" {
+		heder.Add("authorization", "token "+a.token)
+	}
+	r := &http.Request{
+		Method: "GET",
+		URL:    req,
+		Header: heder,
+	}
+	resp, err = cl.Do(r)
 	if err != nil {
 		return res, false, err
 	}
-	bytes, err := ioutil.ReadAll(resp.Body)
+	res, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return res, false, err
+		return nil, false, err
 	}
-	return bytes, false, nil
+	return res, false, nil
 }

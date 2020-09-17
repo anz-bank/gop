@@ -9,7 +9,7 @@ import (
 )
 
 func TestGitHub(t *testing.T) {
-	retriever := New()
+	retriever := New("")
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)
