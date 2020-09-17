@@ -109,7 +109,7 @@ func NewGopper(cachelocation, fsType string) (*GitGopper, error) {
 		gcs := gop_gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
-	r.Retriever = retriever_git.New("", "")
+	r.Retriever = retriever_git.New(nil)
 	return &r, nil
 }
 
