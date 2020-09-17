@@ -2,6 +2,7 @@ package retriever_git
 
 import (
 	"io/ioutil"
+	"net/url"
 
 	"github.com/joshcarp/gop/gop"
 
@@ -13,26 +14,34 @@ import (
 )
 
 type Retriever struct {
-	token    string
-	username string
+	token map[string]string
 }
 
-func New(token string, username string) Retriever {
-	return Retriever{token: token, username: username}
+/* New returns a retriever with a key/value pairs of <host>, <token> eg: New("github.com", "abcdef") */
+func New(tokens map[string]string) Retriever {
+	if tokens == nil {
+		tokens = map[string]string{}
+	}
+	return Retriever{token: tokens}
+}
+
+func getToken(token map[string]string, resource string) string {
+	u, _ := url.Parse("https://" + resource)
+	return token[u.Host]
 }
 
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var auth *http.BasicAuth
 	store := memory.NewStorage()
 	fs := memfs.New()
-	repo, resource, version, err := gop.ProcessRequest(resource)
+	repo, path, version, err := gop.ProcessRequest(resource)
 	if err != nil {
 		return nil, false, gop.CreateError(gop.BadRequestError, "BadRequestError")
 	}
-	if a.token != "" {
+	if b := getToken(a.token, resource); b != "" {
 		auth = &http.BasicAuth{
-			Username: a.username,
-			Password: a.token,
+			Username: "gop",
+			Password: b,
 		}
 	}
 	r, err := git.Clone(store, fs, &git.CloneOptions{
@@ -59,7 +68,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, gop.CreateError(gop.CacheReadError, "Failed to checkout version", err)
 	}
-	f, err := commit.File(resource)
+	f, err := commit.File(path)
 	if err != nil {
 		return nil, false, gop.CreateError(gop.CacheReadError, "File does not exist", err)
 	}

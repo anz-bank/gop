@@ -15,15 +15,16 @@ type Retriever struct {
 }
 
 /* New returns a retriever with a key/value pairs of <host>, <token> eg: New("github.com", "abcdef") */
-func New(hosttoken ...string) Retriever {
-	if len(hosttoken)%2 != 0 {
-		return Retriever{}
-	}
-	tokens := make(map[string]string, len(hosttoken))
-	for i := 1; i < len(hosttoken); i += 2 {
-		tokens[hosttoken[i-1]] = hosttoken[i]
+func New(tokens map[string]string) Retriever {
+	if tokens == nil {
+		tokens = map[string]string{}
 	}
 	return Retriever{token: tokens}
+}
+
+func getToken(token map[string]string, resource string) string {
+	u, _ := url.Parse("https://" + resource)
+	return token[u.Host]
 }
 
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
@@ -55,8 +56,8 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	heder := http.Header{}
 	heder.Add("accept", "application/vnd.github.v3.raw+json")
 
-	if a.token[host] != "" {
-		heder.Add("authorization", "token "+a.token[host])
+	if b := getToken(a.token, resource); b != "" {
+		heder.Add("authorization", "token "+b)
 	}
 
 	r := &http.Request{
