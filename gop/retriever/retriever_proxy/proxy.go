@@ -1,8 +1,11 @@
 package retriever_proxy
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/joshcarp/gop/gop"
 )
 
 type Client struct {
@@ -24,5 +27,9 @@ func (c Client) Retrieve(resource string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, err
 	}
-	return bytes, false, nil
+	var obj gop.Object
+	if err := json.Unmarshal(bytes, &obj); err != nil {
+		return nil, false, err
+	}
+	return obj.Content, false, nil
 }
