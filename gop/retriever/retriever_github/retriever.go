@@ -20,10 +20,8 @@ func New(hosttoken ...string) Retriever {
 		return Retriever{}
 	}
 	tokens := make(map[string]string, len(hosttoken))
-	for i := 0; i < len(hosttoken); i += 2 {
-		if i%2 == 1 {
-			tokens[hosttoken[i-1]] = hosttoken[i]
-		}
+	for i := 1; i < len(hosttoken); i += 2 {
+		tokens[hosttoken[i-1]] = hosttoken[i]
 	}
 	return Retriever{token: tokens}
 }

@@ -19,3 +19,8 @@ func TestGitHub(t *testing.T) {
 		})
 	}
 }
+
+func TestNew(t *testing.T) {
+	a := New("1", "2", "3", "4")
+	require.Equal(t, map[string]string{"1": "2", "3": "4"}, a.token)
+}
