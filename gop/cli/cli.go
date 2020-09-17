@@ -1,8 +1,6 @@
 package cli
 
 import (
-	"fmt"
-
 	"github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
@@ -55,46 +53,38 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
-
-	if r.local == nil {
-		return nil, false, fmt.Errorf("Could not load %s", resource)
+	if r.local != nil {
+		content, _, err = r.local.Retrieve(resource)
+		if !(err != nil || content == nil || len(content) == 0) {
+			return content, false, nil
+		}
 	}
-	content, _, err = r.local.Retrieve(resource)
-	if !(err != nil || content == nil || len(content) == 0) {
-		return content, false, nil
+	if r.cache != nil {
+		content, _, err = r.cache.Retrieve(resource)
+		if !(err != nil || content == nil || len(content) == 0) {
+			return content, false, nil
+		}
+		defer func() {
+			r.cache.Cache(resource, content)
+		}()
 	}
-	if r.cache == nil {
-		return nil, false, fmt.Errorf("Could not load %s", resource)
+	if r.proxy != nil {
+		content, _, err = r.proxy.Retrieve(resource)
+		if !(err != nil || content == nil || len(content) == 0) {
+			return content, false, nil
+		}
 	}
-	content, _, err = r.cache.Retrieve(resource)
-	if !(err != nil || content == nil || len(content) == 0) {
-		return content, false, nil
+	if r.git != nil {
+		content, _, err = r.git.Retrieve(resource)
+		if !(err != nil || content == nil || len(content) == 0) {
+			return content, false, nil
+		}
 	}
-
-	defer func() {
-		r.cache.Cache(resource, content)
-	}()
-
-	if r.proxy == nil {
-		return nil, false, fmt.Errorf("Could not load %s", resource)
-	}
-	content, _, err = r.proxy.Retrieve(resource)
-	if !(err != nil || content == nil || len(content) == 0) {
-		return content, false, nil
-	}
-	if r.git == nil {
-		return nil, false, fmt.Errorf("Could not load %s", resource)
-	}
-	content, _, err = r.git.Retrieve(resource)
-	if !(err != nil || content == nil || len(content) == 0) {
-		return content, false, nil
-	}
-	if r.github == nil {
-		return nil, false, fmt.Errorf("Could not load %s", resource)
-	}
-	content, _, err = r.github.Retrieve(resource)
-	if !(err != nil || content == nil || len(content) == 0) {
-		return content, false, nil
+	if r.github != nil {
+		content, _, err = r.github.Retrieve(resource)
+		if !(err != nil || content == nil || len(content) == 0) {
+			return content, false, nil
+		}
 	}
 	return content, false, err
 }
