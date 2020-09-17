@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
@@ -17,8 +19,8 @@ import (
 4. git retrieve -> cache
 */
 
-/* CLIRetriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
-type CLIRetriever struct {
+/* Retriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
+type Retriever struct {
 	local  gop.Retriever
 	cache  gop.Gopper
 	proxy  gop.Retriever
@@ -26,8 +28,8 @@ type CLIRetriever struct {
 	git    gop.Retriever
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever) CLIRetriever {
-	return CLIRetriever{
+func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever) Retriever {
+	return Retriever{
 		local:  local,
 		cache:  cache,
 		proxy:  proxy,
@@ -36,7 +38,7 @@ func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever) C
 	}
 }
 
-func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) CLIRetriever {
+func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
 	return New(
 		gop_filesystem.New(fs, ""),
 		gop_filesystem.New(fs, cacheDir),
@@ -46,13 +48,19 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 }
 
 /* Retrieve implements the retriever interface */
-func (r CLIRetriever) Retrieve(resource string) ([]byte, bool, error) {
+func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
 
+	if r.local == nil {
+		return nil, false, fmt.Errorf("Could not load %s", resource)
+	}
 	content, _, err = r.local.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
 		return content, false, nil
+	}
+	if r.cache == nil {
+		return nil, false, fmt.Errorf("Could not load %s", resource)
 	}
 	content, _, err = r.cache.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
@@ -63,13 +71,22 @@ func (r CLIRetriever) Retrieve(resource string) ([]byte, bool, error) {
 		r.cache.Cache(resource, content)
 	}()
 
+	if r.proxy == nil {
+		return nil, false, fmt.Errorf("Could not load %s", resource)
+	}
 	content, _, err = r.proxy.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
 		return content, false, nil
 	}
+	if r.git == nil {
+		return nil, false, fmt.Errorf("Could not load %s", resource)
+	}
 	content, _, err = r.git.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
 		return content, false, nil
+	}
+	if r.github == nil {
+		return nil, false, fmt.Errorf("Could not load %s", resource)
 	}
 	content, _, err = r.github.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
