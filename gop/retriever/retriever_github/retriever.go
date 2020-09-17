@@ -11,11 +11,21 @@ import (
 )
 
 type Retriever struct {
-	token string
+	token map[string]string
 }
 
-func New(token string) Retriever {
-	return Retriever{token: token}
+/* New returns a retriever with a key/value pairs of <host>, <token> eg: New("github.com", "abcdef") */
+func New(hosttoken ...string) Retriever {
+	if len(hosttoken)%2 != 0 {
+		return Retriever{}
+	}
+	tokens := make(map[string]string, len(hosttoken))
+	for i := 0; i < len(hosttoken); i += 2 {
+		if i%2 == 1 {
+			tokens[hosttoken[i-1]] = hosttoken[i]
+		}
+	}
+	return Retriever{token: tokens}
 }
 
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
@@ -47,8 +57,8 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	heder := http.Header{}
 	heder.Add("accept", "application/vnd.github.v3.raw+json")
 
-	if a.token != "" {
-		heder.Add("authorization", "token "+a.token)
+	if a.token[host] != "" {
+		heder.Add("authorization", "token "+a.token[host])
 	}
 
 	r := &http.Request{
