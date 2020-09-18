@@ -42,7 +42,7 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 		cache = gop_filesystem.New(fs, cacheDir)
 	}
 	return New(
-		gop_filesystem.New(fs, ""),
+		gop_filesystem.New(fs, "."),
 		cache,
 		retriever_proxy.New(proxyURL),
 		retriever_github.New(token),
@@ -74,14 +74,14 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return content, false, nil
 		}
 	}
-	if r.git != nil {
-		content, _, err = r.git.Retrieve(resource)
+	if r.github != nil {
+		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
 	}
-	if r.github != nil {
-		content, _, err = r.github.Retrieve(resource)
+	if r.git != nil {
+		content, _, err = r.git.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
