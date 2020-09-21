@@ -65,7 +65,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return content, false, nil
 		}
 		defer func() {
-			if len(content) != 0 {
+			if repo, _, ver, _ := gop.ProcessRequest(resource); repo != "" && ver != "" && len(content) != 0 {
 				r.cache.Cache(resource, content)
 			}
 		}()
