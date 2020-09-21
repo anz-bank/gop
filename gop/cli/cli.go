@@ -38,13 +38,17 @@ func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever) R
 
 func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
 	var cache gop.Gopper
+	var proxy gop.Retriever
 	if cacheDir != "" {
 		cache = gop_filesystem.New(fs, cacheDir)
+	}
+	if proxyURL != "" {
+		proxy = retriever_proxy.New(proxyURL)
 	}
 	return New(
 		gop_filesystem.New(fs, "."),
 		cache,
-		retriever_proxy.New(proxyURL),
+		proxy,
 		retriever_github.New(token),
 		retriever_git.New(token))
 }
