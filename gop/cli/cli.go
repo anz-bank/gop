@@ -63,6 +63,9 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return content, false, nil
 		}
 	}
+	if _, _, ver, _ := gop.ProcessRequest(resource); ver == "" {
+		resource += "@HEAD"
+	}
 	if r.cache != nil {
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
