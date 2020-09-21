@@ -65,7 +65,9 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return content, false, nil
 		}
 		defer func() {
-			r.cache.Cache(resource, content)
+			if len(content) != 0 {
+				r.cache.Cache(resource, content)
+			}
 		}()
 	}
 	if r.proxy != nil {
