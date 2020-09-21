@@ -30,21 +30,9 @@ GOP, or Git Object Proxy is a generic tool that allows for git objects to be ret
     - VCS
     - Data store
 
-- These responsibilities have been split into 3 Interfaces:
+- These responsibilities have been split into 2 Interfaces:
     - Retriever
-    - Processor
     - Cacher
-
-### Object type
-
-```go 
-type Object struct {
-	Repo      string  `json:"repo"`
-	Resource  string  `json:"resource"`
-	Version   string  `json:"version"`
-	Content   []byte  `json:"content"`
-}
-```
 
 Where:
  - `Repo` is the target repository (eg `github.com/joshcarp/gop`)
@@ -57,17 +45,13 @@ Where:
 
 ```go
 type Retriever interface {
-	Retrieve(repo, resource, version string) (res gop.Object, cached bool, err error)
+	Retrieve(resource string) (content []byte, cached bool, err error)
 }
 ```
 
 - Used to retrieve a specified resource
  
-- Fields:
-    - `Repo`
-    - `Resource`
-    - `Version`
-- Should return a populated gop.Object, and `caches` which determines if later steps run or not
+- Should return content, whether or not the content is already cached, and an error if anything failed during retrieving 
     
 - Examples:
     - [../gop/gop_filesystem/retriever.go](../gop/gop_filesystem/retriever.go) Retrieve from a filesystem
@@ -79,16 +63,11 @@ type Retriever interface {
 
 ```go
 type Cacher interface {
-	Cache(res gop.Object) (err error)
+	Cache(resource string, content []byte) (err error)
 }
 ```
 
-- Used to cache the given Object to a data source
-- Required Object fields:
-    - `Repo`
-    - `Resource`
-    - `Version`
-    - `Content`
+- Used to cache the given resource to a data source
 
 - Should populate: Read only: Doesn't populate
 - Examples:
