@@ -1,19 +1,9 @@
 package gop
 
-import (
-	"github.com/pkg/errors"
-)
-
-type Error struct {
-	Message string
-	Kind    Kind
-	Cause   error
-}
-
-type Kind int
+type Error int
 
 const (
-	UnknownError Kind = iota
+	UnknownError Error = iota
 	BadRequestError
 	InternalError
 	UnauthorizedError
@@ -24,20 +14,31 @@ const (
 	DownstreamError
 	CacheWriteError
 	FileNotFoundError
+	FileReadError
+	GitCloneError
+	GitCheckoutError
+	GithubFetchError
 )
 
-func (k Error) String() string {
-	return k.Message
-}
-
 func (k Error) Error() string {
-	return k.Message
+	return [...]string{
+		"UnknownError",
+		"BadRequestError",
+		"InternalError",
+		"UnauthorizedError",
+		"TimeoutError",
+		"CacheAccessError",
+		"CacheReadError",
+		"ProxyReadError",
+		"DownstreamError",
+		"CacheWriteError",
+		"FileNotFoundError",
+		"FileReadError",
+		"GitCloneError",
+		"GitCheckoutError",
+		"GithubFetchError"}[k]
 }
 
-func CreateError(kind Kind, message string, cause ...error) error {
-	var err error
-	for _, e := range cause {
-		err = errors.Wrap(err, e.Error())
-	}
-	return Error{Kind: kind, Message: message, Cause: err}
+func (k Error) String() string {
+	return k.Error()
 }

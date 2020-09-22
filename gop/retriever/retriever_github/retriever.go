@@ -1,6 +1,8 @@
 package retriever_github
 
 import (
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
@@ -12,6 +14,27 @@ import (
 
 type Retriever struct {
 	token map[string]string
+}
+
+type GithubResponse struct {
+	Message          string `json:"message,omitempty"`
+	DocumentationURL string `json:"documentation_url,omitempty"`
+	Name             string `json:"name,omitempty"`
+	Path             string `json:"path,omitempty"`
+	Sha              string `json:"sha,omitempty"`
+	Size             int    `json:"size,omitempty"`
+	URL              string `json:"url,omitempty"`
+	HTMLURL          string `json:"html_url,omitempty"`
+	GitURL           string `json:"git_url,omitempty"`
+	DownloadURL      string `json:"download_url,omitempty"`
+	Type             string `json:"type,omitempty"`
+	Content          string `json:"content,omitempty"`
+	Encoding         string `json:"encoding,omitempty"`
+	Links            struct {
+		Self string `json:"self,omitempty"`
+		Git  string `json:"git,omitempty"`
+		HTML string `json:"html,omitempty"`
+	} `json:"_links,omitempty"`
 }
 
 /* New returns a retriever with a key/value pairs of <host>, <token> eg: New("github.com", "abcdef") */
@@ -32,11 +55,12 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var apibase string
 	var repo, path, version string
 	var err error
-	var res []byte
+	var b []byte
+	var res GithubResponse
 
 	repo, path, version, err = gop.ProcessRequest(resource)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.BadRequestError, "Can't process request")
+		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
 	requestedurl, _ := url.Parse("https://" + resource)
 	host := requestedurl.Host
@@ -54,7 +78,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			"https://%s/repos/%s/contents/%s?ref=%s",
 			apibase, repo, path, version))
 	heder := http.Header{}
-	heder.Add("accept", "application/vnd.github.v3.raw+json")
+	heder.Add("accept", "application/vnd.github.v3+json")
 
 	if b := getToken(a.token, resource); b != "" {
 		heder.Add("authorization", "token "+b)
@@ -68,11 +92,15 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 
 	resp, err = http.DefaultClient.Do(r)
 	if err != nil {
-		return res, false, err
+		return b, false, fmt.Errorf("%s: %w", gop.GithubFetchError, err)
 	}
-	res, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return nil, false, err
+	b, err = ioutil.ReadAll(resp.Body)
+	if err = json.Unmarshal(b, &res); err != nil {
+		return nil, false, fmt.Errorf("%s: %w", gop.FileReadError, err)
 	}
-	return res, false, nil
+	if resp.StatusCode == 404 {
+		return nil, false, fmt.Errorf("%s", res.Message)
+	}
+	b, err = base64.StdEncoding.DecodeString(res.Content)
+	return b, false, err
 }

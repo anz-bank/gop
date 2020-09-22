@@ -1,6 +1,7 @@
 package retriever_git
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/url"
 
@@ -36,7 +37,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	fs := memfs.New()
 	repo, path, version, err := gop.ProcessRequest(resource)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.BadRequestError, "BadRequestError")
+		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
 	if b := getToken(a.token, resource); b != "" {
 		auth = &http.BasicAuth{
@@ -49,36 +50,36 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		Auth: auth,
 	})
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheAccessError, "Failed to clone repository", err)
+		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
 	}
 	h, err := r.ResolveRevision(plumbing.Revision(version))
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheAccessError, "Failed to clone repository", err)
+		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
 	}
 	w, err := r.Worktree()
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheAccessError, "Failed to clone repository", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.GitCloneError, err)
 	}
 	if err = w.Checkout(&git.CheckoutOptions{
 		Hash: plumbing.NewHash(h.String()),
 	}); err != nil {
-		return nil, false, gop.CreateError(gop.CacheReadError, "Failed to checkout version", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.GitCheckoutError, err)
 	}
 	commit, err := r.CommitObject(*h)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheReadError, "Failed to checkout version", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.GitCheckoutError, err)
 	}
 	f, err := commit.File(path)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheReadError, "File does not exist", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.FileNotFoundError, err)
 	}
 	reader, err := f.Reader()
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheReadError, "Error reading file", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.FileNotFoundError, err)
 	}
 	b, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.CacheReadError, "Error reading file", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.FileNotFoundError, err)
 	}
 	return b, false, nil
 }

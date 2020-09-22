@@ -57,7 +57,7 @@ func HandleErr(w http.ResponseWriter, err error) {
 	switch e := err.(type) {
 	case gop3.Error:
 		desc = e.String()
-		switch e.Kind {
+		switch e {
 		case gop3.BadRequestError:
 			httpCode = 400
 		case gop3.UnauthorizedError:

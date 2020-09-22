@@ -23,7 +23,7 @@ func ProcessRequest(resource string) (string, string, string, error) {
 	version := location_version[1]
 	parts := strings.Split(repo_resource, "/")
 	if len(parts) < 3 {
-		return "", "", "", CreateError(BadRequestError, "resource must be in form gitx.com/repo/resource.ext@hash")
+		return "", "", "", BadRequestError
 	}
 	repo := path.Join(parts[0], parts[1], parts[2])
 	relresource := path.Join(parts[3:]...)

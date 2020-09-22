@@ -1,6 +1,8 @@
 package cli
 
 import (
+	"fmt"
+
 	"github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/retriever/retriever_git"
@@ -63,18 +65,24 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
-		cummulative = gop.CreateError(gop.FileNotFoundError, "error finding in current dir", err)
+		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
-	if _, _, ver, _ := gop.ProcessRequest(resource); ver == "" {
+
+	repo, _, ver, _ := gop.ProcessRequest(resource)
+	if repo == "" {
+		return nil, false, cummulative
+	}
+	if ver == "" {
 		resource += "@HEAD"
 	}
+
 	if r.cache != nil {
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
 
-		cummulative = gop.CreateError(gop.FileNotFoundError, "error retrieving from local cache", cummulative, err)
+		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 		defer func() {
 			if repo, _, ver, _ := gop.ProcessRequest(resource); repo != "" && ver != "" && len(content) != 0 {
 				r.cache.Cache(resource, content)
@@ -86,21 +94,21 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
-		cummulative = gop.CreateError(gop.ProxyReadError, "error caching from proxy", cummulative, err)
+		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	if r.github != nil {
 		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
-		cummulative = gop.CreateError(gop.DownstreamError, "error retrieving from github api", cummulative, err)
+		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	if r.git != nil {
 		content, _, err = r.git.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
-		cummulative = gop.CreateError(gop.DownstreamError, "error retrieving from git", cummulative, err)
+		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	return content, false, cummulative
 }

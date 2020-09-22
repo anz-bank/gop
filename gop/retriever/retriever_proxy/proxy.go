@@ -2,6 +2,7 @@ package retriever_proxy
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 
@@ -21,15 +22,15 @@ func (c Client) Retrieve(resource string) ([]byte, bool, error) {
 	var err error
 	resp, err = http.Get(c.Proxy + "?resource=" + resource)
 	if err != nil {
-		return nil, false, err
+		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return nil, false, err
+		return nil, false, fmt.Errorf("%s: %w", gop.ProxyReadError, err)
 	}
 	var obj gop.Object
 	if err := json.Unmarshal(bytes, &obj); err != nil {
-		return nil, false, err
+		return nil, false, fmt.Errorf("%s: %w", gop.FileReadError, err)
 	}
 	return obj.Content, false, nil
 }

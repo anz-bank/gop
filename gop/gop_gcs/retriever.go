@@ -16,11 +16,11 @@ type downloader func(bucket, object string) (io.Reader, error)
 func (a GOP) Retrieve(resource string) ([]byte, bool, error) {
 	r, err := a.downloader(a.bucket, resource)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.FileNotFoundError, "Error finding resource in cache", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.FileNotFoundError, err)
 	}
 	b, err := ioutil.ReadAll(r)
 	if err != nil {
-		return nil, false, gop.CreateError(gop.FileNotFoundError, "Error finding resource in cache", err)
+		return nil, false, fmt.Errorf("%s: %w", gop.FileNotFoundError, err)
 	}
 	return b, true, nil
 }

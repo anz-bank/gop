@@ -15,7 +15,7 @@ type uploader func(bucket string, object string, r io.Reader) error
 
 func (a GOP) Cache(resource string, content []byte) (err error) {
 	if err := a.upload(a.bucket, resource, bytes.NewReader(content)); err != nil {
-		return gop.CreateError(gop.CacheWriteError, "Error uploading file to cache", err)
+		return fmt.Errorf("%s: %w", gop.CacheWriteError, err)
 	}
 	return nil
 }
