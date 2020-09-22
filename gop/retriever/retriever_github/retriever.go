@@ -77,6 +77,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		fmt.Sprintf(
 			"https://%s/repos/%s/contents/%s?ref=%s",
 			apibase, repo, path, version))
+	if err != nil {
+		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
+	}
 	heder := http.Header{}
 	heder.Add("accept", "application/vnd.github.v3+json")
 
@@ -95,6 +98,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		return b, false, fmt.Errorf("%s: %w", gop.GithubFetchError, err)
 	}
 	b, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return b, false, fmt.Errorf("%s: %w", gop.FileReadError, err)
+	}
 	if err = json.Unmarshal(b, &res); err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.FileReadError, err)
 	}
