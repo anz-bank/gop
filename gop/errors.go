@@ -20,6 +20,8 @@ const (
 	TimeoutError
 	CacheAccessError
 	CacheReadError
+	ProxyReadError
+	DownstreamError
 	CacheWriteError
 	FileNotFoundError
 )

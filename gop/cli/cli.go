@@ -57,11 +57,13 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
+	var cummulative error
 	if r.local != nil {
 		content, _, err = r.local.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
+		cummulative = gop.CreateError(gop.FileNotFoundError, "error finding in current dir", err)
 	}
 	if _, _, ver, _ := gop.ProcessRequest(resource); ver == "" {
 		resource += "@HEAD"
@@ -71,6 +73,8 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
+
+		cummulative = gop.CreateError(gop.FileNotFoundError, "error retrieving from local cache", cummulative, err)
 		defer func() {
 			if repo, _, ver, _ := gop.ProcessRequest(resource); repo != "" && ver != "" && len(content) != 0 {
 				r.cache.Cache(resource, content)
@@ -82,18 +86,21 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
+		cummulative = gop.CreateError(gop.ProxyReadError, "error caching from proxy", cummulative, err)
 	}
 	if r.github != nil {
 		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
+		cummulative = gop.CreateError(gop.DownstreamError, "error retrieving from github api", cummulative, err)
 	}
 	if r.git != nil {
 		content, _, err = r.git.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
+		cummulative = gop.CreateError(gop.DownstreamError, "error retrieving from git", cummulative, err)
 	}
-	return content, false, err
+	return content, false, cummulative
 }
