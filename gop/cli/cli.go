@@ -24,6 +24,7 @@ type Retriever struct {
 	local  gop.Retriever
 	cache  gop.Gopper
 	proxy  gop.Retriever
+	http   gop.Retriever
 	github gop.Retriever
 	git    gop.Retriever
 }
@@ -96,6 +97,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
+
 	if r.github != nil {
 		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
