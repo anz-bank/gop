@@ -45,7 +45,7 @@ func TokensFromGitCredentialsFile(contents []byte) (map[string]string, error) {
 				}
 			}
 			if host != "" && token != "" {
-				tokenHost[token] = host
+				tokenHost[host] = token
 			}
 		}
 	}
