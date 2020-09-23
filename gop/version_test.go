@@ -55,7 +55,8 @@ direct:
 				}
 				return "HEAD", nil
 			}
-			ver := LoadVersion(c, resolver, "testFile", e.repo)
+			ver, err := LoadVersion(c, resolver, "testFile", e.repo)
+			require.NoError(t, err)
 			a, b := Modules{}, Modules{}
 			EqualYaml(e.in+"\n"+e.diff, c.contents["testFile"], &a, &b)
 			require.Equal(t, a, b)

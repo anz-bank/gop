@@ -22,7 +22,7 @@ type Direct struct {
 /* LoadVersion returns the version from a version */
 func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile, resource string) (string, error) {
 	content, _, _ := cacher.Retrieve(cacheFile)
-	repo, _, ver, _ := ProcessRequest(resource)
+	repo, path, ver, _ := ProcessRequest(resource)
 	var repoVer = repo
 	if ver != "" {
 		repoVer += "@" + ver
@@ -47,7 +47,7 @@ func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile
 	if err := cacher.Cache(cacheFile, newfile); err != nil {
 		return "", err
 	}
-	return CreateResource(repo, "", hash), err
+	return CreateResource(repo, path, hash), err
 }
 
 /* ResolveHash Resolves a github resource to its hash */

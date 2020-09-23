@@ -72,7 +72,8 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
 	if r.cache != nil {
-		resource, err := gop.LoadVersion(r.cache, gop.ResolveHash, r.cacheFile, resource)
+
+		resource, err = gop.LoadVersion(r.cache, gop.ResolveHash, r.cacheFile, resource)
 		if err != nil {
 			return nil, false, err
 		}

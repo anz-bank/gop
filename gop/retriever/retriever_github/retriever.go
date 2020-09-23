@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/joshcarp/gop/gop"
 )
@@ -61,6 +62,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
+	h, _ := url.Parse("https://" + repo)
+	repo = strings.ReplaceAll(repo, h.Host+"/", "")
+
 	apibase = gop.GetApiURL(resource)
 
 	req, err := url.Parse(
