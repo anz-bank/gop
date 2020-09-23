@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"strings"
 
 	"github.com/joshcarp/gop/gop"
 )
@@ -53,30 +52,21 @@ func getToken(token map[string]string, resource string) string {
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var resp *http.Response
 	var apibase string
-	var repo, path, version string
+	var repo, path, ver string
 	var err error
 	var b []byte
 	var res GithubResponse
 
-	repo, path, version, err = gop.ProcessRequest(resource)
+	repo, path, ver, err = gop.ProcessRequest(resource)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
-	requestedurl, _ := url.Parse("https://" + resource)
-	host := requestedurl.Host
-	repo = strings.ReplaceAll(repo, host+"/", "")
-
-	switch host {
-	case "github.com":
-		apibase = "api.github.com"
-	default:
-		apibase = fmt.Sprintf("%s/api/v3", host)
-	}
+	apibase = gop.GetApiURL(resource)
 
 	req, err := url.Parse(
 		fmt.Sprintf(
 			"https://%s/repos/%s/contents/%s?ref=%s",
-			apibase, repo, path, version))
+			apibase, repo, path, ver))
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
