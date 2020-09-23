@@ -15,12 +15,12 @@ type Config struct {
 }
 
 func ProcessRequest(resource string) (string, string, string, error) {
+	var version string
 	location_version := strings.Split(resource, "@")
-	if len(location_version) != 2 {
-		return "", resource, "", nil
-	}
 	repo_resource := location_version[0]
-	version := location_version[1]
+	if len(location_version) > 1 {
+		version = location_version[1]
+	}
 	parts := strings.Split(repo_resource, "/")
 	if len(parts) < 3 {
 		return "", "", "", BadRequestError
@@ -28,4 +28,8 @@ func ProcessRequest(resource string) (string, string, string, error) {
 	repo := path.Join(parts[0], parts[1], parts[2])
 	relresource := path.Join(parts[3:]...)
 	return repo, relresource, version, nil
+}
+
+func CreateResource(repo, resource, version string) string {
+	return path.Join(repo, resource) + "@" + version
 }

@@ -9,7 +9,7 @@ import (
 )
 
 func TestCLI(t *testing.T) {
-	retriever := Default(afero.NewMemMapFs(), "/", "", nil)
+	retriever := Default(afero.NewMemMapFs(), "", "/", "", nil)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)

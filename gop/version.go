@@ -5,32 +5,49 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
-	"regexp"
+
+	"github.com/ghodss/yaml"
 )
 
-/* LoadVersion returns the version from a version */
-func LoadVersion(content []byte, repo string) string {
-	re := regexp.MustCompile(regexp.QuoteMeta(repo) + ".*")
-	for _, e := range re.FindAllString(string(content), -1) {
-		_, _, ver, _ := ProcessRequest(e)
-		return ver
-	}
-	return ""
+/* Modules is the representation of the module file: */
+type Modules struct {
+	Direct []Direct `yaml:"direct"`
 }
 
-/* RestructureGithubResource restructures a well formed resource from the form
-   gitx.com/user/repo/resource.ext@ver to gitx.com/user/repo/resource.ext@hash
-*/
-func RestructureGithubResource(resource string) (string, error) {
-	repo, path, _, err := ProcessRequest(resource)
+type Direct struct {
+	Repo string `yaml:"repo"`
+	Hash string `yaml:"hash"`
+}
+
+/* LoadVersion returns the version from a version */
+func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile, resource string) (string, error) {
+	content, _, _ := cacher.Retrieve(cacheFile)
+	repo, _, ver, _ := ProcessRequest(resource)
+	var repoVer = repo
+	if ver != "" {
+		repoVer += "@" + ver
+	}
+
+	mod := Modules{}
+	if err := yaml.Unmarshal(content, &mod); err != nil {
+		return "", err
+	}
+	for _, e := range mod.Direct {
+		if e.Repo == repoVer {
+			return e.Hash, nil
+		}
+	}
+	hash, _ := resolver(repoVer)
+	entry := Direct{Repo: repoVer, Hash: hash}
+	mod.Direct = append(mod.Direct, entry)
+	newfile, err := yaml.Marshal(mod)
 	if err != nil {
 		return "", err
 	}
-	hash, err := ResolveHash(resource)
-	if err != nil {
+	if err := cacher.Cache(cacheFile, newfile); err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%s/%s@%s", repo, path, hash), nil
+	return CreateResource(repo, "", hash), err
 }
 
 /* ResolveHash Resolves a github resource to its hash */
@@ -38,6 +55,9 @@ func ResolveHash(resource string) (string, error) {
 	base := GetApiURL(resource)
 	heder := http.Header{}
 	repo, _, ref, _ := ProcessRequest(resource)
+	if ref == "" {
+		ref = "HEAD"
+	}
 	repoURL, _ := url.Parse("httpps://" + repo)
 	heder.Add("accept", "application/vnd.github.VERSION.sha")
 	u, err := url.Parse(fmt.Sprintf("https://%s/repos%s/commits/%s", base, repoURL.Path, ref))

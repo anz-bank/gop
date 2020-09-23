@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/storage v1.10.0
 	github.com/anz-bank/sysl v0.207.0
 	github.com/fsouza/fake-gcs-server v1.20.0
+	github.com/ghodss/yaml v1.0.0
 	github.com/go-git/go-billy/v5 v5.0.0
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/pingcap/log v0.0.0-20200828042413-fce0951f1463 // indirect

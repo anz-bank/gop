@@ -21,25 +21,27 @@ import (
 
 /* Retriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
 type Retriever struct {
-	local  gop.Retriever
-	cache  gop.Gopper
-	proxy  gop.Retriever
-	http   gop.Retriever
-	github gop.Retriever
-	git    gop.Retriever
+	cacheFile string
+	local     gop.Retriever
+	cache     gop.Gopper
+	proxy     gop.Retriever
+	http      gop.Retriever
+	github    gop.Retriever
+	git       gop.Retriever
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever, cacheFile string) Retriever {
 	return Retriever{
-		local:  local,
-		cache:  cache,
-		proxy:  proxy,
-		github: github,
-		git:    git,
+		cacheFile: cacheFile,
+		local:     local,
+		cache:     cache,
+		proxy:     proxy,
+		github:    github,
+		git:       git,
 	}
 }
 
-func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
+func Default(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string) Retriever {
 	var cache gop.Gopper
 	var proxy gop.Retriever
 	if cacheDir != "" {
@@ -53,7 +55,8 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 		cache,
 		proxy,
 		retriever_github.New(token),
-		retriever_git.New(token))
+		retriever_git.New(token),
+		cacheFile)
 }
 
 /* Retrieve implements the retriever interface */
@@ -68,21 +71,12 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		}
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
-
-	repo, _, ver, _ := gop.ProcessRequest(resource)
-	if ver == "" {
-		resource += "@HEAD"
-	}
-	repo, _, ver, _ = gop.ProcessRequest(resource)
-	if repo == "" {
-		return nil, false, cummulative
-	}
-	resource, err = gop.RestructureGithubResource(resource)
-	if err != nil {
-		return nil, false, err
-	}
-
 	if r.cache != nil {
+		resource, err := gop.LoadVersion(r.cache, gop.ResolveHash, r.cacheFile, resource)
+		if err != nil {
+			return nil, false, err
+		}
+
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
