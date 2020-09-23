@@ -45,3 +45,22 @@ func TestResolveHash(t *testing.T) {
 		})
 	}
 }
+
+func TestRestructureResource(t *testing.T) {
+	type testcase struct {
+		name string
+		in   string
+		out  string
+	}
+	tests := []testcase{
+		{name: "tag", in: "github.com/joshcarp/gop@test", out: "github.com/joshcarp/gop@dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
+		{name: "branch", in: "github.com/joshcarp/gop@test2", out: "github.com/joshcarp/gop@dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
+	}
+	for _, e := range tests {
+		t.Run(e.name, func(t *testing.T) {
+			ver, err := RestructureGithubResource(e.in)
+			require.NoError(t, err)
+			require.Equal(t, e.out, ver)
+		})
+	}
+}

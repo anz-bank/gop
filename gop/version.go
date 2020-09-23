@@ -18,6 +18,21 @@ func LoadVersion(content []byte, repo string) string {
 	return ""
 }
 
+/* RestructureGithubResource restructures a well formed resource from the form
+   gitx.com/user/repo/resource.ext@ver to gitx.com/user/repo/resource.ext@hash
+*/
+func RestructureGithubResource(resource string) (string, error) {
+	repo, path, _, err := ProcessRequest(resource)
+	if err != nil {
+		return "", err
+	}
+	hash, err := ResolveHash(resource)
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("%s/%s@%s", repo, path, hash), nil
+}
+
 /* ResolveHash Resolves a github resource to its hash */
 func ResolveHash(resource string) (string, error) {
 	base := GetApiURL(resource)

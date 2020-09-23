@@ -70,11 +70,16 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	}
 
 	repo, _, ver, _ := gop.ProcessRequest(resource)
+	if ver == "" {
+		resource += "@HEAD"
+	}
+	repo, _, ver, _ = gop.ProcessRequest(resource)
 	if repo == "" {
 		return nil, false, cummulative
 	}
-	if ver == "" {
-		resource += "@HEAD"
+	resource, err = gop.RestructureGithubResource(resource)
+	if err != nil {
+		return nil, false, err
 	}
 
 	if r.cache != nil {
