@@ -20,25 +20,25 @@ func TestLoadVersion(t *testing.T) {
 	tests := []testcase{
 		{name: `simple`, in: `
 direct:
-- repo: github.com/abc/def
-  hash: 1234
+- pattern: github.com/abc/def
+  resolve: github.com/abc/def@1234
 `, repo: `github.com/abc/def`, out: `github.com/abc/def@1234`},
 		{name: `multiple_imports`, in: `
 direct:
-- repo: github.com/abc/def@1234
-  hash: 1234
-- repo: github.com/abc/xyz@567
-  hash: 567
+- pattern: github.com/abc/def@1234
+  resolve: github.com/abc/def@1234
+- pattern: github.com/abc/xyz@567
+  resolve: github.com/abc/xyz@567
 `, repo: `github.com/abc/xyz@567`, out: `github.com/abc/xyz@567`},
 		{name: `missing_import`, in: `
 direct:
-- repo: github.com/abc/def@1234
-  hash: 1234
-- repo: github.com/abc/xyz@567
-  hash: 567`, repo: `github.com/def/opo`, out: `github.com/def/opo@HEAD`,
+- pattern: github.com/abc/def@1234
+  resolve: github.com/abc/def@1234
+- pattern: github.com/abc/xyz@567
+  resolve: github.com/abc/xyz@567`, repo: `github.com/def/opo`, out: `github.com/def/opo@HEAD`,
 			diff: `
-- repo: github.com/def/opo
-  hash: HEAD`,
+- pattern: github.com/def/opo
+  resolve: github.com/def/opo@HEAD`,
 		},
 	}
 

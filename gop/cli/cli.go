@@ -68,7 +68,6 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
 	var cummulative error
-
 	if r.local != nil {
 		content, _, err = r.local.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
@@ -77,14 +76,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
 	if r.cache != nil {
-		orig := resource
-		if resource == "github.com/joshcarp/sysl-1/sysl-1.sysl@v1.0.0" {
-			println(orig)
-		}
 		resource, err = gop.LoadVersion(r.cache, r.Resolver, r.cacheFile, resource)
-		if resource == "ee5c8cd2b97ba24226cb86556c17ad4f852915f2" {
-			println(orig)
-		}
 		if err != nil {
 			return nil, false, err
 		}

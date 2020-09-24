@@ -13,8 +13,8 @@ type Modules struct {
 }
 
 type Direct struct {
-	Repo string `yaml:"repo"`
-	Hash string `yaml:"hash"`
+	Pattern string `yaml:"pattern"`
+	Resolve string `yaml:"resolve"`
 }
 
 /* LoadVersion returns the version from a version */
@@ -34,12 +34,12 @@ func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile
 		return "", err
 	}
 	for _, e := range mod.Direct {
-		if e.Repo == repoVer {
-			return CreateResource(repo, path, e.Hash), nil
+		if e.Pattern == repoVer {
+			return AddPath(e.Resolve, path), nil
 		}
 	}
 	hash, _ := resolver(repoVer)
-	entry := Direct{Repo: repoVer, Hash: hash}
+	entry := Direct{Pattern: repoVer, Resolve: CreateResource(repo, "", hash)}
 	mod.Direct = append(mod.Direct, entry)
 	newfile, err := yaml.Marshal(mod)
 	if err != nil {
@@ -48,9 +48,12 @@ func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile
 	if err := cacher.Cache(cacheFile, newfile); err != nil {
 		return "", err
 	}
-	return CreateResource(repo, path, hash), err
+	return AddPath(entry.Resolve, path), err
 }
-
+func AddPath(repoVer string, path string) string {
+	a, _, c, _ := ProcessRequest(repoVer)
+	return CreateResource(a, path, c)
+}
 func GetApiURL(resource string) string {
 	requestedurl, _ := url.Parse("https://" + resource)
 	switch requestedurl.Host {

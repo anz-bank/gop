@@ -45,12 +45,38 @@ func TestCLIMock(t *testing.T) {
 
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
-			//if resource == "github.com/joshcarp/sysl-1/sysl-1.sysl@v1.0.0" {
 			res, cached, err := retriever.Retrieve(resource)
 			require.NoError(t, err)
 			require.False(t, cached)
 			require.Equal(t, contents, string(res))
-			//}
+		})
+
+	}
+}
+
+func TestCLIMockModFile(t *testing.T) {
+	retriever := Default(afero.NewMemMapFs(), "test.mod", "/", "", nil)
+	fs := afero.NewMemMapFs()
+	githubMock := retriever_github.NewMock()
+	server := httptest.NewServer(githubMock)
+	defer server.Close()
+	gh := retriever_github.New(nil)
+	gh.Client = server.Client()
+	New(
+		gop_filesystem.New(fs, "."),
+		gop_filesystem.New(fs, "/"),
+		nil,
+		gh,
+		nil,
+		"",
+		githubMock.ResolveHash)
+
+	for resource, contents := range retrievertests.Tests {
+		t.Run(resource, func(t *testing.T) {
+			res, cached, err := retriever.Retrieve(resource)
+			require.NoError(t, err)
+			require.False(t, cached)
+			require.Equal(t, contents, string(res))
 		})
 
 	}
