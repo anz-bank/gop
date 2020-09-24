@@ -41,7 +41,7 @@ func TestCLIMock(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		"",
+		"", "",
 		githubMock.ResolveHash)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
@@ -68,7 +68,7 @@ func TestCLIMockModFile(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		"test.mod",
+		"test.mod", "",
 		githubMock.ResolveHash)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {

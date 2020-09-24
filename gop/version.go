@@ -1,8 +1,12 @@
 package gop
 
 import (
+	"bufio"
 	"fmt"
 	"net/url"
+	"path"
+	"regexp"
+	"strings"
 
 	"gopkg.in/yaml.v2"
 )
@@ -10,6 +14,7 @@ import (
 /* Modules is the representation of the module file: */
 type Modules struct {
 	Direct []Direct `yaml:"direct"`
+	Sum    []Direct `yaml:"sum"`
 }
 
 type Direct struct {
@@ -17,11 +22,66 @@ type Direct struct {
 	Resolve string `yaml:"resolve"`
 }
 
+func ReplaceImports(retriever Retriever, resource string, content []byte) ([]byte, error) {
+	var mod Modules
+	content1, _, err := retriever.Retrieve(resource)
+	if err != nil {
+		return nil, err
+	}
+	if err := yaml.Unmarshal(content1, &mod); err != nil {
+		return nil, err
+	}
+	for _, e := range mod.Direct {
+		repoFrom, _, verFrom := ProcessRepo(e.Pattern)
+		repoTo, _, verTo := ProcessRepo(e.Resolve)
+		content = []byte(ReplaceSpecificImport(string(content), repoFrom, verFrom, repoTo, verTo))
+	}
+	return content, nil
+}
+
+func ReplaceSpecificImport(content string, oldimp, oldver, newimp, newver string) string {
+	var pth string
+	if oldver != "" {
+		oldver = "(?P<version>" + regexp.QuoteMeta(oldver) + ")"
+	}
+	//oldver = `[a-zA-Z0-9/._]`
+	//else {
+	//oldver = regexp.QuoteMeta(oldver)
+	//}
+	re := fmt.Sprintf(`(?:%s)(?P<path>[a-zA-Z0-9/._\-]*)@*%s(?:\S)?`,
+		regexp.QuoteMeta(oldimp), oldver)
+
+	impRe := regexp.MustCompile(re)
+	scanner := bufio.NewScanner(strings.NewReader(content))
+	for scanner.Scan() {
+		txt := scanner.Text()
+		for _, match := range impRe.FindAllStringSubmatch(scanner.Text(), -1) {
+			if match == nil {
+				continue
+			}
+			for i, name := range impRe.SubexpNames() {
+				if match[i] != "" {
+					switch name {
+					case "path":
+						pth = match[i]
+					}
+				}
+			}
+			for _, match := range impRe.FindAllString(txt, -1) {
+				newImport := fmt.Sprintf("%s@%s", path.Join(newimp, pth), newver)
+				content = strings.ReplaceAll(content, match, newImport)
+			}
+		}
+	}
+	return content
+
+}
+
 /* LoadVersion returns the version from a version */
-func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile, resource string) (string, error) {
+func LoadVersion(retriever Retriever, cacher Cacher, resolver func(string) (string, error), cacheFile, resource string) (string, error) {
 	var content []byte
 	if cacheFile != "" {
-		content, _, _ = cacher.Retrieve(cacheFile)
+		content, _, _ = retriever.Retrieve(cacheFile)
 	}
 	repo, path, ver := ProcessRepo(resource)
 	var repoVer = repo
@@ -38,7 +98,13 @@ func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile
 			return AddPath(e.Resolve, path), nil
 		}
 	}
-	hash, _ := resolver(repoVer)
+	if cacher == nil {
+		return resource, nil
+	}
+	hash, err := resolver(repoVer)
+	if err != nil {
+		return AddPath(repoVer, path), nil
+	}
 	entry := Direct{Pattern: repoVer, Resolve: CreateResource(repo, "", hash)}
 	mod.Direct = append(mod.Direct, entry)
 	newfile, err := yaml.Marshal(mod)
