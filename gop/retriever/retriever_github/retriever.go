@@ -55,10 +55,14 @@ func getToken(token map[string]string, resource string) string {
 /* ResolveHash Resolves a github resource to its hash */
 func (a Retriever) ResolveHash(resource string) (string, error) {
 	if a.ApiBase == "" {
-		a.ApiBase = "https://" + gop.GetApiURL(resource)
+		a.ApiBase = gop.GetApiURL(resource)
+		if a.ApiBase == "" {
+			return "", gop.BadRequestError
+		}
+		a.ApiBase = "https://" + a.ApiBase
 	}
 	heder := http.Header{}
-	repo, _, ref, _ := gop.ProcessRequest(resource)
+	repo, _, ref := gop.ProcessRepo(resource)
 	if ref == "" {
 		ref = "HEAD"
 	}
@@ -75,6 +79,9 @@ func (a Retriever) ResolveHash(resource string) (string, error) {
 		Header: heder,
 	}
 	resp, err := http.DefaultClient.Do(r)
+	if err != nil || resp == nil || resp.Body == nil {
+		return "", gop.GitCloneError
+	}
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err

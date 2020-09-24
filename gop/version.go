@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/ghodss/yaml"
+	"gopkg.in/yaml.v2"
 )
 
 /* Modules is the representation of the module file: */
@@ -23,7 +23,7 @@ func LoadVersion(cacher Gopper, resolver func(string) (string, error), cacheFile
 	if cacheFile != "" {
 		content, _, _ = cacher.Retrieve(cacheFile)
 	}
-	repo, path, ver, _ := ProcessRequest(resource)
+	repo, path, ver := ProcessRepo(resource)
 	var repoVer = repo
 	if ver != "" {
 		repoVer += "@" + ver

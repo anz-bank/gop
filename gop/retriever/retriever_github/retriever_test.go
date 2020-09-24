@@ -10,6 +10,9 @@ import (
 )
 
 func TestGitHub(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping test in short mode.")
+	}
 	retriever := New(nil)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
