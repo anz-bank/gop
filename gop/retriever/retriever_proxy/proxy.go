@@ -10,17 +10,18 @@ import (
 )
 
 type Client struct {
-	Proxy string
+	Proxy  string
+	Client *http.Client
 }
 
 func New(addr string) Client {
-	return Client{Proxy: addr}
+	return Client{Proxy: addr, Client: http.DefaultClient}
 }
 
 func (c Client) Retrieve(resource string) ([]byte, bool, error) {
 	var resp *http.Response
 	var err error
-	resp, err = http.Get(c.Proxy + "?resource=" + resource)
+	resp, err = c.Client.Get(c.Proxy + "?resource=" + resource)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}

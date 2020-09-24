@@ -13,7 +13,9 @@ import (
 )
 
 type Retriever struct {
-	token map[string]string
+	token   map[string]string
+	Client  *http.Client
+	ApiBase string
 }
 
 type GithubResponse struct {
@@ -42,7 +44,7 @@ func New(tokens map[string]string) Retriever {
 	if tokens == nil {
 		tokens = map[string]string{}
 	}
-	return Retriever{token: tokens}
+	return Retriever{token: tokens, Client: http.DefaultClient}
 }
 
 func getToken(token map[string]string, resource string) string {
@@ -50,9 +52,38 @@ func getToken(token map[string]string, resource string) string {
 	return token[u.Host]
 }
 
+/* ResolveHash Resolves a github resource to its hash */
+func (a Retriever) ResolveHash(resource string) (string, error) {
+	if a.ApiBase == "" {
+		a.ApiBase = "https://" + gop.GetApiURL(resource)
+	}
+	heder := http.Header{}
+	repo, _, ref, _ := gop.ProcessRequest(resource)
+	if ref == "" {
+		ref = "HEAD"
+	}
+	repoURL, _ := url.Parse("httpps://" + repo)
+	heder.Add("accept", "application/vnd.github.VERSION.sha")
+	u, err := url.Parse(fmt.Sprintf("%s/repos%s/commits/%s", a.ApiBase, repoURL.Path, ref))
+	if err != nil {
+		return "", gop.BadRequestError
+	}
+
+	r := &http.Request{
+		Method: "GET",
+		URL:    u,
+		Header: heder,
+	}
+	resp, err := http.DefaultClient.Do(r)
+	b, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
+}
+
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var resp *http.Response
-	var apibase string
 	var repo, path, ver string
 	var err error
 	var b []byte
@@ -65,12 +96,14 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	h, _ := url.Parse("https://" + repo)
 	repo = strings.ReplaceAll(repo, h.Host+"/", "")
 
-	apibase = gop.GetApiURL(resource)
+	if a.ApiBase == "" {
+		a.ApiBase = "https://" + gop.GetApiURL(resource)
+	}
 
 	req, err := url.Parse(
 		fmt.Sprintf(
-			"https://%s/repos/%s/contents/%s?ref=%s",
-			apibase, repo, path, ver))
+			"%s/repos/%s/contents/%s?ref=%s",
+			a.ApiBase, repo, path, ver))
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
@@ -87,7 +120,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		Header: heder,
 	}
 
-	resp, err = http.DefaultClient.Do(r)
+	resp, err = a.Client.Do(r)
 	if err != nil {
 		return b, false, fmt.Errorf("%s: %w", gop.GithubFetchError, err)
 	}

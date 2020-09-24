@@ -28,9 +28,10 @@ type Retriever struct {
 	http      gop.Retriever
 	github    gop.Retriever
 	git       gop.Retriever
+	Resolver  gop.Resolver
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever, cacheFile string) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, git gop.Retriever, cacheFile string, resolver gop.Resolver) Retriever {
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
@@ -38,6 +39,7 @@ func New(local gop.Gopper, cache gop.Gopper, proxy, github, git gop.Retriever, c
 		proxy:     proxy,
 		github:    github,
 		git:       git,
+		Resolver:  resolver,
 	}
 }
 
@@ -50,13 +52,15 @@ func Default(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	if proxyURL != "" {
 		proxy = retriever_proxy.New(proxyURL)
 	}
+	gh := retriever_github.New(token)
 	return New(
 		gop_filesystem.New(fs, "."),
 		cache,
 		proxy,
-		retriever_github.New(token),
+		gh,
 		retriever_git.New(token),
-		cacheFile)
+		cacheFile,
+		gh.ResolveHash)
 }
 
 /* Retrieve implements the retriever interface */
@@ -64,6 +68,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
 	var cummulative error
+
 	if r.local != nil {
 		content, _, err = r.local.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
@@ -72,8 +77,14 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
 	if r.cache != nil {
-
-		resource, err = gop.LoadVersion(r.cache, gop.ResolveHash, r.cacheFile, resource)
+		orig := resource
+		if resource == "github.com/joshcarp/sysl-1/sysl-1.sysl@v1.0.0" {
+			println(orig)
+		}
+		resource, err = gop.LoadVersion(r.cache, r.Resolver, r.cacheFile, resource)
+		if resource == "ee5c8cd2b97ba24226cb86556c17ad4f852915f2" {
+			println(orig)
+		}
 		if err != nil {
 			return nil, false, err
 		}
