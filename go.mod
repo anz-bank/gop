@@ -11,6 +11,7 @@ require (
 	github.com/go-git/go-git/v5 v5.1.0
 	github.com/pingcap/log v0.0.0-20200828042413-fce0951f1463 // indirect
 	github.com/pkg/errors v0.9.1
+	github.com/sirupsen/logrus v1.6.0
 	github.com/spf13/afero v1.3.4
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a // indirect

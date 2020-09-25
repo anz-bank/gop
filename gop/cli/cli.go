@@ -24,28 +24,48 @@ import (
 
 /* Retriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
 type Retriever struct {
-	cacheFile    string
-	cacheDir     string
-	absCacheFile string
-	local        gop.Retriever
-	cache        gop.Gopper
-	proxy        gop.Retriever
-	github       gop.Retriever
-	git          gop.Retriever
-	Resolver     modules.Resolver
+	cacheFile string
+	local     gop.Retriever
+	cache     gop.Gopper
+	proxy     gop.Retriever
+	github    gop.Retriever
+	git       gop.Retriever
+	versioner gop.Retriever
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, git gop.Retriever, cacheFile, cacheDir string, resolver modules.Resolver) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, versioner gop.Retriever, git gop.Retriever, cacheFile string) Retriever {
 	return Retriever{
-		cacheFile:    cacheFile,
-		cacheDir:     cacheDir,
-		local:        local,
-		cache:        cache,
-		proxy:        proxy,
-		github:       github,
-		git:          git,
-		Resolver:     resolver,
-		absCacheFile: path.Join(cacheDir, cacheFile),
+		cacheFile: cacheFile,
+		local:     local,
+		cache:     cache,
+		proxy:     proxy,
+		github:    github,
+		git:       git,
+		versioner: versioner,
+	}
+}
+
+func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string) Retriever {
+	var cache gop.Gopper
+	var proxy gop.Retriever
+	if cacheDir != "" {
+		cache = gop_filesystem.New(fs, cacheDir)
+	}
+	if proxyURL != "" {
+		proxy = retriever_proxy.New(proxyURL)
+	}
+	gh := retriever_github.New(token)
+	local := gop_filesystem.New(fs, ".")
+	versioner := modules.NewLoader(local, gh.ResolveHash, cacheFile)
+	absModuler := path.Join(cacheFile, cacheDir)
+	return Retriever{
+		cacheFile: cacheFile,
+		local:     local,
+		cache:     cache,
+		proxy:     proxy,
+		github:    modules.New(gh, absModuler),
+		git:       modules.New(retriever_git.New(token), absModuler),
+		versioner: versioner,
 	}
 }
 
@@ -58,15 +78,16 @@ func Default(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	if proxyURL != "" {
 		proxy = retriever_proxy.New(proxyURL)
 	}
+	absModuler := path.Join(cacheDir, cacheFile)
 	gh := retriever_github.New(token)
-	return New(
-		gop_filesystem.New(fs, "."),
-		cache,
-		proxy,
-		gh,
-		retriever_git.New(token),
-		cacheFile, cacheDir,
-		gh.ResolveHash)
+	return Retriever{
+		cacheFile: cacheFile,
+		local:     gop_filesystem.New(fs, "."),
+		cache:     cache,
+		proxy:     proxy,
+		github:    modules.New(gh, absModuler),
+		git:       modules.New(retriever_git.New(token), absModuler),
+	}
 }
 
 /* Retrieve implements the retriever interface */
@@ -74,6 +95,9 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
 	var cummulative error
+	defer func() {
+
+	}()
 	if r.local != nil {
 		content, _, err = r.local.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
@@ -81,13 +105,16 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		}
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
-	if r.cache != nil {
-		if _, _, v := gop.ProcessRepo(resource); len(v) < 20 {
-			resource, err = modules.LoadVersion(r.cache, r.cache, r.Resolver, r.cacheFile, resource)
-			if err != nil {
-				return nil, false, err
-			}
+	if r.versioner != nil {
+		resolvedResource, _, err := r.versioner.Retrieve(resource)
+		if err != nil {
+			return nil, false, err
 		}
+		resource = string(resolvedResource)
+
+	}
+	if r.cache != nil {
+
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
@@ -108,14 +135,14 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	if r.github != nil {
-		content, _, err = modules.RetrieveAndReplace(r.github, resource, r.absCacheFile)
+		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	if r.git != nil {
-		content, _, err = modules.RetrieveAndReplace(r.git, resource, r.absCacheFile)
+		content, _, err = r.git.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}

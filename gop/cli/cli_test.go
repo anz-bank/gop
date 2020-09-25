@@ -41,8 +41,7 @@ func TestCLIMock(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		"", "",
-		githubMock.ResolveHash)
+		nil, "")
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)
@@ -68,8 +67,7 @@ func TestCLIMockModFile(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		"test.mod", "",
-		githubMock.ResolveHash)
+		nil, "test.mod")
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)
@@ -95,8 +93,8 @@ func TestImportReplace(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		"test.mod", "",
-		githubMock.ResolveHash)
+		nil, "test.mod",
+	)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)

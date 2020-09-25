@@ -16,6 +16,15 @@ type Modules struct {
 	Imports map[string]string `yaml:"imports"`
 }
 
+func New(retriever gop.Retriever, importFile string) Retriever {
+	return Retriever{retriever: retriever, importFile: importFile}
+}
+
+type Retriever struct {
+	retriever  gop.Retriever
+	importFile string
+}
+
 /* ReplaceImports replaces the contents of sourcefile with the imports in modfile */
 func ReplaceImports(modFile []byte, sourceFile []byte) ([]byte, error) {
 	var mod Modules
@@ -59,11 +68,11 @@ func ReplaceSpecificImport(content string, oldrepo, oldver, newrepo, newver stri
 	return content
 }
 
-/* RetrieveAndReplace retrieves a resource and replaces its import statements with the patterns described in the import file */
-func RetrieveAndReplace(retriever gop.Retriever, resource string, importFile string) ([]byte, bool, error) {
-	content, _, err := retriever.Retrieve(resource)
+/* Retrieve retrieves a resource and replaces its import statements with the patterns described in the import file */
+func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
+	content, _, err := a.retriever.Retrieve(resource)
 	if !(err != nil || content == nil || len(content) == 0) {
-		importFilecontents, _, err := retriever.Retrieve(AddPath(resource, importFile))
+		importFilecontents, _, err := a.retriever.Retrieve(AddPath(resource, a.importFile))
 		if err != nil {
 			return content, false, nil
 		}

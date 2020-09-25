@@ -12,6 +12,32 @@ import (
 /* Resolver resolves a git ref to a hash */
 type Resolver func(string) (string, error)
 
+type Loader struct {
+	gopper    gop.Gopper
+	resolver  Resolver
+	cacheFile string
+}
+
+func NewLoader(gopper gop.Gopper, resolver Resolver, cacheFile string) Loader {
+	return Loader{
+		gopper:    gopper,
+		resolver:  resolver,
+		cacheFile: cacheFile,
+	}
+}
+
+/* Retrieve resolves an import from resource to a full commit hash */
+func (a Loader) Retrieve(resource string) ([]byte, bool, error) {
+	if _, _, v := gop.ProcessRepo(resource); len(v) == 20 {
+		return []byte(v), false, nil
+	}
+	ver, err := LoadVersion(a.gopper, a.gopper, a.resolver, a.cacheFile, resource)
+	if err != nil {
+		return nil, false, err
+	}
+	return []byte(ver), false, nil
+}
+
 /* LoadVersion returns the version from a version */
 func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver Resolver, cacheFile, resource string) (string, error) {
 	var content []byte
@@ -52,6 +78,7 @@ func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver Resolver, 
 	}
 	return AddPath(resolve, path), err
 }
+
 func AddPath(repoVer string, path string) string {
 	a, _, c, _ := gop.ProcessRequest(repoVer)
 	return gop.CreateResource(a, path, c)

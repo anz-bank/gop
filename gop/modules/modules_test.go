@@ -61,7 +61,7 @@ func TestRetrieveAndReplace(t *testing.T) {
 	for _, i := range tests {
 		t.Run(i.name, func(t *testing.T) {
 			retr := retrievertests.New(i.files)
-			a, _, err := RetrieveAndReplace(retr, i.resource, i.importFile)
+			a, _, err := New(retr, i.importFile).Retrieve(i.resource)
 			require.NoError(t, err)
 			require.Equal(t, i.out, string(a))
 		})
