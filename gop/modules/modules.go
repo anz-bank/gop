@@ -17,23 +17,20 @@ type Modules struct {
 	Imports map[string]string `yaml:"imports"`
 }
 
-func ReplaceImports(retriever gop.Retriever, resource string, content []byte) ([]byte, error) {
+func ReplaceImports(modFile []byte, sourceFile []byte) ([]byte, error) {
 	var mod Modules
-	content1, _, err := retriever.Retrieve(resource)
-	if err != nil {
-		return nil, err
-	}
-	if err := yaml.Unmarshal(content1, &mod); err != nil {
+	if err := yaml.Unmarshal(modFile, &mod); err != nil {
 		return nil, err
 	}
 	for pattern, resolve := range mod.Imports {
 		repoFrom, _, verFrom := gop.ProcessRepo(pattern)
 		repoTo, _, verTo := gop.ProcessRepo(resolve)
-		content = []byte(ReplaceSpecificImport(string(content), repoFrom, verFrom, repoTo, verTo))
+		sourceFile = []byte(ReplaceSpecificImport(string(sourceFile), repoFrom, verFrom, repoTo, verTo))
 	}
-	return content, nil
+	return sourceFile, nil
 }
 
+/* ReplaceSpecificImport replaces a specific import in content */
 func ReplaceSpecificImport(content string, oldimp, oldver, newimp, newver string) string {
 	var pth string
 	if oldver != "" {
@@ -41,7 +38,6 @@ func ReplaceSpecificImport(content string, oldimp, oldver, newimp, newver string
 	}
 	re := fmt.Sprintf(`(?:%s)(?P<path>[a-zA-Z0-9/._\-]*)@*%s(?:\S)?`,
 		regexp.QuoteMeta(oldimp), oldver)
-
 	impRe := regexp.MustCompile(re)
 	scanner := bufio.NewScanner(strings.NewReader(content))
 	for scanner.Scan() {
@@ -65,5 +61,20 @@ func ReplaceSpecificImport(content string, oldimp, oldver, newimp, newver string
 		}
 	}
 	return content
+}
 
+/* RetrieveAndReplace retrieves a resource and replaces its import statements with the patterns described in the import file */
+func RetrieveAndReplace(retriever gop.Retriever, resource string, importFile string) ([]byte, bool, error) {
+	content, _, err := retriever.Retrieve(resource)
+	if !(err != nil || content == nil || len(content) == 0) {
+		importFilecontents, _, err := retriever.Retrieve(AddPath(resource, importFile))
+		if err != nil {
+			return content, false, nil
+		}
+		if reindexed, err := ReplaceImports(importFilecontents, content); err == nil {
+			content = reindexed
+		}
+		return content, false, nil
+	}
+	return content, false, err
 }

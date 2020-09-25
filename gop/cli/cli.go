@@ -24,27 +24,29 @@ import (
 
 /* Retriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
 type Retriever struct {
-	cacheFile string
-	cacheDir  string
-	local     gop.Retriever
-	cache     gop.Gopper
-	proxy     gop.Retriever
-	http      gop.Retriever
-	github    gop.Retriever
-	git       gop.Retriever
-	Resolver  gop.Resolver
+	cacheFile    string
+	cacheDir     string
+	absCacheFile string
+	local        gop.Retriever
+	cache        gop.Gopper
+	proxy        gop.Retriever
+	http         gop.Retriever
+	github       gop.Retriever
+	git          gop.Retriever
+	Resolver     gop.Resolver
 }
 
 func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, git gop.Retriever, cacheFile, cacheDir string, resolver gop.Resolver) Retriever {
 	return Retriever{
-		cacheFile: cacheFile,
-		cacheDir:  cacheDir,
-		local:     local,
-		cache:     cache,
-		proxy:     proxy,
-		github:    github,
-		git:       git,
-		Resolver:  resolver,
+		cacheFile:    cacheFile,
+		cacheDir:     cacheDir,
+		local:        local,
+		cache:        cache,
+		proxy:        proxy,
+		github:       github,
+		git:          git,
+		Resolver:     resolver,
+		absCacheFile: path.Join(cacheDir, cacheFile),
 	}
 }
 
@@ -87,7 +89,6 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 				return nil, false, err
 			}
 		}
-
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
@@ -109,21 +110,15 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	}
 
 	if r.github != nil {
-		content, _, err = r.github.Retrieve(resource)
+		content, _, err = modules.RetrieveAndReplace(r.github, resource, r.absCacheFile)
 		if !(err != nil || content == nil || len(content) == 0) {
-			if reindexed, err := modules.ReplaceImports(r.github, modules.AddPath(resource, path.Join(r.cacheDir, r.cacheFile)), content); err == nil {
-				content = reindexed
-			}
 			return content, false, nil
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
 	if r.git != nil {
-		content, _, err = r.git.Retrieve(resource)
+		content, _, err = modules.RetrieveAndReplace(r.git, resource, r.absCacheFile)
 		if !(err != nil || content == nil || len(content) == 0) {
-			if reindexed, err := modules.ReplaceImports(r.git, modules.AddPath(resource, path.Join(r.cacheDir, r.cacheFile)), content); err == nil {
-				content = reindexed
-			}
 			return content, false, nil
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)

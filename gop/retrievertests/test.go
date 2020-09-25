@@ -1,5 +1,7 @@
 package retrievertests
 
+import "github.com/joshcarp/gop/gop"
+
 var Tests = map[string]string{
 	"github.com/joshcarp/gop/.gitignore@104c2af996a36b532113194dbf359ed128ad0b32":     "/default.db\n/out",
 	"github.com/joshcarp/gop/.gitignore@main":                                         "/default.db\n/out",
@@ -31,4 +33,19 @@ var GithubRequestPaths = map[string]string{
 	"/repos/joshcarp/sysl-1/commits/main":                                                      "e52c640e41ba2cc918e4f2dda3a2cfeb4768b075",
 	"/repos/joshcarp/sysl-2/commits/0e19b891da4ea38e82910a5ef3dc24692ab711ce":                  "0e19b891da4ea38e82910a5ef3dc24692ab711ce",
 	"/repos/joshcarp/sysl-2/contents/sysl-2.sysl?ref=0e19b891da4ea38e82910a5ef3dc24692ab711ce": "\nsdifnscfsdhifs:\n    /address:\n        GET(ok <: foo):\n            return ok <: sequence of App.foo\n    !type foo:\n        this <: string\n        that <: int",
+}
+
+type retriever struct {
+	content map[string]string
+}
+
+func (r retriever) Retrieve(resource string) (content []byte, cached bool, err error) {
+	if val, ok := r.content[resource]; ok {
+		return []byte(val), cached, nil
+	}
+	return nil, false, gop.FileNotFoundError
+}
+
+func New(a map[string]string) retriever {
+	return retriever{content: a}
 }
