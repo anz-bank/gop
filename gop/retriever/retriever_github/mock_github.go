@@ -39,12 +39,12 @@ func (g GithubMock) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 	if val, ok := g.content[r.URL.Path+query]; ok {
 		if r.Header.Get("Accept") == "application/vnd.github.VERSION.sha" {
-			w.Write([]byte(val))
+			_, _ = w.Write([]byte(val))
 			return
 		}
 		resp := GithubResponse{Content: base64.StdEncoding.EncodeToString([]byte(val))}
 		content, _ := json.Marshal(resp)
-		w.Write(content)
+		_, _ = w.Write(content)
 		return
 	}
 	w.WriteHeader(404)

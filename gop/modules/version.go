@@ -9,8 +9,11 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
+/* Resolver resolves a git ref to a hash */
+type Resolver func(string) (string, error)
+
 /* LoadVersion returns the version from a version */
-func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver gop.Resolver, cacheFile, resource string) (string, error) {
+func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver Resolver, cacheFile, resource string) (string, error) {
 	var content []byte
 	if cacheFile != "" {
 		content, _, _ = retriever.Retrieve(cacheFile)
@@ -58,8 +61,6 @@ func GetApiURL(resource string) string {
 	switch requestedurl.Host {
 	case "github.com":
 		return "api.github.com"
-	default:
-		return fmt.Sprintf("%s/api/v3", requestedurl.Host)
 	}
-	return ""
+	return fmt.Sprintf("%s/api/v3", requestedurl.Host)
 }

@@ -1,7 +1,6 @@
 package modules
 
 import (
-	"bufio"
 	"fmt"
 	"path"
 	"regexp"
@@ -17,6 +16,7 @@ type Modules struct {
 	Imports map[string]string `yaml:"imports"`
 }
 
+/* ReplaceImports replaces the contents of sourcefile with the imports in modfile */
 func ReplaceImports(modFile []byte, sourceFile []byte) ([]byte, error) {
 	var mod Modules
 	if err := yaml.Unmarshal(modFile, &mod); err != nil {
@@ -31,33 +31,29 @@ func ReplaceImports(modFile []byte, sourceFile []byte) ([]byte, error) {
 }
 
 /* ReplaceSpecificImport replaces a specific import in content */
-func ReplaceSpecificImport(content string, oldimp, oldver, newimp, newver string) string {
+func ReplaceSpecificImport(content string, oldrepo, oldver, newrepo, newver string) string {
 	var pth string
 	if oldver != "" {
 		oldver = "(?P<version>" + regexp.QuoteMeta(oldver) + ")"
 	}
 	re := fmt.Sprintf(`(?:%s)(?P<path>[a-zA-Z0-9/._\-]*)@*%s(?:\S)?`,
-		regexp.QuoteMeta(oldimp), oldver)
+		regexp.QuoteMeta(oldrepo), oldver)
 	impRe := regexp.MustCompile(re)
-	scanner := bufio.NewScanner(strings.NewReader(content))
-	for scanner.Scan() {
-		txt := scanner.Text()
-		for _, match := range impRe.FindAllStringSubmatch(scanner.Text(), -1) {
-			if match == nil {
-				continue
-			}
-			for i, name := range impRe.SubexpNames() {
-				if match[i] != "" {
-					switch name {
-					case "path":
-						pth = match[i]
-					}
+	for _, match := range impRe.FindAllStringSubmatch(content, -1) {
+		if match == nil {
+			continue
+		}
+		for i, name := range impRe.SubexpNames() {
+			if match[i] != "" {
+				switch name {
+				case "path":
+					pth = match[i]
 				}
 			}
-			for _, match := range impRe.FindAllString(txt, -1) {
-				newImport := fmt.Sprintf("%s@%s", path.Join(newimp, pth), newver)
-				content = strings.ReplaceAll(content, match, newImport)
-			}
+		}
+		for _, match := range impRe.FindAllString(content, -1) {
+			newImport := fmt.Sprintf("%s@%s", path.Join(newrepo, pth), newver)
+			content = strings.ReplaceAll(content, match, newImport)
 		}
 	}
 	return content

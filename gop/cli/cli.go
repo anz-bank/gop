@@ -30,13 +30,12 @@ type Retriever struct {
 	local        gop.Retriever
 	cache        gop.Gopper
 	proxy        gop.Retriever
-	http         gop.Retriever
 	github       gop.Retriever
 	git          gop.Retriever
-	Resolver     gop.Resolver
+	Resolver     modules.Resolver
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, git gop.Retriever, cacheFile, cacheDir string, resolver gop.Resolver) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, git gop.Retriever, cacheFile, cacheDir string, resolver modules.Resolver) Retriever {
 	return Retriever{
 		cacheFile:    cacheFile,
 		cacheDir:     cacheDir,
@@ -97,7 +96,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 		defer func() {
 			if repo, _, ver, _ := gop.ProcessRequest(resource); repo != "" && ver != "" && len(content) != 0 {
-				r.cache.Cache(resource, content)
+				_ = r.cache.Cache(resource, content)
 			}
 		}()
 	}
@@ -108,7 +107,6 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 	}
-
 	if r.github != nil {
 		content, _, err = modules.RetrieveAndReplace(r.github, resource, r.absCacheFile)
 		if !(err != nil || content == nil || len(content) == 0) {

@@ -21,5 +21,3 @@ type Object struct {
 	Content  []byte `json:"content"`
 	Resource string `json:"resource"`
 }
-
-type Resolver func(string) (string, error)

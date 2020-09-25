@@ -61,8 +61,8 @@ imports:
 }
 
 func EqualYaml(a, b string, i, j interface{}) {
-	yaml.Unmarshal([]byte(a), i)
-	yaml.Unmarshal([]byte(b), j)
+	_ = yaml.Unmarshal([]byte(a), i)
+	_ = yaml.Unmarshal([]byte(b), j)
 }
 
 type testGopper struct {
