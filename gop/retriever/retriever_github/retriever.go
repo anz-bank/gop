@@ -9,6 +9,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/joshcarp/gop/gop/modules"
+
 	"github.com/joshcarp/gop/gop"
 )
 
@@ -55,7 +57,7 @@ func getToken(token map[string]string, resource string) string {
 /* ResolveHash Resolves a github resource to its hash */
 func (a Retriever) ResolveHash(resource string) (string, error) {
 	if a.ApiBase == "" {
-		a.ApiBase = gop.GetApiURL(resource)
+		a.ApiBase = modules.GetApiURL(resource)
 		if a.ApiBase == "" {
 			return "", gop.BadRequestError
 		}
@@ -104,7 +106,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	repo = strings.ReplaceAll(repo, h.Host+"/", "")
 
 	if a.ApiBase == "" {
-		a.ApiBase = "https://" + gop.GetApiURL(resource)
+		a.ApiBase = "https://" + modules.GetApiURL(resource)
 	}
 
 	req, err := url.Parse(

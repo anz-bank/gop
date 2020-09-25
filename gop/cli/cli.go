@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"path"
 
-	"net/http/httptest"
+	"github.com/joshcarp/gop/gop/modules"
 
 	"github.com/joshcarp/gop/gop"
 	"github.com/joshcarp/gop/gop/gop_filesystem"
@@ -57,11 +57,7 @@ func Default(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	if proxyURL != "" {
 		proxy = retriever_proxy.New(proxyURL)
 	}
-	mock := retriever_github.NewMock()
-	serve := httptest.NewServer(mock)
 	gh := retriever_github.New(token)
-	gh.Client = serve.Client()
-	gh.ApiBase = serve.URL
 	return New(
 		gop_filesystem.New(fs, "."),
 		cache,
@@ -85,9 +81,11 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
 	if r.cache != nil {
-		resource, err = gop.LoadVersion(r.cache, r.cache, r.Resolver, r.cacheFile, resource)
-		if err != nil {
-			return nil, false, err
+		if _, _, v := gop.ProcessRepo(resource); len(v) < 20 {
+			resource, err = modules.LoadVersion(r.cache, r.cache, r.Resolver, r.cacheFile, resource)
+			if err != nil {
+				return nil, false, err
+			}
 		}
 
 		content, _, err = r.cache.Retrieve(resource)
@@ -113,7 +111,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	if r.github != nil {
 		content, _, err = r.github.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
-			if reindexed, err := gop.ReplaceImports(r.github, gop.AddPath(resource, path.Join(r.cacheDir, r.cacheFile)), content); err == nil {
+			if reindexed, err := modules.ReplaceImports(r.github, modules.AddPath(resource, path.Join(r.cacheDir, r.cacheFile)), content); err == nil {
 				content = reindexed
 			}
 			return content, false, nil
@@ -123,6 +121,9 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	if r.git != nil {
 		content, _, err = r.git.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
+			if reindexed, err := modules.ReplaceImports(r.git, modules.AddPath(resource, path.Join(r.cacheDir, r.cacheFile)), content); err == nil {
+				content = reindexed
+			}
 			return content, false, nil
 		}
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)

@@ -80,3 +80,30 @@ func TestCLIMockModFile(t *testing.T) {
 
 	}
 }
+
+func TestImportReplace(t *testing.T) {
+	fs := afero.NewMemMapFs()
+	githubMock := retriever_github.NewMock()
+	server := httptest.NewServer(githubMock)
+	defer server.Close()
+	gh := retriever_github.New(nil)
+	gh.Client = server.Client()
+	gh.ApiBase = server.URL
+	retriever := New(
+		gop_filesystem.New(fs, "."),
+		gop_filesystem.New(fs, "/"),
+		nil,
+		gh,
+		nil,
+		"test.mod", "",
+		githubMock.ResolveHash)
+	for resource, contents := range retrievertests.Tests {
+		t.Run(resource, func(t *testing.T) {
+			res, cached, err := retriever.Retrieve(resource)
+			require.NoError(t, err)
+			require.False(t, cached)
+			require.Equal(t, contents, string(res))
+		})
+
+	}
+}
