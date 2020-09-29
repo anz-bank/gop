@@ -56,8 +56,8 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	}
 	gh := retriever_github.New(token)
 	local := gop_filesystem.New(fs, ".")
-	versioner := modules.NewLoader(local, gh.ResolveHash, cacheFile)
-	absModuler := path.Join(cacheFile, cacheDir)
+	absModuler := path.Join(cacheDir, cacheFile)
+	versioner := modules.NewLoader(local, gh.ResolveHash, absModuler)
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
@@ -95,9 +95,6 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var content []byte
 	var err error
 	var cummulative error
-	defer func() {
-
-	}()
 	if r.local != nil {
 		content, _, err = r.local.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
@@ -111,15 +108,12 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return nil, false, err
 		}
 		resource = string(resolvedResource)
-
 	}
 	if r.cache != nil {
-
 		content, _, err = r.cache.Retrieve(resource)
 		if !(err != nil || content == nil || len(content) == 0) {
 			return content, false, nil
 		}
-
 		cummulative = fmt.Errorf("%s: %w\n", cummulative, err)
 		defer func() {
 			if repo, _, ver, _ := gop.ProcessRequest(resource); repo != "" && ver != "" && len(content) != 0 {
