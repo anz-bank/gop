@@ -26,16 +26,39 @@ func NewLoader(gopper gop.Gopper, resolver Resolver, cacheFile string) Loader {
 	}
 }
 
-/* Retrieve resolves an import from resource to a full commit hash */
-func (a Loader) Retrieve(resource string) ([]byte, bool, error) {
-	if _, _, v := gop.ProcessRepo(resource); len(v) == 20 {
-		return []byte(v), false, nil
+/* Resolve resolves an import from resource to a full commit hash */
+func (a Loader) Resolve(resource string) string {
+	if _, _, v := gop.ProcessRepo(resource); gop.IsHash(v) {
+		return resource
 	}
 	ver, err := LoadVersion(a.gopper, a.gopper, a.resolver, a.cacheFile, resource)
 	if err != nil {
-		return nil, false, err
+		return ""
 	}
-	return []byte(ver), false, nil
+	return ver
+}
+
+func (a Loader) Update(old, new string) error {
+	var content []byte
+	if a.cacheFile != "" {
+		content, _, _ = a.gopper.Retrieve(a.cacheFile)
+	}
+	mod := Modules{}
+	if err := yaml.Unmarshal(content, &mod); err != nil {
+		return err
+	}
+	if _, ok := mod.Imports[old]; ok {
+		new, _ = a.resolver(new)
+		mod.Imports[old] = new
+	}
+	newfile, err := yaml.Marshal(mod)
+	if err != nil {
+		return err
+	}
+	if err := a.gopper.Cache(a.cacheFile, newfile); err != nil {
+		return err
+	}
+	return nil
 }
 
 /* LoadVersion returns the version from a version */
@@ -49,7 +72,6 @@ func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver Resolver, 
 	if ver != "" {
 		repoVer += "@" + ver
 	}
-
 	mod := Modules{}
 	if err := yaml.Unmarshal(content, &mod); err != nil {
 		return "", err

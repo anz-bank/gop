@@ -4,6 +4,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/joshcarp/gop/gop/modules"
+
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/retriever/retriever_github"
 
@@ -91,8 +93,8 @@ func TestImportReplace(t *testing.T) {
 		gop_filesystem.New(fs, "."),
 		gop_filesystem.New(fs, "/"),
 		nil,
-		gh,
-		nil,
+		modules.New(gh, "test.mod"),
+		nil, //modules.NewLoader(gop_filesystem.New(fs, "/"), gh.ResolveHash, "test.mod"),
 		nil, "test.mod",
 	)
 	for resource, contents := range retrievertests.Tests {

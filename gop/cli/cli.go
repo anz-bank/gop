@@ -30,10 +30,10 @@ type Retriever struct {
 	proxy     gop.Retriever
 	github    gop.Retriever
 	git       gop.Retriever
-	versioner gop.Retriever
+	versioner gop.Resolver
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, versioner gop.Retriever, git gop.Retriever, cacheFile string) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, versioner gop.Resolver, git gop.Retriever, cacheFile string) Retriever {
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
@@ -103,11 +103,7 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
 	if r.versioner != nil {
-		resolvedResource, _, err := r.versioner.Retrieve(resource)
-		if err != nil {
-			return nil, false, err
-		}
-		resource = string(resolvedResource)
+		resource = r.versioner.Resolve(resource)
 	}
 	if r.cache != nil {
 		content, _, err = r.cache.Retrieve(resource)

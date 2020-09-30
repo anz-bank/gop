@@ -2,6 +2,7 @@ package gop
 
 import (
 	"path"
+	"regexp"
 	"strings"
 )
 
@@ -12,6 +13,16 @@ type Config struct {
 	FsType        string `yaml:"fstype"` // one of "os", "mem"
 	ImportRegex   string `yaml:"importregex"`
 	Proxy         string `yaml:"proxy"`
+}
+
+func IsHash(s string) bool {
+	if len(s) != 40 {
+		return false
+	}
+	if e, err := regexp.MatchString(`[a-fA-F0-9]{40}`, s); err == nil {
+		return e
+	}
+	return false
 }
 
 func ProcessRepo(resource string) (string, string, string) {

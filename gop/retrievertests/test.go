@@ -46,6 +46,11 @@ func (r retriever) Retrieve(resource string) (content []byte, cached bool, err e
 	return nil, false, gop.FileNotFoundError
 }
 
+func (r retriever) Cache(resource string, content []byte) (err error) {
+	r.content[resource] = string(content)
+	return nil
+}
+
 func New(a map[string]string) retriever {
 	return retriever{content: a}
 }

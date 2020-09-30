@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -64,6 +65,78 @@ func TestRetrieveAndReplace(t *testing.T) {
 			a, _, err := New(retr, i.importFile).Retrieve(i.resource)
 			require.NoError(t, err)
 			require.Equal(t, i.out, string(a))
+		})
+	}
+}
+
+func TestUpdate(t *testing.T) {
+	type testcases struct {
+		name        string
+		pattern     string
+		oldResolved string
+		new         string
+		out         string
+		importFile  string
+		files       map[string]string
+	}
+	tests := []testcases{{
+		name:        "simple",
+		pattern:     "github.com/abc/def",
+		oldResolved: "github.com/abc/def@1234",
+		new:         "github.com/abc/def@567",
+		out:         "github.com/abc/def@567",
+		importFile:  "gop_modules/gop.yaml",
+		files: map[string]string{
+			"gop_modules/gop.yaml": "imports:\n    github.com/abc/def: github.com/abc/def@1234",
+		},
+	}, {
+		name:        "more than one import",
+		pattern:     "github.com/abc/def",
+		oldResolved: "github.com/abc/def@1234",
+		new:         "github.com/abc/def@567",
+		out:         "github.com/abc/def@567",
+		importFile:  "gop_modules/gop.yaml",
+		files: map[string]string{
+			"gop_modules/gop.yaml": "imports:\n    github.com/abc/def: github.com/abc/def@1234\n    github.com/xyz/xyz: github.com/xyz/xyz@xyz",
+		},
+	},
+		{
+			name:        "same repo imported under different patterns",
+			pattern:     "github.com/abc/def",
+			oldResolved: "github.com/abc/def@1234",
+			new:         "github.com/abc/def@567",
+			out:         "github.com/abc/def@567",
+			importFile:  "gop_modules/gop.yaml",
+			files: map[string]string{
+				"gop_modules/gop.yaml": "imports:\n    github.com/abc/def@123: github.com/abc/def@1234\n    github.com/abc/def: github.com/abc/def@1234",
+			},
+		}, {
+			name:        "resolve to HEAD",
+			pattern:     "github.com/abc/def",
+			oldResolved: "github.com/abc/def@1234",
+			new:         "github.com/abc/def",
+			out:         "github.com/abc/def@HEAD",
+			importFile:  "gop_modules/gop.yaml",
+			files: map[string]string{
+				"gop_modules/gop.yaml": "imports:\n    github.com/abc/def@123: github.com/abc/def@1234\n    github.com/abc/def: github.com/abc/def@1234",
+			},
+		}}
+	f := func(s string) (string, error) {
+		if !strings.Contains(s, "@") {
+			return s + "@HEAD", nil
+		}
+		return s, nil
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			retr := retrievertests.New(test.files)
+			b := NewLoader(retr, f, test.importFile)
+			resolved := b.Resolve(test.pattern)
+			require.Equal(t, test.oldResolved, resolved)
+			err := b.Update(test.pattern, test.new)
+			require.NoError(t, err)
+			resolved = b.Resolve(test.pattern)
+			require.Equal(t, test.out, resolved)
 		})
 	}
 }
