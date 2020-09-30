@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+/* TODO: this test is failing*/
 func TestGit(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping test in short mode.")
