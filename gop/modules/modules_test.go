@@ -120,23 +120,85 @@ func TestUpdate(t *testing.T) {
 			files: map[string]string{
 				"gop_modules/gop.yaml": "imports:\n    github.com/abc/def@123: github.com/abc/def@1234\n    github.com/abc/def: github.com/abc/def@1234",
 			},
+		}, {
+			name:        "doesn't already exist in version file",
+			pattern:     "github.com/rrr/rrr",
+			oldResolved: "github.com/rrr/rrr@HEAD",
+			new:         "github.com/rrr/rrr@HEAD",
+			out:         "github.com/rrr/rrr@HEAD",
+			importFile:  "gop_modules/gop.yaml",
+			files: map[string]string{
+				"gop_modules/gop.yaml": "imports:\n    github.com/abc/def@123: github.com/abc/def@1234\n",
+			},
 		}}
 	f := func(s string) (string, error) {
 		if !strings.Contains(s, "@") {
-			return s + "@HEAD", nil
+			return "HEAD", nil
 		}
-		return s, nil
+		return strings.Split(s, "@")[1], nil
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
+			if test.name == "doesn't already exist in version file" {
+				println()
+			}
 			retr := retrievertests.New(test.files)
 			b := NewLoader(retr, f, test.importFile)
 			resolved := b.Resolve(test.pattern)
 			require.Equal(t, test.oldResolved, resolved)
-			err := b.Update(test.pattern, test.new)
+			err := b.UpdateTo(test.pattern, test.new)
 			require.NoError(t, err)
 			resolved = b.Resolve(test.pattern)
 			require.Equal(t, test.out, resolved)
+		})
+	}
+}
+
+func TestUpdateAll(t *testing.T) {
+	type testcases struct {
+		name        string
+		pattern     string
+		oldResolved string
+		new         string
+		out         string
+		importFile  string
+		files       map[string]string
+		versions    map[string]string
+	}
+	tests := []testcases{{
+		name:       "simple",
+		out:        "imports:\n  github.com/abc/def: github.com/abc/def@newversion\n",
+		importFile: "gop_modules/gop.yaml",
+		files: map[string]string{
+			"gop_modules/gop.yaml": "imports:\n  github.com/abc/def: github.com/abc/def@1234\n",
+		},
+		versions: map[string]string{
+			"github.com/abc/def": "newversion",
+		},
+	}, {
+		name:       "simple",
+		out:        "imports:\n  github.com/abc/iop: github.com/abc/iop@pppppp\n  github.com/abc/xyz: github.com/abc/xyz@oooooooo\n",
+		importFile: "gop_modules/gop.yaml",
+		files: map[string]string{
+			"gop_modules/gop.yaml": "imports:\n  github.com/abc/xyz: github.com/abc/xyz@1234\n  github.com/abc/iop: github.com/abc/iop@1234\n",
+		},
+		versions: map[string]string{
+			"github.com/abc/xyz": "oooooooo",
+			"github.com/abc/iop": "pppppp",
+		},
+	}}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			f := func(s string) (string, error) {
+				return test.versions[strings.ReplaceAll(s, "@HEAD", "")], nil
+			}
+			retr := retrievertests.New(test.files)
+			b := NewLoader(retr, f, test.importFile)
+			err := b.UpdateAll()
+			require.NoError(t, err)
+			c, _, err := retr.Retrieve(test.importFile)
+			require.NoError(t, err)
+			require.Equal(t, test.out, string(c))
 		})
 	}
 }

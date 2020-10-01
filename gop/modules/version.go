@@ -38,7 +38,13 @@ func (a Loader) Resolve(resource string) string {
 	return ver
 }
 
-func (a Loader) Update(old, new string) error {
+/* Update updates the base of version to the version */
+func (a Loader) Update(version string) error {
+	x, _, z := gop.ProcessRepo(version)
+	return a.UpdateTo(x, x+"@"+z)
+}
+
+func (a Loader) UpdateAll() error {
 	var content []byte
 	if a.cacheFile != "" {
 		content, _, _ = a.gopper.Retrieve(a.cacheFile)
@@ -47,10 +53,33 @@ func (a Loader) Update(old, new string) error {
 	if err := yaml.Unmarshal(content, &mod); err != nil {
 		return err
 	}
-	if _, ok := mod.Imports[old]; ok {
-		new, _ = a.resolver(new)
-		mod.Imports[old] = new
+	for base := range mod.Imports {
+		if x, _, z := gop.ProcessRepo(base); z == "" {
+			mod.Imports[base] = a.Resolve(x + "@HEAD")
+		}
 	}
+	newfile, err := yaml.Marshal(mod)
+	if err != nil {
+		return err
+	}
+	if err := a.gopper.Cache(a.cacheFile, newfile); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (a Loader) UpdateTo(old, new string) error {
+	var content []byte
+	if a.cacheFile != "" {
+		content, _, _ = a.gopper.Retrieve(a.cacheFile)
+	}
+	mod := Modules{}
+	if err := yaml.Unmarshal(content, &mod); err != nil {
+		return err
+	}
+	repo, _, _ := gop.ProcessRepo(new)
+	hash, _ := a.resolver(new)
+	mod.Imports[old] = gop.CreateResource(repo, "", hash)
 	newfile, err := yaml.Marshal(mod)
 	if err != nil {
 		return err
