@@ -63,6 +63,7 @@ func (a Retriever) ResolveHash(resource string) (string, error) {
 		}
 		a.ApiBase = "https://" + a.ApiBase
 	}
+
 	heder := http.Header{}
 	repo, _, ref := gop.ProcessRepo(resource)
 	if ref == "" {
@@ -70,6 +71,7 @@ func (a Retriever) ResolveHash(resource string) (string, error) {
 	}
 	repoURL, _ := url.Parse("httpps://" + repo)
 	heder.Add("accept", "application/vnd.github.VERSION.sha")
+	heder.Add("authorization", "Bearer "+a.token[repoURL.Host])
 	u, err := url.Parse(fmt.Sprintf("%s/repos%s/commits/%s", a.ApiBase, repoURL.Path, ref))
 	if err != nil {
 		return "", gop.BadRequestError
