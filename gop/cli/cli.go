@@ -72,10 +72,12 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	}
 }
 
-func Default(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string) Retriever {
+func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
 	var cache gop.Gopper
 	var proxy gop.Retriever
+	var cacheFile string
 	if cacheDir != "" {
+		cacheFile = cacheDir + ".yaml"
 		cache = gop_filesystem.New(fs, cacheDir)
 	}
 	if proxyURL != "" {
