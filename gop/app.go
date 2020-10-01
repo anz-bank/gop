@@ -60,5 +60,8 @@ func ProcessRequest(resource string) (string, string, string, error) {
 }
 
 func CreateResource(repo, resource, version string) string {
-	return path.Join(repo, resource) + "@" + version
+	if version != "" {
+		version = "@" + version
+	}
+	return path.Join(repo, resource) + version
 }

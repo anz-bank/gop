@@ -16,13 +16,15 @@ type Loader struct {
 	gopper    gop.Gopper
 	resolver  Resolver
 	cacheFile string
+	log       gop.Logger
 }
 
-func NewLoader(gopper gop.Gopper, resolver Resolver, cacheFile string) Loader {
+func NewLoader(gopper gop.Gopper, resolver Resolver, cacheFile string, log gop.Logger) Loader {
 	return Loader{
 		gopper:    gopper,
 		resolver:  resolver,
 		cacheFile: cacheFile,
+		log:       log,
 	}
 }
 
@@ -41,7 +43,7 @@ func (a Loader) Resolve(resource string) string {
 /* Update updates the base of version to the version */
 func (a Loader) Update(version string) error {
 	x, _, z := gop.ProcessRepo(version)
-	return a.UpdateTo(x, x+"@"+z)
+	return a.UpdateTo(x, gop.CreateResource(x, "", z))
 }
 
 func (a Loader) UpdateAll() error {
@@ -55,7 +57,9 @@ func (a Loader) UpdateAll() error {
 	}
 	for base := range mod.Imports {
 		if x, _, z := gop.ProcessRepo(base); z == "" {
-			mod.Imports[base] = a.Resolve(x + "@HEAD")
+			new := a.Resolve(x + "@HEAD")
+			a.log("%s -> %s", x, new)
+			mod.Imports[base] = new
 		}
 	}
 	newfile, err := yaml.Marshal(mod)
@@ -78,7 +82,14 @@ func (a Loader) UpdateTo(old, new string) error {
 		return err
 	}
 	repo, _, _ := gop.ProcessRepo(new)
-	hash, _ := a.resolver(new)
+	hash, err := a.resolver(new)
+	if err != nil {
+		return err
+	}
+	a.log("updating %s -> %s : %s", old, new, hash)
+	if mod.Imports == nil {
+		mod.Imports = make(map[string]string)
+	}
 	mod.Imports[old] = gop.CreateResource(repo, "", hash)
 	newfile, err := yaml.Marshal(mod)
 	if err != nil {

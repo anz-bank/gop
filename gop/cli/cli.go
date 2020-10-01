@@ -31,9 +31,10 @@ type Retriever struct {
 	github    gop.Retriever
 	git       gop.Retriever
 	versioner gop.Resolver
+	log       gop.Logger
 }
 
-func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, versioner gop.Resolver, git gop.Retriever, cacheFile string) Retriever {
+func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Retriever, versioner gop.Resolver, git gop.Retriever, cacheFile string, log gop.Logger) Retriever {
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
@@ -42,10 +43,11 @@ func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Ret
 		github:    github,
 		git:       git,
 		versioner: versioner,
+		log:       log,
 	}
 }
 
-func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string) Retriever {
+func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string, logger gop.Logger) Retriever {
 	var cache gop.Gopper
 	var proxy gop.Retriever
 	if cacheDir != "" {
@@ -57,7 +59,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	gh := retriever_github.New(token)
 	local := gop_filesystem.New(fs, ".")
 	absModuler := path.Join(cacheDir, cacheFile)
-	versioner := modules.NewLoader(local, gh.ResolveHash, absModuler)
+	versioner := modules.NewLoader(local, gh.ResolveHash, absModuler, logger)
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
@@ -66,6 +68,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 		github:    modules.New(gh, absModuler),
 		git:       modules.New(retriever_git.New(token), absModuler),
 		versioner: versioner,
+		log:       logger,
 	}
 }
 

@@ -29,3 +29,5 @@ type Object struct {
 	Content  []byte `json:"content"`
 	Resource string `json:"resource"`
 }
+
+type Logger func(format string, args ...interface{})

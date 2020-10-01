@@ -1,6 +1,7 @@
 package modules
 
 import (
+	"log"
 	"strings"
 	"testing"
 
@@ -143,7 +144,7 @@ func TestUpdate(t *testing.T) {
 				println()
 			}
 			retr := retrievertests.New(test.files)
-			b := NewLoader(retr, f, test.importFile)
+			b := NewLoader(retr, f, test.importFile, log.Printf)
 			resolved := b.Resolve(test.pattern)
 			require.Equal(t, test.oldResolved, resolved)
 			err := b.UpdateTo(test.pattern, test.new)
@@ -193,7 +194,7 @@ func TestUpdateAll(t *testing.T) {
 				return test.versions[strings.ReplaceAll(s, "@HEAD", "")], nil
 			}
 			retr := retrievertests.New(test.files)
-			b := NewLoader(retr, f, test.importFile)
+			b := NewLoader(retr, f, test.importFile, log.Printf)
 			err := b.UpdateAll()
 			require.NoError(t, err)
 			c, _, err := retr.Retrieve(test.importFile)

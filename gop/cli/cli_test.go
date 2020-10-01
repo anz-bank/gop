@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"log"
 	"net/http/httptest"
 	"testing"
 
@@ -43,7 +44,7 @@ func TestCLIMock(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		nil, "")
+		nil, "", log.Printf)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)
@@ -69,7 +70,7 @@ func TestCLIMockModFile(t *testing.T) {
 		nil,
 		gh,
 		nil,
-		nil, "test.mod")
+		nil, "test.mod", log.Printf)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {
 			res, cached, err := retriever.Retrieve(resource)
@@ -95,7 +96,7 @@ func TestImportReplace(t *testing.T) {
 		nil,
 		modules.New(gh, "test.mod"),
 		nil, //modules.NewLoader(gop_filesystem.New(fs, "/"), gh.ResolveHash, "test.mod"),
-		nil, "test.mod",
+		nil, "test.mod", log.Printf,
 	)
 	for resource, contents := range retrievertests.Tests {
 		t.Run(resource, func(t *testing.T) {

@@ -5,6 +5,7 @@ type Error int
 const (
 	UnknownError Error = iota
 	BadRequestError
+	BadReferenceError
 	InternalError
 	UnauthorizedError
 	TimeoutError
@@ -24,6 +25,7 @@ func (k Error) Error() string {
 	return [...]string{
 		"UnknownError",
 		"BadRequestError",
+		"BadReferenceError",
 		"InternalError",
 		"UnauthorizedError",
 		"TimeoutError",

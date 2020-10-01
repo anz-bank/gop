@@ -88,9 +88,11 @@ func (a Retriever) ResolveHash(resource string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if strings.Contains(string(b), `"message":"Not Found"`) {
+		return "", gop.BadReferenceError
+	}
 	return string(b), nil
 }
-
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var resp *http.Response
 	var repo, path, ver string
