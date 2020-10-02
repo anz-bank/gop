@@ -1,3 +1,5 @@
+// +build !wasm,!js
+
 package retriever_git
 
 import (
