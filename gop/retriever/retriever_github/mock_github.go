@@ -21,6 +21,10 @@ func NewMock() GithubMock {
 	return GithubMock{content: retrievertests.GithubRequestPaths}
 }
 
+func NewMockFromMap(m map[string]string) GithubMock {
+	return GithubMock{content: m}
+}
+
 func (g GithubMock) ResolveHash(resource string) (string, error) {
 	repo, resource, ver, _ := gop.ProcessRequest(resource)
 	r, _ := url.Parse("https://" + repo)
