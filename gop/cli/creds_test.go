@@ -23,8 +23,7 @@ func TestTokensFromString(t *testing.T) {
 
 	for _, e := range tests {
 		t.Run(e.in+e.name, func(t *testing.T) {
-			tokenmap, err := TokensFromString(e.in)
-			require.Equal(t, e.err, err)
+			tokenmap := TokensFromString(e.in)
 			require.Equal(t, e.out, tokenmap)
 		})
 	}

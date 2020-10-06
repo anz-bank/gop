@@ -78,25 +78,25 @@ func HandleErr(w http.ResponseWriter, err error) {
 	http.Error(w, desc, httpCode)
 }
 
-/* GitGopper is an implementation of Gopper that will fall back to a git retriever if the file can't be found in
+/* GopperService is an implementation of Gopper that will fall back to a git retriever if the file can't be found in
 its data source */
-type GitGopper struct {
+type GopperService struct {
 	gop3.Gopper
-	retriever_git.Retriever
+	gop3.Retriever
 }
 
-/* Retrieve attempts to retrieve a file from GitGopper.Gopper, if this fails then it will fall back to using a
+/* Retrieve attempts to retrieve a file from GopperService.Gopper, if this fails then it will fall back to using a
 git retriever */
-func (a GitGopper) Retrieve(resource string) ([]byte, bool, error) {
+func (a GopperService) Retrieve(resource string) ([]byte, bool, error) {
 	if res, cached, err := a.Gopper.Retrieve(resource); err == nil {
 		return res, cached, nil
 	}
 	return a.Retriever.Retrieve(resource)
 }
 
-/* NewGopper returns a GitGopper for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
-func NewGopper(cachelocation, fsType string) (*GitGopper, error) {
-	r := GitGopper{}
+/* NewGopper returns a GopperService for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
+func NewGopper(cachelocation, fsType string) (*GopperService, error) {
+	r := GopperService{}
 	switch fsType {
 	case "os":
 		r.Gopper = gop_filesystem.New(afero.NewOsFs(), "")

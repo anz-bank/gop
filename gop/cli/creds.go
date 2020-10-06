@@ -9,8 +9,6 @@ import (
 	"path"
 	"regexp"
 	"strings"
-
-	"github.com/joshcarp/gop/gop"
 )
 
 /* NewTokenMap Returns a tokenstring from a token env var in the form host:token,host:token or from a gitcredentialsvar which points to the gitcredentials location*/
@@ -41,17 +39,17 @@ func NewTokenMap(tokensVar, gitCredentialsVar string) (map[string]string, error)
 }
 
 /* TokensFromString returns a map of host:token from a string in form: host:token,host:token */
-func TokensFromString(str string) (map[string]string, error) {
+func TokensFromString(str string) map[string]string {
 	hostTokens := strings.Split(str, ",")
 	tokenmap := make(map[string]string)
 	for _, e := range hostTokens {
 		arr := strings.Split(e, ":")
 		if len(arr) < 2 {
-			return nil, gop.UnauthorizedError
+			return nil
 		}
 		tokenmap[arr[0]] = arr[1]
 	}
-	return tokenmap, nil
+	return tokenmap
 }
 
 /* TokensFromGitCredentialsFile returns a map of host:token a git credentials file */
