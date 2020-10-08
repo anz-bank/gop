@@ -2,13 +2,13 @@ package gop
 
 import (
 	"encoding/json"
+	"github.com/joshcarp/gop/gop/cli"
+	"github.com/joshcarp/gop/gop/retriever/retriever_github"
 	"log"
 	"net/http"
 	"os"
 
 	gop3 "github.com/joshcarp/gop/gop"
-
-	"github.com/joshcarp/gop/gop/retriever/retriever_git"
 
 	"github.com/joshcarp/gop/gop/gop_filesystem"
 	"github.com/joshcarp/gop/gop/gop_gcs"
@@ -109,7 +109,8 @@ func NewGopper(cachelocation, fsType string) (*GopperService, error) {
 		gcs := gop_gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
-	r.Retriever = retriever_git.New(nil)
+	token, _ := cli.NewTokenMap("SYSL_TOKENS","")
+	r.Retriever = retriever_github.New(token)
 	return &r, nil
 }
 
