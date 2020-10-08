@@ -59,7 +59,7 @@ func TestResolveHash(t *testing.T) {
 	}
 	for _, e := range tests {
 		t.Run(e.name, func(t *testing.T) {
-			ver, err := retriever.ResolveHash(e.in)
+			ver, err := retriever.Resolve(e.in)
 			require.NoError(t, err)
 			require.Equal(t, e.out, ver)
 		})

@@ -10,12 +10,16 @@ type Cacher interface {
 	Cache(resource string, content []byte) (err error)
 }
 
-/* Resolver is an interface that returns the resolved version of the original resource */
-type Resolver interface {
+/* Updater is an interface that returns the resolved version of the original resource */
+type Updater interface {
 	Resolve(resource string) (resolved string)
 	Update(version string) error
 	UpdateAll() error
 	UpdateTo(from, to string) error
+}
+
+type Resolver interface {
+	Resolve(resource string) (resolved string, err error)
 }
 
 /* Gopper is the composition of both Retriever and Cacher */

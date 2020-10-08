@@ -2,11 +2,12 @@ package gop
 
 import (
 	"encoding/json"
-	"github.com/joshcarp/gop/gop/cli"
-	"github.com/joshcarp/gop/gop/retriever/retriever_github"
 	"log"
 	"net/http"
 	"os"
+
+	"github.com/joshcarp/gop/gop/cli"
+	"github.com/joshcarp/gop/gop/retriever/retriever_github"
 
 	gop3 "github.com/joshcarp/gop/gop"
 
@@ -83,6 +84,7 @@ its data source */
 type GopperService struct {
 	gop3.Gopper
 	gop3.Retriever
+	gop3.Resolver
 }
 
 /* Retrieve attempts to retrieve a file from GopperService.Gopper, if this fails then it will fall back to using a
@@ -91,7 +93,14 @@ func (a GopperService) Retrieve(resource string) ([]byte, bool, error) {
 	if res, cached, err := a.Gopper.Retrieve(resource); err == nil {
 		return res, cached, nil
 	}
-	return a.Retriever.Retrieve(resource)
+	res, cached, err := a.Retriever.Retrieve(resource)
+	if err != nil {
+		return nil, false, err
+	}
+	if !cached {
+		_ = a.Gopper.Cache(resource, res)
+	}
+	return res, cached, err
 }
 
 /* NewGopper returns a GopperService for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
@@ -109,7 +118,7 @@ func NewGopper(cachelocation, fsType, tokenEnv string) (*GopperService, error) {
 		gcs := gop_gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
-	token, _ := cli.NewTokenMap(tokenEnv,"")
+	token, _ := cli.NewTokenMap(tokenEnv, "")
 	r.Retriever = retriever_github.New(token)
 	return &r, nil
 }

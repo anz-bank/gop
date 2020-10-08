@@ -54,8 +54,8 @@ func getToken(token map[string]string, resource string) string {
 	return token[u.Host]
 }
 
-/* ResolveHash Resolves a github resource to its hash */
-func (a Retriever) ResolveHash(resource string) (string, error) {
+/* Resolve Resolves a github resource to its hash */
+func (a Retriever) Resolve(resource string) (string, error) {
 	if a.ApiBase == "" {
 		a.ApiBase = modules.GetApiURL(resource)
 		if a.ApiBase == "" {
