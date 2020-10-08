@@ -21,7 +21,7 @@ var fs afero.Fs
 func ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	var err error
 
-	s, _ := NewGopper(os.Getenv("CacheLocation"), os.Getenv("FsType"))
+	s, _ := NewGopper(os.Getenv("CacheLocation"), os.Getenv("FsType"), "GIT_TOKEN")
 	defer func() {
 		HandleErr(w, err)
 	}()
@@ -95,7 +95,7 @@ func (a GopperService) Retrieve(resource string) ([]byte, bool, error) {
 }
 
 /* NewGopper returns a GopperService for a config; This Gopper can use an os filesystem, memory filesystem or a gcs bucket*/
-func NewGopper(cachelocation, fsType string) (*GopperService, error) {
+func NewGopper(cachelocation, fsType, tokenEnv string) (*GopperService, error) {
 	r := GopperService{}
 	switch fsType {
 	case "os":
@@ -109,7 +109,7 @@ func NewGopper(cachelocation, fsType string) (*GopperService, error) {
 		gcs := gop_gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
-	token, _ := cli.NewTokenMap("SYSL_TOKENS","")
+	token, _ := cli.NewTokenMap(tokenEnv,"")
 	r.Retriever = retriever_github.New(token)
 	return &r, nil
 }

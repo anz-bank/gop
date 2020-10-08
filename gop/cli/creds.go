@@ -31,7 +31,7 @@ func NewTokenMap(tokensVar, gitCredentialsVar string) (map[string]string, error)
 	for _, e := range hostTokens {
 		arr := strings.Split(e, ":")
 		if len(arr) < 2 {
-			return map[string]string{}, fmt.Errorf("SYSL_TOKENS env var is invalid, should be in form `gita.com:<tokena>,gitb.com:<tokenb>`")
+			return map[string]string{}, fmt.Errorf("TOKENS env var is invalid, should be in form `gita.com:<tokena>,gitb.com:<tokenb>`")
 		}
 		tokenmap[arr[0]] = arr[1]
 	}
