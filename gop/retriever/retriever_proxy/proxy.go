@@ -17,7 +17,7 @@ type Client struct {
 }
 
 func New(addr string) Client {
-	return Client{Proxy: addr, Client: http.DefaultClient}
+	return Client{Proxy: addr, Client: &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}}
 }
 
 func (c *Client) SetHeader(header http.Header) {

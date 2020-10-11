@@ -46,7 +46,7 @@ func New(tokens map[string]string) Retriever {
 	if tokens == nil {
 		tokens = map[string]string{}
 	}
-	return Retriever{token: tokens, Client: http.DefaultClient}
+	return Retriever{token: tokens, Client: &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}}
 }
 
 func getToken(token map[string]string, resource string) string {
@@ -86,7 +86,7 @@ func (a Retriever) Resolve(resource string) (string, error) {
 	if err != nil || resp == nil || resp.Body == nil {
 		return "", gop.GitCloneError
 	}
-	if err := gop.HandleHTTPStatus(resp.StatusCode); err != nil{
+	if err := gop.HandleHTTPStatus(resp.StatusCode); err != nil {
 		return "", err
 	}
 	b, err := ioutil.ReadAll(resp.Body)
@@ -143,10 +143,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	if err != nil {
 		return b, false, fmt.Errorf("%s: %w", gop.GithubFetchError, err)
 	}
-	if err := gop.HandleHTTPStatus(resp.StatusCode); err !=nil{
+	if err := gop.HandleHTTPStatus(resp.StatusCode); err != nil {
 		return b, false, err
 	}
-
 
 	b, err = ioutil.ReadAll(resp.Body)
 	if err != nil {
