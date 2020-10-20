@@ -40,6 +40,15 @@ func (a Loader) Resolve(resource string) string {
 	return ver
 }
 
+func (a Loader) Init() error {
+	return a.gopper.Cache(a.cacheFile, []byte(`imports:`))
+}
+
+func (a Loader) Get(repo string) error {
+	x, _, z := gop.ProcessRepo(repo)
+	return a.UpdateTo(x, gop.CreateResource(x, "", z))
+}
+
 /* Update updates the base of version to the version */
 func (a Loader) Update(version string) error {
 	x, _, z := gop.ProcessRepo(version)
@@ -153,3 +162,4 @@ func GetApiURL(resource string) string {
 	}
 	return fmt.Sprintf("%s/api/v3", requestedurl.Host)
 }
+

@@ -15,23 +15,11 @@ func (r Retriever) Command(cmd, repo string) error {
 	case "update":
 		if repo == "" {
 			return r.UpdateAll()
-
 		} else {
 			return r.Update(repo)
 		}
+	case "init":
+		return r.Init()
 	}
-	return r.versioner.Update(repo)
-}
-
-func (r Retriever) Update(repo string) error {
-	return r.versioner.Update(repo)
-}
-
-func (r Retriever) UpdateAll() error {
-	return r.versioner.UpdateAll()
-}
-
-func (r Retriever) Get(repo string) error {
-	a, _, c := gop.ProcessRepo(repo)
-	return r.versioner.UpdateTo(a, gop.CreateResource(a, "", c))
+	return r.Update(repo)
 }

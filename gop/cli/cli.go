@@ -25,12 +25,12 @@ import (
 /* Retriever Is a CLI retriever that can be used for retrieving and caching for cli tools that require remote imports */
 type Retriever struct {
 	cacheFile string
+	gop.Updater
 	local     gop.Retriever
 	cache     gop.Gopper
 	proxy     gop.Retriever
 	github    gop.Retriever
 	git       gop.Retriever
-	versioner gop.Updater
 	log       gop.Logger
 }
 
@@ -42,7 +42,7 @@ func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Ret
 		proxy:     proxy,
 		github:    github,
 		git:       git,
-		versioner: versioner,
+		Updater: versioner,
 		log:       log,
 	}
 }
@@ -67,7 +67,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 		proxy:     proxy,
 		github:    modules.New(gh, absModuler),
 		git:       modules.New(retriever_git.New(token), absModuler),
-		versioner: versioner,
+		Updater: versioner,
 		log:       logger,
 	}
 }
@@ -107,8 +107,8 @@ func (r Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		}
 		cummulative = fmt.Errorf("%s: %w\n", gop.FileNotFoundError, err)
 	}
-	if r.versioner != nil {
-		resource = r.versioner.Resolve(resource)
+	if r.Updater != nil {
+		resource = r.Resolve(resource)
 	}
 	if r.cache != nil {
 		content, _, err = r.cache.Retrieve(resource)

@@ -16,6 +16,9 @@ type Updater interface {
 	Update(version string) error
 	UpdateAll() error
 	UpdateTo(from, to string) error
+	Init() error
+	Get(repo string) error
+
 }
 
 type Resolver interface {
