@@ -1,4 +1,4 @@
-package gop_filesystem
+package filesystem
 
 import (
 	"os"

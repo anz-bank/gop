@@ -1,6 +1,6 @@
 // +build !wasm,!js
 
-package retriever_git
+package git
 
 import (
 	"fmt"

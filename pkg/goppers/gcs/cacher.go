@@ -1,4 +1,4 @@
-package gop_gcs
+package gcs
 
 import (
 	"bytes"

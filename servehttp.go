@@ -7,12 +7,12 @@ import (
 	"os"
 
 	"github.com/joshcarp/gop/pkg/cli"
-	"github.com/joshcarp/gop/pkg/retriever/retriever_github"
+	"github.com/joshcarp/gop/pkg/retrievers/github"
 
 	gop3 "github.com/joshcarp/gop/pkg/gop"
 
-	"github.com/joshcarp/gop/pkg/gop_filesystem"
-	"github.com/joshcarp/gop/pkg/gop_gcs"
+	"github.com/joshcarp/gop/pkg/goppers/filesystem"
+	"github.com/joshcarp/gop/pkg/goppers/gcs"
 	"github.com/spf13/afero"
 )
 
@@ -108,18 +108,18 @@ func NewGopper(cachelocation, fsType, tokenEnv string) (*GopperService, error) {
 	r := GopperService{}
 	switch fsType {
 	case "os":
-		r.Gopper = gop_filesystem.New(afero.NewOsFs(), "")
+		r.Gopper = filesystem.New(afero.NewOsFs(), "")
 	case "mem", "memory", "":
 		if fs == nil {
 			fs = afero.NewMemMapFs()
 		}
-		r.Gopper = gop_filesystem.New(fs, "/")
+		r.Gopper = filesystem.New(fs, "/")
 	case "gcs":
-		gcs := gop_gcs.New(cachelocation)
+		gcs := gcs.New(cachelocation)
 		r.Gopper = &gcs
 	}
 	token, _ := cli.NewTokenMap(tokenEnv, "")
-	r.Retriever = retriever_github.New(token)
+	r.Retriever = github.New(token)
 	return &r, nil
 }
 

@@ -1,4 +1,4 @@
-package retriever_local
+package local
 
 import (
 	"fmt"

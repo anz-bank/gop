@@ -1,4 +1,4 @@
-package retriever_git
+package git
 
 import (
 	"testing"

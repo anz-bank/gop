@@ -1,4 +1,4 @@
-package retriever_naked
+package naked
 
 import "github.com/joshcarp/gop/pkg/gop"
 

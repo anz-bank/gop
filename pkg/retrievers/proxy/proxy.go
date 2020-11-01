@@ -1,4 +1,4 @@
-package retriever_proxy
+package proxy
 
 import (
 	"encoding/json"

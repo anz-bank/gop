@@ -1,4 +1,4 @@
-package retriever_wrapper
+package wrapper
 
 import (
 	"github.com/joshcarp/gop/pkg/gop"

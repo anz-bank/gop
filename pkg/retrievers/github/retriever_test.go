@@ -1,4 +1,4 @@
-package retriever_github
+package github
 
 import (
 	"net/http/httptest"

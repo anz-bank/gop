@@ -1,4 +1,4 @@
-package gop_filesystem
+package filesystem
 
 import (
 	"github.com/spf13/afero"

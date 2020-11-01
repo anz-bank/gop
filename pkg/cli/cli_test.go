@@ -7,8 +7,8 @@ import (
 
 	"github.com/joshcarp/gop/pkg/modules"
 
-	"github.com/joshcarp/gop/pkg/gop_filesystem"
-	"github.com/joshcarp/gop/pkg/retriever/retriever_github"
+	"github.com/joshcarp/gop/pkg/goppers/filesystem"
+	"github.com/joshcarp/gop/pkg/retrievers/github"
 
 	"github.com/joshcarp/gop/pkg/retrievertests"
 	"github.com/spf13/afero"
@@ -32,15 +32,15 @@ func TestCLI(t *testing.T) {
 
 func TestCLIMock(t *testing.T) {
 	fs := afero.NewMemMapFs()
-	githubMock := retriever_github.NewMock()
+	githubMock := github.NewMock()
 	server := httptest.NewServer(githubMock)
 	defer server.Close()
-	gh := retriever_github.New(nil)
+	gh := github.New(nil)
 	gh.Client = server.Client()
 	gh.ApiBase = server.URL
 	retriever := New(
-		gop_filesystem.New(fs, "."),
-		gop_filesystem.New(fs, "/"),
+		filesystem.New(fs, "."),
+		filesystem.New(fs, "/"),
 		nil,
 		gh,
 		nil,
@@ -58,15 +58,15 @@ func TestCLIMock(t *testing.T) {
 
 func TestCLIMockModFile(t *testing.T) {
 	fs := afero.NewMemMapFs()
-	githubMock := retriever_github.NewMock()
+	githubMock := github.NewMock()
 	server := httptest.NewServer(githubMock)
 	defer server.Close()
-	gh := retriever_github.New(nil)
+	gh := github.New(nil)
 	gh.Client = server.Client()
 	gh.ApiBase = server.URL
 	retriever := New(
-		gop_filesystem.New(fs, "."),
-		gop_filesystem.New(fs, "/"),
+		filesystem.New(fs, "."),
+		filesystem.New(fs, "/"),
 		nil,
 		gh,
 		nil,
@@ -84,15 +84,15 @@ func TestCLIMockModFile(t *testing.T) {
 
 func TestImportReplace(t *testing.T) {
 	fs := afero.NewMemMapFs()
-	githubMock := retriever_github.NewMock()
+	githubMock := github.NewMock()
 	server := httptest.NewServer(githubMock)
 	defer server.Close()
-	gh := retriever_github.New(nil)
+	gh := github.New(nil)
 	gh.Client = server.Client()
 	gh.ApiBase = server.URL
 	retriever := New(
-		gop_filesystem.New(fs, "."),
-		gop_filesystem.New(fs, "/"),
+		filesystem.New(fs, "."),
+		filesystem.New(fs, "/"),
 		nil,
 		modules.New(gh, "test.mod"),
 		nil, //modules.NewLoader(gop_filesystem.New(fs, "/"), gh.Resolve, "test.mod"),

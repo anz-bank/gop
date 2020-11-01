@@ -7,10 +7,9 @@ import (
 	"github.com/joshcarp/gop/pkg/modules"
 
 	"github.com/joshcarp/gop/pkg/gop"
-	"github.com/joshcarp/gop/pkg/gop_filesystem"
-	"github.com/joshcarp/gop/pkg/retriever/retriever_git"
-	"github.com/joshcarp/gop/pkg/retriever/retriever_github"
-	"github.com/joshcarp/gop/pkg/retriever/retriever_proxy"
+	"github.com/joshcarp/gop/pkg/goppers/filesystem"
+	"github.com/joshcarp/gop/pkg/retrievers/git"
+	"github.com/joshcarp/gop/pkg/retrievers/github"
 	"github.com/spf13/afero"
 )
 
@@ -51,13 +50,13 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	var cache gop.Gopper
 	var proxy gop.Retriever
 	if cacheDir != "" {
-		cache = gop_filesystem.New(fs, cacheDir)
+		cache = filesystem.New(fs, cacheDir)
 	}
 	if proxyURL != "" {
-		proxy = retriever_proxy.New(proxyURL)
+		proxy = proxy.New(proxyURL)
 	}
-	gh := retriever_github.New(token)
-	local := gop_filesystem.New(fs, ".")
+	gh := github.New(token)
+	local := filesystem.New(fs, ".")
 	absModuler := path.Join(cacheDir, cacheFile)
 	versioner := modules.NewLoader(local, gh.Resolve, absModuler, logger)
 	return Retriever{
@@ -66,7 +65,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 		cache:     cache,
 		proxy:     proxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(retriever_git.New(token), absModuler),
+		git:       modules.New(git.New(token), absModuler),
 		Updater:   versioner,
 		log:       logger,
 	}
@@ -78,20 +77,20 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 	var cacheFile string
 	if cacheDir != "" {
 		cacheFile = cacheDir + ".yaml"
-		cache = gop_filesystem.New(fs, cacheDir)
+		cache = filesystem.New(fs, cacheDir)
 	}
 	if proxyURL != "" {
-		proxy = retriever_proxy.New(proxyURL)
+		proxy = proxy.New(proxyURL)
 	}
 	absModuler := path.Join(cacheDir, cacheFile)
-	gh := retriever_github.New(token)
+	gh := github.New(token)
 	return Retriever{
 		cacheFile: cacheFile,
-		local:     gop_filesystem.New(fs, "."),
+		local:     filesystem.New(fs, "."),
 		cache:     cache,
 		proxy:     proxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(retriever_git.New(token), absModuler),
+		git:       modules.New(git.New(token), absModuler),
 	}
 }
 
