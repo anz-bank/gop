@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joshcarp/gop/gop/cli"
-	"github.com/joshcarp/gop/gop/retriever/retriever_github"
+	"github.com/joshcarp/gop/pkg/cli"
+	"github.com/joshcarp/gop/pkg/retriever/retriever_github"
 
-	gop3 "github.com/joshcarp/gop/gop"
+	gop3 "github.com/joshcarp/gop/pkg/gop"
 
-	"github.com/joshcarp/gop/gop/gop_filesystem"
-	"github.com/joshcarp/gop/gop/gop_gcs"
+	"github.com/joshcarp/gop/pkg/gop_filesystem"
+	"github.com/joshcarp/gop/pkg/gop_gcs"
 	"github.com/spf13/afero"
 )
 

@@ -54,9 +54,9 @@ type Retriever interface {
 - Should return content, whether or not the content is already cached, and an error if anything failed during retrieving 
     
 - Examples:
-    - [../gop/gop_filesystem/retriever.go](../gop/gop_filesystem/retriever.go) Retrieve from a filesystem
-    - [../gop/gop_gcs/retriever.go](../gop/gop_gcs/retriever.go) Retrieve from google cloud storage
-    - [../gop/retriever/retriever_git/git.go](../gop/retriever/retriever_git/git.go) Retrieve from a git repository
+    - [../gop/gop_filesystem/retriever.go](../pkg/gop_filesystem/retriever.go) Retrieve from a filesystem
+    - [../gop/gop_gcs/retriever.go](../pkg/gop_gcs/retriever.go) Retrieve from google cloud storage
+    - [../gop/retriever/retriever_git/git.go](../pkg/retriever/retriever_git/git.go) Retrieve from a git repository
     - [../client/main.go](../client/main.go) Retrieve from a GOP proxy
 
 ### Cacher interface
@@ -71,8 +71,8 @@ type Cacher interface {
 
 - Should populate: Read only: Doesn't populate
 - Examples:
-    - [../gop/gop_filesystem/cacher.go](../gop/gop_filesystem/cacher.go) Cache a file to a file system
-    - [../gop/gop_gcs/cacher.go](../gop/gop_gcs/cacher.go) Cache a file to a gcs bucket
+    - [../gop/gop_filesystem/cacher.go](../pkg/gop_filesystem/cacher.go) Cache a file to a file system
+    - [../gop/gop_gcs/cacher.go](../pkg/gop_gcs/cacher.go) Cache a file to a gcs bucket
 
 ## Sequence Diagram
 
