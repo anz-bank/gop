@@ -1,6 +1,6 @@
-module github.com/joshcarp/gop
+module github.com/anz-bank/gop
 
-go 1.14
+go 1.13
 
 require (
 	cloud.google.com/go/storage v1.10.0

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 
 	"github.com/spf13/afero"
 )

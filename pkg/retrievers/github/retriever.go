@@ -9,9 +9,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/joshcarp/gop/pkg/modules"
+	"github.com/anz-bank/gop/pkg/modules"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 )
 
 type Retriever struct {

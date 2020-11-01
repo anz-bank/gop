@@ -1,6 +1,6 @@
 package naked
 
-import "github.com/joshcarp/gop/pkg/gop"
+import "github.com/anz-bank/gop/pkg/gop"
 
 type Retriever struct {
 	retriever  gop.Retriever

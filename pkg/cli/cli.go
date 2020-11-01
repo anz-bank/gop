@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"path"
 
-	"github.com/joshcarp/gop/pkg/modules"
+	"github.com/anz-bank/gop/pkg/modules"
 
-	"github.com/joshcarp/gop/pkg/gop"
-	"github.com/joshcarp/gop/pkg/goppers/filesystem"
-	"github.com/joshcarp/gop/pkg/retrievers/git"
-	"github.com/joshcarp/gop/pkg/retrievers/github"
+	"github.com/anz-bank/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/goppers/filesystem"
+	"github.com/anz-bank/gop/pkg/retrievers/git"
+	"github.com/anz-bank/gop/pkg/retrievers/github"
 	"github.com/spf13/afero"
 )
 

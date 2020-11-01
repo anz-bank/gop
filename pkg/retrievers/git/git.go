@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 	"net/url"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 
 	"github.com/go-git/go-billy/v5/memfs"
 	"github.com/go-git/go-git/v5"

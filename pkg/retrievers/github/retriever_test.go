@@ -4,7 +4,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/joshcarp/gop/pkg/retrievertests"
+	"github.com/anz-bank/gop/pkg/retrievertests"
 
 	"github.com/stretchr/testify/require"
 )
@@ -54,8 +54,8 @@ func TestResolveHash(t *testing.T) {
 		out  string
 	}
 	tests := []testcase{
-		{name: "tag", in: "github.com/joshcarp/gop@test", out: "dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
-		{name: "branch", in: "github.com/joshcarp/gop@test2", out: "dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
+		{name: "tag", in: "github.com/anz-bank/gop@test", out: "dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
+		{name: "branch", in: "github.com/anz-bank/gop@test2", out: "dad0c54cae43ea40f3f1b5063af680ed4521eab2"},
 	}
 	for _, e := range tests {
 		t.Run(e.name, func(t *testing.T) {

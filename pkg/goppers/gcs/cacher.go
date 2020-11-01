@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 
 	"cloud.google.com/go/storage"
 )

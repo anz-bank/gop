@@ -8,7 +8,7 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 )
 
 /* Modules is the representation of the module file: */

@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 
 	"github.com/stretchr/testify/require"
 )

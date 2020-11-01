@@ -5,12 +5,12 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/joshcarp/gop/pkg/modules"
+	"github.com/anz-bank/gop/pkg/modules"
 
-	"github.com/joshcarp/gop/pkg/goppers/filesystem"
-	"github.com/joshcarp/gop/pkg/retrievers/github"
+	"github.com/anz-bank/gop/pkg/goppers/filesystem"
+	"github.com/anz-bank/gop/pkg/retrievers/github"
 
-	"github.com/joshcarp/gop/pkg/retrievertests"
+	"github.com/anz-bank/gop/pkg/retrievertests"
 	"github.com/spf13/afero"
 	"github.com/stretchr/testify/require"
 )

@@ -1,7 +1,7 @@
 package wrapper
 
 import (
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 	"github.com/pkg/errors"
 )
 

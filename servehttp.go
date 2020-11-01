@@ -6,13 +6,13 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joshcarp/gop/pkg/cli"
-	"github.com/joshcarp/gop/pkg/retrievers/github"
+	"github.com/anz-bank/gop/pkg/cli"
+	"github.com/anz-bank/gop/pkg/retrievers/github"
 
-	gop3 "github.com/joshcarp/gop/pkg/gop"
+	gop3 "github.com/anz-bank/gop/pkg/gop"
 
-	"github.com/joshcarp/gop/pkg/goppers/filesystem"
-	"github.com/joshcarp/gop/pkg/goppers/gcs"
+	"github.com/anz-bank/gop/pkg/goppers/filesystem"
+	"github.com/anz-bank/gop/pkg/goppers/gcs"
 	"github.com/spf13/afero"
 )
 

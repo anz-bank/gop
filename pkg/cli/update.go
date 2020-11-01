@@ -1,6 +1,6 @@
 package cli
 
-import "github.com/joshcarp/gop/pkg/gop"
+import "github.com/anz-bank/gop/pkg/gop"
 
 /* Command is meant to be used in a cli tool with cmd and repo args */
 func (r Retriever) Command(cmd, repo string) error {

@@ -9,8 +9,8 @@
 <div align="center">
 
   [![Status](https://img.shields.io/badge/status-active-success.svg)]() 
-  [![GitHub Issues](https://img.shields.io/github/issues/joshcarp/gop)](https://github.com/joshcarp/gop/issues)
-  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/joshcarp/gop)](https://github.com/joshcarp/gop/pulls)
+  [![GitHub Issues](https://img.shields.io/github/issues/anz-bank/gop)](https://github.com/anz-bank/gop/issues)
+  [![GitHub Pull Requests](https://img.shields.io/github/issues-pr/anz-bank/gop)](https://github.com/anz-bank/gop/pulls)
   [![License](https://img.shields.io/badge/license-apache2-blue.svg)](/LICENSE)
 
 </div>
@@ -51,7 +51,7 @@ What things you need to install the software and how to install them.
 
 ## 🚀 Deployment <a name = "deployment"></a>
 
-- See .github/workflows/cloud-function-deploy.yml
+- [example](/deployment/cloud-function-example.yml)
 
 ## ⛏️ Built Using <a name = "built_using"></a>
 - [Google Cloud Functions](https://cloud.google.com/functions/) - Deployment

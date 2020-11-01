@@ -3,7 +3,7 @@ package git
 import (
 	"testing"
 
-	"github.com/joshcarp/gop/pkg/retrievertests"
+	"github.com/anz-bank/gop/pkg/retrievertests"
 
 	"github.com/stretchr/testify/require"
 )

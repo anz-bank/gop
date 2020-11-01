@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/joshcarp/gop/pkg/retrievertests"
+	"github.com/anz-bank/gop/pkg/retrievertests"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 )
 
 type GithubMock struct {

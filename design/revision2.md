@@ -35,7 +35,7 @@ GOP, or Git Object Proxy is a generic tool that allows for git objects to be ret
     - Cacher
 
 Where:
- - `Repo` is the target repository (eg `github.com/joshcarp/gop`)
+ - `Repo` is the target repository (eg `github.com/anz-bank/gop`)
  - `Resource` is the target file (eg `pbmod.sysl`)
  - `Version` is the target commit hash (eg `165081dd92025fb5cae3fef575eca1ad9521e4cc`)
  - `Content` is the content of the file that will be returned

@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/joshcarp/gop/pkg/retrievertests"
+	"github.com/anz-bank/gop/pkg/retrievertests"
 )
 
 func TestRetrieveAndReplace(t *testing.T) {

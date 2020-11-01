@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/joshcarp/gop/pkg/gop"
+	"github.com/anz-bank/gop/pkg/gop"
 )
 
 func (a GOP) Retrieve(resource string) ([]byte, bool, error) {
