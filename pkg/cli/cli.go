@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"github.com/anz-bank/gop/pkg/retrievers/proxy"
 	"path"
 
 	"github.com/anz-bank/gop/pkg/modules"
@@ -48,12 +49,12 @@ func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Ret
 
 func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string, logger gop.Logger) Retriever {
 	var cache gop.Gopper
-	var proxy gop.Retriever
+	var gopproxy gop.Retriever
 	if cacheDir != "" {
 		cache = filesystem.New(fs, cacheDir)
 	}
 	if proxyURL != "" {
-		proxy = proxy.New(proxyURL)
+		gopproxy = proxy.New(proxyURL)
 	}
 	gh := github.New(token)
 	local := filesystem.New(fs, ".")
@@ -63,7 +64,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 		cacheFile: cacheFile,
 		local:     local,
 		cache:     cache,
-		proxy:     proxy,
+		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
 		git:       modules.New(git.New(token), absModuler),
 		Updater:   versioner,
@@ -73,14 +74,14 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 
 func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
 	var cache gop.Gopper
-	var proxy gop.Retriever
+	var gopproxy gop.Retriever
 	var cacheFile string
 	if cacheDir != "" {
 		cacheFile = cacheDir + ".yaml"
 		cache = filesystem.New(fs, cacheDir)
 	}
 	if proxyURL != "" {
-		proxy = proxy.New(proxyURL)
+		gopproxy = proxy.New(proxyURL)
 	}
 	absModuler := path.Join(cacheDir, cacheFile)
 	gh := github.New(token)
@@ -88,7 +89,7 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 		cacheFile: cacheFile,
 		local:     filesystem.New(fs, "."),
 		cache:     cache,
-		proxy:     proxy,
+		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
 		git:       modules.New(git.New(token), absModuler),
 	}

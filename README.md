@@ -42,7 +42,7 @@ What things you need to install the software and how to install them.
 
 ## 🔧 Running the tests <a name = "tests"></a>
 
-`go test ./...`
+`go test ./... -short`
 
 ## 🎈 Usage <a name="usage"></a>
 `go run ./cmd/servegop`

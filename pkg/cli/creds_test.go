@@ -3,8 +3,6 @@ package cli
 import (
 	"testing"
 
-	"github.com/anz-bank/gop/pkg/gop"
-
 	"github.com/stretchr/testify/require"
 )
 
@@ -13,10 +11,9 @@ func TestTokensFromString(t *testing.T) {
 		name string
 		in   string
 		out  map[string]string
-		err  error
 	}
 	tests := []testcase{
-		{name: "empty", in: "", err: gop.UnauthorizedError},
+		{name: "empty", in: ""},
 		{in: "github.com:1234", out: map[string]string{"github.com": "1234"}},
 		{in: "gitx.com:1234", out: map[string]string{"gitx.com": "1234"}},
 		{in: "github.com:1234,gitx.com:12345", out: map[string]string{"github.com": "1234", "gitx.com": "12345"}}}

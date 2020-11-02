@@ -158,9 +158,6 @@ func TestUpdate(t *testing.T) {
 func TestUpdateAll(t *testing.T) {
 	type testcases struct {
 		name        string
-		pattern     string
-		oldResolved string
-		new         string
 		out         string
 		importFile  string
 		files       map[string]string
