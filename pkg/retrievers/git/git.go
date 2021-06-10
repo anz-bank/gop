@@ -56,6 +56,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			URL:  "https://" + repo + ".git",
 			Auth: auth,
 		})
+		if err != nil {
+			return nil, false, fmt.Errorf("%s, git clone via PAT, %w", gop.GitCloneError, err)
+		}
 	} else {
 		_, err = os.Stat(a.privateKeyFile)
 		if err != nil {
@@ -70,10 +73,9 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			URL:  "ssh://git@" + repo + ".git",
 			Auth: publicKeys,
 		})
-	}
-
-	if err != nil {
-		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
+		if err != nil {
+			return nil, false, fmt.Errorf("%s, git clone via SSH, %w", gop.GitCloneError, err)
+		}
 	}
 
 	h, err := r.ResolveRevision(plumbing.Revision(version))
