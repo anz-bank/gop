@@ -2,15 +2,15 @@ package cli
 
 import (
 	"fmt"
-	"github.com/anz-bank/gop/pkg/retrievers/proxy"
 	"path"
-
-	"github.com/anz-bank/gop/pkg/modules"
 
 	"github.com/anz-bank/gop/pkg/gop"
 	"github.com/anz-bank/gop/pkg/goppers/filesystem"
+	"github.com/anz-bank/gop/pkg/modules"
 	"github.com/anz-bank/gop/pkg/retrievers/git"
 	"github.com/anz-bank/gop/pkg/retrievers/github"
+	"github.com/anz-bank/gop/pkg/retrievers/proxy"
+
 	"github.com/spf13/afero"
 )
 
@@ -42,12 +42,12 @@ func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Ret
 		proxy:     proxy,
 		github:    github,
 		git:       git,
-		Updater: versioner,
+		Updater:   versioner,
 		log:       log,
 	}
 }
 
-func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map[string]string, logger gop.Logger) Retriever {
+func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens map[string]string, privateKeyFile string, password string, logger gop.Logger) Retriever {
 	var cache gop.Gopper
 	var gopproxy gop.Retriever
 	if cacheDir != "" {
@@ -56,7 +56,7 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 	if proxyURL != "" {
 		gopproxy = proxy.New(proxyURL)
 	}
-	gh := github.New(token)
+	gh := github.New(tokens)
 	local := filesystem.New(fs, ".")
 	absModuler := path.Join(cacheDir, cacheFile)
 	versioner := modules.NewLoader(local, gh.Resolve, absModuler, logger)
@@ -66,13 +66,13 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, token map
 		cache:     cache,
 		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(git.New(token), absModuler),
+		git:       modules.New(git.New(tokens, privateKeyFile, password), absModuler),
 		Updater:   versioner,
 		log:       logger,
 	}
 }
 
-func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]string) Retriever {
+func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]string, privateKeyFile string, password string) Retriever {
 	var cache gop.Gopper
 	var gopproxy gop.Retriever
 	var cacheFile string
@@ -84,14 +84,14 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, token map[string]str
 		gopproxy = proxy.New(proxyURL)
 	}
 	absModuler := path.Join(cacheDir, cacheFile)
-	gh := github.New(token)
+	gh := github.New(tokens)
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     filesystem.New(fs, "."),
 		cache:     cache,
 		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(git.New(token), absModuler),
+		git:       modules.New(git.New(tokens, privateKeyFile, password), absModuler),
 	}
 }
 

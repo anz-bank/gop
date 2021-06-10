@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
+	"os"
 
 	"github.com/anz-bank/gop/pkg/gop"
 
@@ -13,47 +14,70 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
+	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 	"github.com/go-git/go-git/v5/storage/memory"
 )
 
 type Retriever struct {
-	token map[string]string
+	// tokens is a key/value pairs of <host>, <personal access token>, e.g. { "github.com": "abcdef" }
+	tokens         map[string]string
+	privateKeyFile string
+	password       string
 }
 
-/* New returns a retriever with a key/value pairs of <host>, <token> eg: New("github.com", "abcdef") */
-func New(tokens map[string]string) Retriever {
+/* New returns a retriever */
+func New(tokens map[string]string, privateKeyFile string, password string) Retriever {
 	if tokens == nil {
 		tokens = map[string]string{}
 	}
-	return Retriever{token: tokens}
+	return Retriever{tokens: tokens, privateKeyFile: privateKeyFile, password: password}
 }
 
-func getToken(token map[string]string, resource string) string {
+func (a Retriever) getToken(resource string) string {
 	u, _ := url.Parse("https://" + resource)
-	return token[u.Host]
+	return a.tokens[u.Host]
 }
 
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
-	var auth *http.BasicAuth
+	var r *git.Repository
 	store := memory.NewStorage()
 	fs := memfs.New()
 	repo, path, version, err := gop.ProcessRequest(resource)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
-	if b := getToken(a.token, resource); b != "" {
-		auth = &http.BasicAuth{
+
+	if b := a.getToken(resource); b != "" {
+		auth := &http.BasicAuth{
 			Username: "gop",
 			Password: b,
 		}
+		r, err = git.Clone(store, fs, &git.CloneOptions{
+			URL:  "https://" + repo + ".git",
+			Auth: auth,
+		})
+		if err != nil {
+			return nil, false, fmt.Errorf("%s, git clone via PAT, %w", gop.GitCloneError, err)
+		}
+	} else {
+		_, err = os.Stat(a.privateKeyFile)
+		if err != nil {
+			return nil, false, fmt.Errorf("read file %s failed %s\n", a.privateKeyFile, err.Error())
+		}
+
+		publicKeys, err := ssh.NewPublicKeysFromFile("gop", a.privateKeyFile, a.password)
+		if err != nil {
+			return nil, false, fmt.Errorf("generate publickeys failed: %s\n", err.Error())
+		}
+		r, err = git.Clone(store, fs, &git.CloneOptions{
+			URL:  "ssh://git@" + repo + ".git",
+			Auth: publicKeys,
+		})
+		if err != nil {
+			return nil, false, fmt.Errorf("%s, git clone via SSH, %w", gop.GitCloneError, err)
+		}
 	}
-	r, err := git.Clone(store, fs, &git.CloneOptions{
-		URL:  "https://" + repo + ".git",
-		Auth: auth,
-	})
-	if err != nil {
-		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
-	}
+
 	h, err := r.ResolveRevision(plumbing.Revision(version))
 	if err != nil {
 		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
