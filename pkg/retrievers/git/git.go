@@ -65,12 +65,12 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			return nil, false, fmt.Errorf("read file %s failed %s\n", a.privateKeyFile, err.Error())
 		}
 
-		publicKeys, err := ssh.NewPublicKeysFromFile("gop", a.privateKeyFile, a.password)
+		publicKeys, err := ssh.NewPublicKeysFromFile("git", a.privateKeyFile, a.password)
 		if err != nil {
 			return nil, false, fmt.Errorf("generate publickeys failed: %s\n", err.Error())
 		}
 		r, err = git.Clone(store, fs, &git.CloneOptions{
-			URL:  "ssh://git@" + repo + ".git",
+			URL:  "ssh://" + repo + ".git",
 			Auth: publicKeys,
 		})
 		if err != nil {
