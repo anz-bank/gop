@@ -47,7 +47,7 @@ func New(local gop.Gopper, cache gop.Gopper, proxy gop.Retriever, github gop.Ret
 	}
 }
 
-func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens map[string]string, logger gop.Logger) Retriever {
+func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens map[string]string, privateKeyFile string, password string, logger gop.Logger) Retriever {
 	var cache gop.Gopper
 	var gopproxy gop.Retriever
 	if cacheDir != "" {
@@ -66,13 +66,13 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens ma
 		cache:     cache,
 		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(git.New(tokens), absModuler),
+		git:       modules.New(git.New(tokens, privateKeyFile, password), absModuler),
 		Updater:   versioner,
 		log:       logger,
 	}
 }
 
-func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]string) Retriever {
+func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]string, privateKeyFile string, password string) Retriever {
 	var cache gop.Gopper
 	var gopproxy gop.Retriever
 	var cacheFile string
@@ -91,7 +91,7 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]st
 		cache:     cache,
 		proxy:     gopproxy,
 		github:    modules.New(gh, absModuler),
-		git:       modules.New(git.New(tokens), absModuler),
+		git:       modules.New(git.New(tokens, privateKeyFile, password), absModuler),
 	}
 }
 
