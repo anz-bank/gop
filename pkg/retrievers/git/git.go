@@ -59,7 +59,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if err != nil {
 			return nil, false, fmt.Errorf("%s, git clone via PAT, %w", gop.GitCloneError, err)
 		}
-	} else {
+	} else if a.privateKeyFile != "" {
 		_, err = os.Stat(a.privateKeyFile)
 		if err != nil {
 			return nil, false, fmt.Errorf("read file %s failed %s\n", a.privateKeyFile, err.Error())
@@ -74,7 +74,19 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			Auth: publicKeys,
 		})
 		if err != nil {
-			return nil, false, fmt.Errorf("%s, git clone via SSH, %w", gop.GitCloneError, err)
+			return nil, false, fmt.Errorf("%s, git clone via SSH key, %w", gop.GitCloneError, err)
+		}
+	} else {
+		auth, err := ssh.NewSSHAgentAuth("git")
+		if err != nil {
+			return nil, false, fmt.Errorf("set up ssh-agent auth failed %s\n", err.Error())
+		}
+		r, err = git.Clone(store, fs, &git.CloneOptions{
+			URL:  "ssh://" + repo + ".git",
+			Auth: auth,
+		})
+		if err != nil {
+			return nil, false, fmt.Errorf("%s, git clone via SSH agent, %w", gop.GitCloneError, err)
 		}
 	}
 
