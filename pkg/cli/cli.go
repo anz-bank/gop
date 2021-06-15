@@ -2,6 +2,7 @@ package cli
 
 import (
 	"fmt"
+	"log"
 	"path"
 
 	"github.com/anz-bank/gop/pkg/gop"
@@ -73,26 +74,11 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens ma
 }
 
 func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]string, privateKeyFile string, password string) Retriever {
-	var cache gop.Gopper
-	var gopproxy gop.Retriever
 	var cacheFile string
 	if cacheDir != "" {
 		cacheFile = cacheDir + ".yaml"
-		cache = filesystem.New(fs, cacheDir)
 	}
-	if proxyURL != "" {
-		gopproxy = proxy.New(proxyURL)
-	}
-	absModuler := path.Join(cacheDir, cacheFile)
-	gh := github.New(tokens)
-	return Retriever{
-		cacheFile: cacheFile,
-		local:     filesystem.New(fs, "."),
-		cache:     cache,
-		proxy:     gopproxy,
-		github:    modules.New(gh, absModuler),
-		git:       modules.New(git.New(tokens, privateKeyFile, password), absModuler),
-	}
+	return Moduler(fs, cacheFile, cacheDir, proxyURL, tokens, privateKeyFile, password, logger, log.Printf)
 }
 
 /* Retrieve implements the retriever interface */
