@@ -78,7 +78,7 @@ func Default(fs afero.Fs, cacheDir string, proxyURL string, tokens map[string]st
 	if cacheDir != "" {
 		cacheFile = cacheDir + ".yaml"
 	}
-	return Moduler(fs, cacheFile, cacheDir, proxyURL, tokens, privateKeyFile, password, logger, log.Printf)
+	return Moduler(fs, cacheFile, cacheDir, proxyURL, tokens, privateKeyFile, password, log.Printf)
 }
 
 /* Retrieve implements the retriever interface */
