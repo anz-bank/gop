@@ -7,3 +7,9 @@ include codegen.mk
 
 run:
 	go run . config.yaml
+
+test:
+	go test ./... -short
+
+lint:
+	golangci-lint run ./...
