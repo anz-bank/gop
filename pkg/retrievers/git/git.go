@@ -52,12 +52,13 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 			Username: "gop",
 			Password: b,
 		}
+		url := "https://" + repo + ".git"
 		r, err = git.Clone(store, fs, &git.CloneOptions{
-			URL:  "https://" + repo + ".git",
+			URL:  url,
 			Auth: auth,
 		})
 		if err != nil {
-			return nil, false, fmt.Errorf("%s, git clone via PAT, %w", gop.GitCloneError, err)
+			return nil, false, fmt.Errorf("%s, git clone %s via PAT, %w", gop.GitCloneError, url, err)
 		}
 	} else if a.privateKeyFile != "" {
 		_, err = os.Stat(a.privateKeyFile)
@@ -69,24 +70,26 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 		if err != nil {
 			return nil, false, fmt.Errorf("generate publickeys failed: %s\n", err.Error())
 		}
+		url := "ssh://" + repo + ".git"
 		r, err = git.Clone(store, fs, &git.CloneOptions{
-			URL:  "ssh://" + repo + ".git",
+			URL:  url,
 			Auth: publicKeys,
 		})
 		if err != nil {
-			return nil, false, fmt.Errorf("%s, git clone via SSH key, %w", gop.GitCloneError, err)
+			return nil, false, fmt.Errorf("%s, git clone %s via SSH key, %w", gop.GitCloneError, url, err)
 		}
 	} else {
 		auth, err := ssh.NewSSHAgentAuth("git")
 		if err != nil {
 			return nil, false, fmt.Errorf("set up ssh-agent auth failed %s\n", err.Error())
 		}
+		url := "ssh://" + repo + ".git"
 		r, err = git.Clone(store, fs, &git.CloneOptions{
-			URL:  "ssh://" + repo + ".git",
+			URL:  url,
 			Auth: auth,
 		})
 		if err != nil {
-			return nil, false, fmt.Errorf("%s, git clone via SSH agent, %w", gop.GitCloneError, err)
+			return nil, false, fmt.Errorf("%s, git clone %s via SSH agent, %w", gop.GitCloneError, url, err)
 		}
 	}
 
