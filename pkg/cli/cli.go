@@ -60,7 +60,10 @@ func Moduler(fs afero.Fs, cacheFile, cacheDir string, proxyURL string, tokens ma
 	gh := github.New(tokens)
 	local := filesystem.New(fs, ".")
 	absModuler := path.Join(cacheDir, cacheFile)
-	versioner := modules.NewLoader(local, gh.Resolve, absModuler, logger)
+	var versioner gop.Updater
+	if _, ok := tokens["github.com"]; ok {
+		versioner = modules.NewLoader(local, gh.Resolve, absModuler, logger)
+	}
 	return Retriever{
 		cacheFile: cacheFile,
 		local:     local,
