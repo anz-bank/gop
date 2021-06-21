@@ -35,6 +35,7 @@ func (a Loader) Resolve(resource string) string {
 	}
 	ver, err := LoadVersion(a.gopper, a.gopper, a.resolver, a.cacheFile, resource)
 	if err != nil {
+		a.log("Load version error %s", err.Error())
 		return ""
 	}
 	return ver
@@ -162,4 +163,3 @@ func GetApiURL(resource string) string {
 	}
 	return fmt.Sprintf("%s/api/v3", requestedurl.Host)
 }
-

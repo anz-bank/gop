@@ -69,7 +69,7 @@ func (a Retriever) Resolve(resource string) (string, error) {
 	if ref == "" {
 		ref = "HEAD"
 	}
-	repoURL, _ := url.Parse("httpps://" + repo)
+	repoURL, _ := url.Parse("https://" + repo)
 	heder.Add("accept", "application/vnd.github.VERSION.sha")
 	heder.Add("authorization", "Bearer "+a.token[repoURL.Host])
 	u, err := url.Parse(fmt.Sprintf("%s/repos%s/commits/%s", a.ApiBase, repoURL.Path, ref))
@@ -101,6 +101,7 @@ func (a Retriever) Resolve(resource string) (string, error) {
 	}
 	return string(b), nil
 }
+
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	var resp *http.Response
 	var repo, path, ver string
