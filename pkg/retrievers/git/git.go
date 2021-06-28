@@ -37,7 +37,7 @@ func New(tokens map[string]string, privateKeyFile string, password string) Retri
 func (a Retriever) getToken(resource string) string {
 	u, err := url.Parse("https://" + resource)
 	if err != nil {
-		a.log("Parse URL %s error %s", resource, err.Error())
+		return ""
 	}
 	return a.tokens[u.Host]
 }
@@ -50,6 +50,10 @@ func (a Retriever) Resolve(resource string) (string, error) {
 	}
 
 	_, _, version, err := gop.ProcessRequest(resource)
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", gop.BadRequestError, err)
+	}
+
 	h, err := r.ResolveRevision(plumbing.Revision(version))
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", gop.GitCloneError, err)

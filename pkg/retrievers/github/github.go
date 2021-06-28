@@ -52,7 +52,7 @@ func New(tokens map[string]string) Retriever {
 func (a Retriever) getToken(resource string) string {
 	u, err := url.Parse("https://" + resource)
 	if err != nil {
-		a.log("Parse URL %s error %s", resource, err.Error())
+		return ""
 	}
 	return a.tokens[u.Host]
 }
