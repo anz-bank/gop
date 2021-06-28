@@ -134,7 +134,7 @@ func LoadVersion(retriever gop.Retriever, cacher gop.Cacher, resolver Resolver, 
 	}
 	hash, err := resolver(repoVer)
 	if err != nil {
-		return "", gop.GithubFetchError
+		return "", fmt.Errorf("%s: %w", gop.GitCloneError, err)
 	}
 	resolve := gop.CreateResource(repo, "", hash)
 	if mod.Imports == nil {

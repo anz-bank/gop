@@ -15,7 +15,7 @@ import (
 )
 
 type Retriever struct {
-	token   map[string]string
+	tokens  map[string]string
 	Client  *http.Client
 	ApiBase string
 }
@@ -46,12 +46,15 @@ func New(tokens map[string]string) Retriever {
 	if tokens == nil {
 		tokens = map[string]string{}
 	}
-	return Retriever{token: tokens, Client: &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}}
+	return Retriever{tokens: tokens, Client: &http.Client{Transport: &http.Transport{Proxy: http.ProxyFromEnvironment}}}
 }
 
-func getToken(token map[string]string, resource string) string {
-	u, _ := url.Parse("https://" + resource)
-	return token[u.Host]
+func (a Retriever) getToken(resource string) string {
+	u, err := url.Parse("https://" + resource)
+	if err != nil {
+		return ""
+	}
+	return a.tokens[u.Host]
 }
 
 /* Resolve Resolves a github resource to its hash */
@@ -71,7 +74,9 @@ func (a Retriever) Resolve(resource string) (string, error) {
 	}
 	repoURL, _ := url.Parse("https://" + repo)
 	heder.Add("accept", "application/vnd.github.VERSION.sha")
-	heder.Add("authorization", "Bearer "+a.token[repoURL.Host])
+	if token := a.getToken(resource); token != "" {
+		heder.Add("authorization", "Bearer "+token)
+	}
 	u, err := url.Parse(fmt.Sprintf("%s/repos%s/commits/%s", a.ApiBase, repoURL.Path, ref))
 	if err != nil {
 		return "", gop.BadRequestError
@@ -130,7 +135,7 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	heder := http.Header{}
 	heder.Add("accept", "application/vnd.github.v3+json")
 
-	if b := getToken(a.token, resource); b != "" {
+	if b := a.getToken(resource); b != "" {
 		heder.Add("authorization", "token "+b)
 	}
 
