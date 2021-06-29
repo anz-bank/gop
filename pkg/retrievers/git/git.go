@@ -34,8 +34,8 @@ func New(tokens map[string]string, privateKeyFile string, password string) Retri
 	return Retriever{tokens: tokens, privateKeyFile: privateKeyFile, password: password, repositories: make(map[string]*git.Repository)}
 }
 
-func (a Retriever) getToken(resource string) string {
-	u, err := url.Parse("https://" + resource)
+func (a Retriever) getToken(repo string) string {
+	u, err := url.Parse("https://" + repo)
 	if err != nil {
 		return ""
 	}
@@ -44,14 +44,13 @@ func (a Retriever) getToken(resource string) string {
 
 /* Resolve Resolves a git resource to its hash */
 func (a Retriever) Resolve(resource string) (string, error) {
-	r, err := a.Clone(resource)
-	if err != nil {
-		return "", fmt.Errorf("%s: %w", gop.GitCloneError, err)
-	}
-
-	_, _, version, err := gop.ProcessRequest(resource)
+	repo, _, version, err := gop.ProcessRequest(resource)
 	if err != nil {
 		return "", fmt.Errorf("%s: %w", gop.BadRequestError, err)
+	}
+	r, err := a.Clone(repo)
+	if err != nil {
+		return "", fmt.Errorf("%s: %w", gop.GitCloneError, err)
 	}
 
 	h, err := r.ResolveRevision(plumbing.Revision(version))
@@ -63,30 +62,28 @@ func (a Retriever) Resolve(resource string) (string, error) {
 }
 
 func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
-	_, path, version, err := gop.ProcessRequest(resource)
+	repo, path, version, err := gop.ProcessRequest(resource)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
 
-	r, err := a.Clone(resource)
+	r, err := a.Clone(repo)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.GitCloneError, err)
 	}
 
-	h, err := r.ResolveRevision(plumbing.Revision(version))
-	if err != nil {
-		return nil, false, fmt.Errorf("%s, %w", gop.GitCloneError, err)
-	}
+	h := plumbing.NewHash(version)
+
 	w, err := r.Worktree()
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.GitCloneError, err)
 	}
 	if err = w.Checkout(&git.CheckoutOptions{
-		Hash: plumbing.NewHash(h.String()),
+		Hash: h,
 	}); err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.GitCheckoutError, err)
 	}
-	commit, err := r.CommitObject(*h)
+	commit, err := r.CommitObject(h)
 	if err != nil {
 		return nil, false, fmt.Errorf("%s: %w", gop.GitCheckoutError, err)
 	}
@@ -105,21 +102,15 @@ func (a Retriever) Retrieve(resource string) ([]byte, bool, error) {
 	return b, false, nil
 }
 
-func (a Retriever) Clone(resource string) (r *git.Repository, err error) {
-	if r, ok := a.repositories[resource]; ok {
+func (a Retriever) Clone(repo string) (r *git.Repository, err error) {
+	if r, ok := a.repositories[repo]; ok {
 		return r, nil
-	}
-
-	repo, _, _, err := gop.ProcessRequest(resource)
-	if err != nil {
-		return nil, fmt.Errorf("%s: %w", gop.BadRequestError, err)
 	}
 
 	store := memory.NewStorage()
 	fs := memfs.New()
 
-	a.repositories[resource] = r
-	if b := a.getToken(resource); b != "" {
+	if b := a.getToken(repo); b != "" {
 		auth := &http.BasicAuth{
 			Username: "gop",
 			Password: b,
@@ -164,5 +155,6 @@ func (a Retriever) Clone(resource string) (r *git.Repository, err error) {
 			return nil, fmt.Errorf("%s, git clone %s via SSH agent, %w", gop.GitCloneError, url, err)
 		}
 	}
+	a.repositories[repo] = r
 	return r, nil
 }
