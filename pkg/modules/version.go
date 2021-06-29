@@ -5,6 +5,7 @@ import (
 	"net/url"
 
 	"github.com/anz-bank/gop/pkg/gop"
+	"github.com/go-git/go-git/v5/plumbing"
 
 	"gopkg.in/yaml.v2"
 )
@@ -66,7 +67,7 @@ func (a Loader) UpdateAll() error {
 		return err
 	}
 	for base := range mod.Imports {
-		if x, _, z := gop.ProcessRepo(base); z == "" {
+		if x, _, z := gop.ProcessRepo(base); !plumbing.IsHash(z) {
 			new := a.Resolve(x + "@HEAD")
 			a.log("%s -> %s", x, new)
 			mod.Imports[base] = new
