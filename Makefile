@@ -2,8 +2,7 @@
 SYSLFILE = gop.sysl
 APPS = gop
 
--include local.mk
-include codegen.mk
+.PHONY: run test lint
 
 run:
 	go run . config.yaml
